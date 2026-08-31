@@ -1264,7 +1264,9 @@
 (function(){
   // Inside an iframe (the Tasks panel) the timer keeps its own separate history.
   const EMBEDDED = window.parent && window.parent !== window;
-  const STORAGE_KEY = EMBEDDED ? 'start_tracker_embedded' : 'start_tracker_data';
+  // One history everywhere: the panel, the standalone page and the phone all
+  // read the same key and reconcile through the gist.
+  const STORAGE_KEY = 'start_tracker_data';
   const DEFAULT_DATA = {
     phase: 'idle',          // idle | ready | working | break | done
     readyStart: null,       // when READY... was pressed
@@ -1495,7 +1497,7 @@
   function saveSync(){
     try{ window.localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg)); }catch(e){}
   }
-  function syncReady(){ return !EMBEDDED && !!(syncCfg.token && syncCfg.gistId); }
+  function syncReady(){ return !!(syncCfg.token && syncCfg.gistId); }
   function syEsc(s){
     return String(s == null ? '' : s)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -1656,7 +1658,6 @@
   }
 
   function renderSync(){
-    if(EMBEDDED) return '';
     const at = syncCfg.at ? new Date(syncCfg.at) : null;
     const state = !syncCfg.token ? '未設定'
                 : !syncCfg.gistId ? 'Gist 未作成'

@@ -4585,8 +4585,6 @@ PAWS.load();
       saveData();
       render();
     }
-    if(data.phase === 'ready') return;      // one at a time
-
     const now = new Date();
     const today = dayKey(now);
     for(const t of (data.tasks || [])){
@@ -4596,8 +4594,11 @@ PAWS.load();
       if(!last) continue;
       const age = (now.getTime() - last.getTime()) / 1000;
       if(age >= 0 && age <= CATCH_UP){
+        // Already counting down for this very task: leave it alone.
+        if(data.phase === 'ready' && data.armed && data.armed.taskId === t.id) return;
         notify('時間になりました', `${t.label} — ${t.time}`);
         armTask(t, last.getTime(), true);
+        PAWS.setTab('fm');          // bring the countdown into view
         return;
       }
     }

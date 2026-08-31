@@ -1433,8 +1433,14 @@
     font-size:24px; color:#7C6247; letter-spacing:.01em; }
   .handoff-note{ margin-top:12px; font-family:'Space Mono',monospace; font-size:10.5px;
     letter-spacing:.06em; color:var(--text-faint); }
-  .ring-bfly{ position:absolute; left:0; top:0; width:18px; height:16px;
-    margin:-8px 0 0 -9px; pointer-events:none; z-index:4;
+  /* the timer's button slot tucks under its dial; on the Ready tab there is
+     no dial in the idle state, so the pull-up would jam it against the card
+     above it */
+  #paneFm .btn-slot{ margin-top:0; }
+  #paneFm .dial-wrap + .btn-slot{ margin-top:-22px; }
+  #paneFm .pick-wrap{ gap:16px; }
+  .ring-bfly{ position:absolute; left:0; top:0; width:13px; height:11px;
+    margin:-6px 0 0 -6px; pointer-events:none; z-index:4;
     transition:left .25s linear, top .25s linear; }
   .ring-bfly svg{ width:100%; height:100%; animation:flyBob 1.7s ease-in-out infinite; }
   .ring-bfly .wing{ animation:flap .16s ease-in-out infinite alternate; transform-origin:50% 50%; }
@@ -4485,9 +4491,23 @@ PAWS.load();
   }
 
   // Fired by the clock while the app is open.
+  // How long after the scheduled minute a start can still be picked up.
+  // Covers a tab that was asleep, or the app being opened a little late.
+  const CATCH_UP = 30 * 60;
+
   function scheduleWatch(){
-    if(data.phase !== 'idle') return;
     if(data.autoArm === false) return;
+
+    // A countdown left running from hours ago would block every later task.
+    if(data.phase === 'ready' && data.armed &&
+       Date.now() - data.armed.planned > 6 * 3600 * 1000){
+      data.phase = 'idle';
+      data.armed = null;
+      saveData();
+      render();
+    }
+    if(data.phase === 'ready') return;      // one at a time
+
     const now = new Date();
     const today = dayKey(now);
     for(const t of (data.tasks || [])){
@@ -4496,7 +4516,7 @@ PAWS.load();
       const last = lastRunToday(t, now);
       if(!last) continue;
       const age = (now.getTime() - last.getTime()) / 1000;
-      if(age >= 0 && age <= 90){
+      if(age >= 0 && age <= CATCH_UP){
         notify('時間になりました', `${t.label} — ${t.time}`);
         armTask(t, last.getTime(), true);
         return;
@@ -4588,12 +4608,18 @@ PAWS.load();
   const DIAL_SIZE = 260, DIAL_R = 108, FEET = 9;
   // The butterfly rides the edge of the colour, upright, without the
   // walker's rotation.
+  const FLY_LEAD = 0.033;           // a nose-length ahead, so it never sits on the dog
   function placeFly(el, p){
     if(!el) return;
-    const t = ((p % 1) + 1) % 1;
+    const t = ((p + FLY_LEAD) % 1 + 1) % 1;
     const a = -Math.PI/2 + t*Math.PI*2;
-    el.style.left = (DIAL_SIZE/2 + Math.cos(a)*(DIAL_R+FEET)).toFixed(1) + 'px';
-    el.style.top  = (DIAL_SIZE/2 + Math.sin(a)*(DIAL_R+FEET)).toFixed(1) + 'px';
+    // Right by twelve o'clock the dog is in the way, so the butterfly
+    // lifts over its head instead of flying through it.
+    const near = Math.min(t, 1 - t);
+    const lift = near < 0.025 ? (0.025 - near) / 0.025 * 18 : 0;
+    const r = DIAL_R + 23 + lift;   // just above the ring, at the dog's shoulder
+    el.style.left = (DIAL_SIZE/2 + Math.cos(a)*r).toFixed(1) + 'px';
+    el.style.top  = (DIAL_SIZE/2 + Math.sin(a)*r).toFixed(1) + 'px';
   }
 
   function placeOnRing(el, p){
@@ -5622,6 +5648,7 @@ PAWS.load();
     if(armedByUrl) window.__fmArmedByUrl = true;
     if(!armedByUrl && data.phase === 'ready') startTicking();
 
+    scheduleWatch();
     watchHandle = setInterval(scheduleWatch, 1000);
     clockHandle = setInterval(() => {
       if(data.phase === 'idle' && editId === null) render();
@@ -5631,8 +5658,10 @@ PAWS.load();
       if(!document.hidden){
         if(data.phase === 'ready') startTicking();
         render();
+        scheduleWatch();          // a tab that was asleep catches up here
       }
     });
+    window.addEventListener('focus', scheduleWatch);
 
     render();
     if(data.phase === 'ready') startTicking();

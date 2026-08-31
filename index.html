@@ -4759,18 +4759,18 @@ PAWS.load();
         ${fast
           ? '<div class="medal">🏅</div>'
           : `<div class="paw-badge"><svg viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg></div>`}
-        <div class="big">${fast ? esc(lastPraise) : 'はじめられました。'}</div>
+        <div class="big">${fast ? esc(lastPraise) : 'You got going.'}</div>
         <div class="lagbig" style="color:${ringColor(r.lag/(r.goalSec||300))}">${fmtElapsed(r.lag)}</div>
         <div class="small">${fast
-          ? `${esc(r.label)} · 予定から ${fmtElapsed(r.lag)} で開始。<br>目標の ${Math.round((r.goalSec||300)/60)} 分以内です。`
-          : `${esc(r.label)} · 予定から ${fmtElapsed(r.lag)}。<br>時間はかかっても、動き出したことがすべてです。`}</div>
+          ? `${esc(r.label)} · started ${fmtElapsed(r.lag)} after the plan.<br>Inside your ${Math.round((r.goalSec||300)/60)}-minute line.`
+          : `${esc(r.label)} · ${fmtElapsed(r.lag)} after the plan.<br>Starting is the part that counts.`}</div>
         <div class="rows">
-          <div>予定<b>${fmtClock(r.planned)}</b></div>
-          <div>アプリ<b>+${fmtElapsed(r.openDelay)}</b></div>
-          <div>開始<b>${fmtClock(r.started)}</b></div>
-          ${r.snoozes ? `<div>スヌーズ<b>${r.snoozes}回</b></div>` : ''}
+          <div>planned<b>${fmtClock(r.planned)}</b></div>
+          <div>opened<b>+${fmtElapsed(r.openDelay)}</b></div>
+          <div>started<b>${fmtClock(r.started)}</b></div>
+          ${r.snoozes ? `<div>snoozed<b>&times;${r.snoozes}</b></div>` : ''}
         </div>
-        ${handoffPending ? '<div class="handoff-note">まもなく Session の計測に切り替わります…</div>' : ''}
+        ${handoffPending ? '<div class="handoff-note">handing over to Session…</div>' : ''}
         <button class="msg-reset" id="fmDone">OK</button>
       </div>`;
     }

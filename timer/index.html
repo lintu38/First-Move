@@ -1591,16 +1591,27 @@
     if(!silent){ syncBusy = true; setSyncMsg('取り込み中…'); render(); }
     return gh('https://api.github.com/gists/' + encodeURIComponent(syncCfg.gistId))
       .then(j => {
+        // A gist shared with another app simply has no file for us yet.
         const f = j.files && j.files[GIST_FILE];
-        if(!f) throw new Error('この Gist に ' + GIST_FILE + ' がありません');
+        if(!f) return null;
         if(f.truncated && f.raw_url) return fetch(f.raw_url).then(r => r.text());
         return f.content;
       })
       .then(text => {
-        const changed = mergeRemote(JSON.parse(text));
+        let changed = false, fresh = true;
+        if(text != null){
+          const remote = JSON.parse(text);
+          if(remote && remote.app && remote.app !== 'ready-when-you-are'){
+            throw new Error('別のアプリの記録です');
+          }
+          changed = mergeRemote(remote);
+          fresh = false;
+        }
         syncCfg.at = Date.now(); saveSync();
         return saveData(false).then(() => {
-          if(!silent) setSyncMsg(changed ? '取り込みました。' : '差分はありませんでした。', 'ok');
+          if(!silent) setSyncMsg(
+            fresh ? 'この Gist にはまだ記録がありません。「同期する」を押すと作成されます。'
+                  : (changed ? '取り込みました。' : '差分はありませんでした。'), 'ok');
           return changed;
         });
       })

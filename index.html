@@ -1471,6 +1471,25 @@
     color:#6E563D;
     box-shadow:0 6px 16px -8px rgba(183,154,115,.45); }
   #paneFm .action-btn .btn-paw{ width:16px; height:13px; }
+  #paneSs .checkin-btn.start-round{ font-size:26px; letter-spacing:.03em; }
+  /* the same slow ripple as the GO! halo, shaped to the button */
+  .softwave{ position:relative; }
+  .softwave::before, .softwave::after{
+    content:""; position:absolute; inset:0; border-radius:inherit;
+    border:2px solid var(--wave, var(--beige-deep));
+    opacity:0; pointer-events:none;
+    animation:softwave 2.6s ease-out infinite;
+  }
+  .softwave::after{ animation-delay:1.3s; }
+  @keyframes softwave{
+    0%{ inset:0; opacity:.45; }
+    100%{ inset:-15px; opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .softwave::before,.softwave::after{ animation:none; opacity:0; }
+  }
+  .task-row .meta .done-today{ color:#5B9E6B; }
+  #paneFm .task-row .meta{ white-space:normal; flex-wrap:wrap; row-gap:2px; }
   #paneFm .btn-slot{ margin-top:0; }
   #paneFm .dial-wrap + .btn-slot{ margin-top:-22px; }
   #paneFm .pick-wrap{ gap:16px; }
@@ -3333,7 +3352,15 @@ PAWS.load();
   function buttonMarkup(){
     const phase = data.phase;
     if(phase === 'idle'){
-      return `<button class="action-btn" id="startBtn">START<svg class="btn-paw" viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg></button>`;
+      // The button wears the colour of whatever type is selected.
+      const c = typeColor(data.taskType || 'WORK');
+      return `<div class="checkin-wrap">
+        <span class="halo" style="border-color:${c}"></span>
+        <span class="halo d2" style="border-color:${c}"></span>
+        <span class="halo d3" style="border-color:${c}"></span>
+        <button class="checkin-btn start-round" id="startBtn"
+                style="background:radial-gradient(circle at 34% 28%, ${shade(c,12)}, ${c} 58%, ${shade(c,-10)} 100%); box-shadow:0 12px 30px -10px ${shade(c,-10)}99, inset 0 -3px 8px ${shade(c,-22)}66">START<span class="go-steps">${ICON.steps}</span></button>
+      </div>`;
     }
     if(phase === 'ready'){
       const go = goButtonStyle(readyElapsed() / data.thresholdSec);
@@ -3353,8 +3380,8 @@ PAWS.load();
     if(phase === 'break'){
       const tid = data.taskType || 'WORK';
       return `<div class="btn-row">
-        <button class="pill primary" id="restartBtn"
-                style="background:${typeGradient(tid)}; box-shadow:0 8px 20px -9px ${typeDeep(tid)}"><span class="lbl">${ICON.steps}ReSTART</span></button>
+        <button class="pill primary softwave" id="restartBtn"
+                style="background:${typeGradient(tid)}; box-shadow:0 8px 20px -9px ${typeDeep(tid)}; --wave:${typeColor(tid)}"><span class="lbl">${ICON.steps}ReSTART</span></button>
         <button class="pill beige" id="finishBtn"><span class="lbl">${ICON.finish}FINISH</span></button>
       </div>`;
     }
@@ -4895,9 +4922,11 @@ PAWS.load();
             <span>·</span>
             <span>目標${Math.round(goalOf(t)/60)}分</span>
             ${t.session === false ? '<span>·</span><span>計測なし</span>' : ''}
+            ${t.firedOn === dayKey(Date.now()) ? '<span>·</span><span class="done-today">実行済み</span>' : ''}
           </div>
         </div>
         <div class="acts">
+          ${t.firedOn === dayKey(Date.now()) ? `<button class="icon-btn" data-rearm="${esc(t.id)}" title="今日もう一度">${ICON.clock}</button>` : ''}
           <button class="icon-btn ${t.on === false ? '' : 'on'}" data-toggle="${esc(t.id)}" title="有効/無効">${ICON.power}</button>
           <button class="icon-btn" data-edit="${esc(t.id)}" title="編集">${ICON.pen}</button>
         </div>
@@ -5243,6 +5272,14 @@ PAWS.load();
 
     app.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => onEditTask(b.dataset.edit)));
     app.querySelectorAll('[data-toggle]').forEach(b => b.addEventListener('click', () => onToggleTask(b.dataset.toggle)));
+    app.querySelectorAll('[data-rearm]').forEach(b => b.addEventListener('click', () => {
+      const t = (data.tasks || []).find(x => x.id === b.dataset.rearm);
+      if(!t) return;
+      t.firedOn = null;
+      saveData();
+      render();
+      scheduleWatch();
+    }));
     app.querySelectorAll('[data-url]').forEach(b => b.addEventListener('click', () => {
       urlFor = urlFor === b.dataset.url ? null : b.dataset.url; render();
     }));
@@ -5515,7 +5552,15 @@ PAWS.load();
       data.tasks.push(draft);
     } else {
       const i = data.tasks.findIndex(x => x.id === editId);
-      if(i >= 0) data.tasks[i] = Object.assign({}, data.tasks[i], draft);
+      if(i >= 0){
+        const prev = data.tasks[i];
+        // A task only fires once a day. If its schedule changed, today's
+        // firing has to count as unused again.
+        const rescheduled = prev.time !== draft.time ||
+          String(taskDays(prev)) !== String(taskDays(draft));
+        data.tasks[i] = Object.assign({}, prev, draft);
+        if(rescheduled) data.tasks[i].firedOn = null;
+      }
       else data.tasks.push(draft);
     }
     editId = null; draft = null;
@@ -5536,6 +5581,7 @@ PAWS.load();
     const t = (data.tasks || []).find(x => x.id === id);
     if(!t) return;
     t.on = t.on === false;
+    if(t.on) t.firedOn = null;          // switching it back on re-arms today
     saveData();
     render();
   }

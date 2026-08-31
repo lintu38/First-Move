@@ -1433,6 +1433,13 @@
     font-size:24px; color:#7C6247; letter-spacing:.01em; }
   .handoff-note{ margin-top:12px; font-family:'Space Mono',monospace; font-size:10.5px;
     letter-spacing:.06em; color:var(--text-faint); }
+  .ring-bfly{ position:absolute; left:0; top:0; width:18px; height:16px;
+    margin:-8px 0 0 -9px; pointer-events:none; z-index:4;
+    transition:left .25s linear, top .25s linear; }
+  .ring-bfly svg{ width:100%; height:100%; animation:flyBob 1.7s ease-in-out infinite; }
+  .ring-bfly .wing{ animation:flap .16s ease-in-out infinite alternate; transform-origin:50% 50%; }
+  @keyframes flyBob{ 0%,100%{ transform:translateY(-1.5px) } 50%{ transform:translateY(2px) } }
+  @media (prefers-reduced-motion: reduce){ .ring-bfly svg,.ring-bfly .wing{ animation:none } }
 </style>
 </head>
 <body>
@@ -4579,6 +4586,16 @@ PAWS.load();
   let draft = null;       // task being edited in the form
 
   const DIAL_SIZE = 260, DIAL_R = 108, FEET = 9;
+  // The butterfly rides the edge of the colour, upright, without the
+  // walker's rotation.
+  function placeFly(el, p){
+    if(!el) return;
+    const t = ((p % 1) + 1) % 1;
+    const a = -Math.PI/2 + t*Math.PI*2;
+    el.style.left = (DIAL_SIZE/2 + Math.cos(a)*(DIAL_R+FEET)).toFixed(1) + 'px';
+    el.style.top  = (DIAL_SIZE/2 + Math.sin(a)*(DIAL_R+FEET)).toFixed(1) + 'px';
+  }
+
   function placeOnRing(el, p){
     if(!el) return;
     const t = ((p % 1) + 1) % 1;
@@ -4654,7 +4671,8 @@ PAWS.load();
         <div class="dial-task">${esc(a.label || '')}</div>
         <div class="dial-plan">予定 ${fmtClock(a.planned)} · 経過 ${fmtElapsed(armedElapsed())}</div>
       </div>
-      <div class="walker sit" id="fmWalker">${DOG_SVG}</div>
+      <div class="walker still" id="fmWalker">${DOG_SVG}</div>
+      <div class="ring-bfly" id="fmBfly"><svg viewBox="0 0 20 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g class="wing"><ellipse cx="6" cy="7" rx="4.6" ry="5.4" fill="#F2D24B" opacity="0.92"/><ellipse cx="14" cy="7" rx="4.6" ry="5.4" fill="#F7DF74" opacity="0.92"/><ellipse cx="6.6" cy="12.6" rx="3.2" ry="3.6" fill="#EFC93B" opacity="0.88"/><ellipse cx="13.4" cy="12.6" rx="3.2" ry="3.6" fill="#F5D95E" opacity="0.88"/></g><rect x="9.3" y="5" width="1.4" height="9" rx="0.7" fill="#8A6C4F"/></svg></div>
     </div>`;
   }
 
@@ -4732,7 +4750,7 @@ PAWS.load();
     }
     const list = (data.tasks || []).slice().sort((a,b) => (a.time||'').localeCompare(b.time||''));
     return `<div class="pick-wrap">
-      <button class="action-btn" id="quickArm">GET SET
+      <button class="action-btn" id="quickArm">Ready...
         <svg class="btn-paw" viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg>
       </button>
       ${pickerOpen ? `<div class="pick-list">
@@ -5146,7 +5164,8 @@ PAWS.load();
     }));
 
     const w = $id('fmWalker');
-    if(w){ placeOnRing(w, 0); w.className = 'walker sit'; }
+    if(w){ placeOnRing(w, 0); w.className = 'walker still'; }
+    placeFly($id('fmBfly'), Math.min(dialState().raw, 1));
   }
 
   function bind(id, fn){
@@ -5216,6 +5235,7 @@ PAWS.load();
     const goBtn = $id('fmGo');
     if(goBtn){ goBtn.style.background = go.background; goBtn.style.boxShadow = go.shadow; }
     $qa('.halo').forEach(h => { h.style.borderColor = go.halo; });
+    placeFly($id('fmBfly'), Math.min(st.raw, 1));
 
     // While snoozed the nudges stay quiet; when it runs out, we call again.
     if(data.armed && data.armed.snoozeUntil){

@@ -4897,18 +4897,10 @@ PAWS.load();
           </div>
         </div>
         <div class="acts">
-          <button class="icon-btn ${urlFor === t.id ? 'on' : ''}" data-url="${esc(t.id)}" title="ショートカット用URL">${ICON.link}</button>
           <button class="icon-btn ${t.on === false ? '' : 'on'}" data-toggle="${esc(t.id)}" title="有効/無効">${ICON.power}</button>
           <button class="icon-btn" data-edit="${esc(t.id)}" title="編集">${ICON.pen}</button>
         </div>
       </div>
-      ${urlFor === t.id ? `<div class="url-box">
-        <div class="u">${esc(shortcutUrl(t.id))}</div>
-        <div class="row">
-          <button class="mini-btn solid" data-copy="${esc(t.id)}">URLをコピー</button>
-          <button class="mini-btn" data-testurl="${esc(t.id)}">試しに開く</button>
-        </div>
-      </div>` : ''}
     `).join('')}</div>`;
   }
 
@@ -4948,6 +4940,13 @@ PAWS.load();
         <label>計測</label>
         <button class="toggle ${t.session === false ? '' : 'on'}" id="edSession">${t.session === false ? 'OFF' : 'ON'}</button>
       </div>
+
+      ${editId === 'new' ? '' : `<div class="url-box">
+        <div class="u">${esc(shortcutUrl(t.id))}</div>
+        <div class="row">
+          <button class="mini-btn solid" data-copy="${esc(t.id)}">ショートカット用の URL をコピー</button>
+        </div>
+      </div>`}
       <div class="ed-actions">
         <button class="ed-save" id="edSave">SAVE</button>
         ${editId === 'new' ? '' : '<button class="ed-del" id="edDel">DELETE</button>'}

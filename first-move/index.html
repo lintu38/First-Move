@@ -696,18 +696,29 @@
     if(!silent){ syncBusy = true; setSyncMsg('取り込み中…'); render(); }
     return gh('https://api.github.com/gists/' + encodeURIComponent(syncCfg.gistId))
       .then(j => {
-        const f = j.files && (j.files[GIST_FILE] || j.files[Object.keys(j.files)[0]]);
-        if(!f) throw new Error('ファイルが見つかりません');
-        const text = f.truncated && f.raw_url ? null : f.content;
-        if(text === null) return fetch(f.raw_url).then(r => r.text());
-        return text;
+        // A gist shared with another app simply has no file for us yet.
+        const f = j.files && j.files[GIST_FILE];
+        if(!f) return null;
+        if(f.truncated && f.raw_url) return fetch(f.raw_url).then(r => r.text());
+        return f.content;
       })
       .then(text => {
-        const remote = JSON.parse(text);
-        const changed = mergeRemote(remote);
+        let changed = false, fresh = true;
+        if(text != null){
+          const remote = JSON.parse(text);
+          if(remote && remote.app && remote.app !== 'on-your-marks'){
+            throw new Error('別のアプリの記録です');
+          }
+          changed = mergeRemote(remote);
+          fresh = false;
+        }
         syncCfg.at = Date.now(); saveSync();
         saveData(false);
-        if(!silent){ setSyncMsg(changed ? '取り込みました。' : '差分はありませんでした。', 'ok'); }
+        if(!silent){
+          setSyncMsg(
+            fresh ? 'この Gist にはまだ記録がありません。「同期する」を押すと作成されます。'
+                  : (changed ? '取り込みました。' : '差分はありませんでした。'), 'ok');
+        }
         return changed;
       })
       .catch(e => { setSyncMsg('取り込めませんでした: ' + e.message, 'err'); return null; })

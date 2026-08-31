@@ -1436,6 +1436,41 @@
   /* the timer's button slot tucks under its dial; on the Ready tab there is
      no dial in the idle state, so the pull-up would jam it against the card
      above it */
+  #paneSs .log-item .span{ font-family:'Space Mono',monospace; white-space:nowrap; }
+  #paneSs .log-item .span i{ font-style:normal; color:var(--text-faint); margin:0 1px; }
+  #paneSs .log-item .span b{ font-weight:400; color:var(--text-faint); margin-right:3px; }
+  .se-calc{ font-family:'Space Mono',monospace; font-size:15px; font-weight:700;
+    color:var(--cyan-deep); flex:0 0 auto; }
+  /* the session editor never had any styling of its own */
+  .sess-editor{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+    padding:14px; display:flex; flex-direction:column; gap:11px; margin-bottom:10px;
+    box-shadow:0 10px 26px -20px rgba(80,60,40,.7); }
+  .se-title{ font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--text-faint); }
+  .se-field{ display:flex; align-items:center; gap:9px; }
+  .se-field > label{ font-size:12px; color:var(--text-muted); min-width:68px; flex:0 0 auto; }
+  .se-field input[type=date], .se-field input[type=time], .se-field select{
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:14px; color:var(--text);
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:10px;
+    padding:8px 10px; flex:1; min-width:0; }
+  .se-field input[type=number]{ font-family:'Space Mono',monospace; font-size:14px;
+    text-align:center; color:var(--text); background:var(--bg-soft);
+    border:1px solid var(--line); border-radius:10px; padding:8px 6px; flex:0 0 70px; }
+  .se-field .unit{ font-family:'Space Mono',monospace; font-size:11px; color:var(--text-faint); }
+  .se-actions{ display:flex; gap:8px; margin-top:2px; }
+  .se-actions button{ flex:1; border:none; border-radius:999px; padding:11px 0; cursor:pointer;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; }
+  .se-save{ background:linear-gradient(135deg,#D2BB99,var(--beige) 60%,var(--beige-deep));
+    color:var(--beige-ink); }
+  .se-del{ background:#F2E3E3; color:#A9605E; flex:0 0 84px !important; }
+  .se-cancel{ background:var(--bg-soft); color:var(--text-muted); flex:0 0 92px !important; }
+  /* the Set tab's button is a quiet stand-by, not the main event */
+  #paneFm .action-btn{ width:154px; padding:13px 18px; font-size:14px;
+    letter-spacing:.12em; border-radius:12px; gap:7px;
+    background:linear-gradient(135deg,#EFE5D5,#E3D5BE 55%,#D6C3A6);
+    color:#6E563D;
+    box-shadow:0 6px 16px -8px rgba(183,154,115,.45); }
+  #paneFm .action-btn .btn-paw{ width:16px; height:13px; }
   #paneFm .btn-slot{ margin-top:0; }
   #paneFm .dial-wrap + .btn-slot{ margin-top:-22px; }
   #paneFm .pick-wrap{ gap:16px; }
@@ -1461,8 +1496,8 @@
   </div>
 
   <div class="tabbar">
-    <button class="tabbtn on" data-tab="fm"><svg viewBox="1.5 1 23 16" aria-hidden="true"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>Ready</button>
-    <button class="tabbtn" data-tab="ss"><svg viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg>Session</button>
+    <button class="tabbtn on" data-tab="fm"><svg viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg>Ready</button>
+    <button class="tabbtn" data-tab="ss"><svg viewBox="1.5 1 23 16" aria-hidden="true"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>Session</button>
   </div>
 
   <div class="pane" id="paneFm"><div class="loading">Loading…</div></div>
@@ -1836,7 +1871,7 @@ window.PAWS = (function(){
       <div class="help ${helpOpen ? 'open' : ''}">
         <button id="shHelp"><span class="caret">▸</span>使い方とセットアップ</button>
         ${helpOpen ? `<div class="help-body">
-          <h4>First Move タブ</h4>
+          <h4>Ready タブ</h4>
           <p>タスクに開始時間を決めておくと、その時刻を起点に「実際に動き出すまでの時間」を測ります。iPhone のショートカットで各タスクの URL を開くと、自動で待機に入ります（タスク一覧の 🔗 ボタンで URL がコピーできます）。</p>
           <h4>Session タブ</h4>
           <p>READY… を押してから GO! までが初動、そこから FINISH までが作業時間です。休憩をはさんでも合計は正しく積み上がります。</p>
@@ -1991,6 +2026,7 @@ PAWS.load();
     breakAccum: 0,
     hoursChimed: 0,
     goalCelebrated: false,
+    goalCelebratedOn: null,
     thresholdSec: 300,      // goal for getting started (5 min)
     workGoalSec: 10800,     // goal for the work session (3 h)
     soundOn: true,
@@ -2117,13 +2153,30 @@ PAWS.load();
     if(h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
     return m + ':' + String(s).padStart(2,'0');
   }
+  // A session's stored ts is the moment FINISH was pressed; work + break
+  // covers the whole span, so the beginning falls out of the two.
+  function sessStart(s){ return s.ts - (((s.work || 0) + (s.rest || 0)) * 1000); }
+
   function fmtClock(ts){
     const d = new Date(ts);
     return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
   }
+  // A day here starts at 05:00 and runs to 04:59, so a late night still
+  // belongs to the day it began in.
   function isToday(ts){
-    const d = new Date(ts), n = new Date();
-    return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+    return dayStart5(ts).getTime() === dayStart5(new Date()).getTime();
+  }
+  function dayKey5(when){
+    const d = dayStart5(when || new Date());
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+  }
+  // Everything worked in the current day, the stretch in progress included.
+  function dayTotalWork(){
+    const from = dayStart5(new Date()).getTime();
+    let total = 0;
+    (data.sessions || []).forEach(s => { if(s.ts >= from) total += (s.work || 0); });
+    if(data.phase === 'working' || data.phase === 'break') total += workElapsed();
+    return total;
   }
 
   function readyElapsed(){
@@ -2830,14 +2883,9 @@ PAWS.load();
 
   const CHART_SPAN = { day: 14, week: 12, month: 12 };
 
-  function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
-  function startOfWeek(d){                     // weeks start on Monday
-    const x = startOfDay(d);
-    const wd = (x.getDay() + 6) % 7;
-    x.setDate(x.getDate() - wd);
-    return x;
-  }
-  function startOfMonth(d){ const x = startOfDay(d); x.setDate(1); return x; }
+  function startOfDay(d){ return dayStart5(d); }
+  function startOfWeek(d){ return weekStart5(d); }   // Monday 05:00
+  function startOfMonth(d){ const x = dayStart5(d); x.setDate(1); return x; }
 
   function bucketStarts(){
     const mode = data.chartMode || 'day';
@@ -3024,9 +3072,14 @@ PAWS.load();
       <div class="se-title">${isNew ? 'New session' : 'Edit session'}</div>
 
       <div class="se-field">
-        <label>Date</label>
-        <input type="date" id="seDate" value="${dateValue(s.ts)}">
-        <input type="time" id="seTime" value="${timeValue(s.ts)}">
+        <label>Started</label>
+        <input type="date" id="seDate" value="${dateValue(sessStart(s))}">
+        <input type="time" id="seStart" value="${timeValue(sessStart(s))}">
+      </div>
+
+      <div class="se-field">
+        <label>Ended</label>
+        <input type="time" id="seEnd" value="${timeValue(s.ts)}">
       </div>
 
       <div class="se-field">
@@ -3037,14 +3090,14 @@ PAWS.load();
       </div>
 
       <div class="se-field">
-        <label>Work</label>
-        <input type="number" id="seWorkH" min="0" max="23" value="${wh}"><span class="unit">h</span>
-        <input type="number" id="seWorkM" min="0" max="59" value="${wm}"><span class="unit">m</span>
+        <label>Break</label>
+        <input type="number" id="seRestM" min="0" max="600" value="${bm}"><span class="unit">m</span>
       </div>
 
       <div class="se-field">
-        <label>Break</label>
-        <input type="number" id="seRestM" min="0" max="600" value="${bm}"><span class="unit">m</span>
+        <label>Work</label>
+        <span class="se-calc" id="seWorkCalc">${fmtElapsed(s.work || 0)}</span>
+        <span class="unit">自動計算</span>
       </div>
 
       <div class="se-field">
@@ -3061,6 +3114,27 @@ PAWS.load();
     </div>`;
   }
 
+  // Start and end are what a person remembers; the working time is the
+  // span between them, less the break.
+  function seCompute(){
+    const dv = ($id('seDate') || {}).value;
+    const sv = ($id('seStart') || {}).value;
+    const ev = ($id('seEnd') || {}).value;
+    if(!dv || !sv || !ev) return null;
+    const start = new Date(dv + 'T' + sv).getTime();
+    let end = new Date(dv + 'T' + ev).getTime();
+    if(isNaN(start) || isNaN(end)) return null;
+    if(end <= start) end += 24 * 3600 * 1000;      // ran past midnight
+    const rest = num('seRestM', 0) * 60;
+    return { start: start, end: end, rest: rest,
+             work: Math.max(0, (end - start) / 1000 - rest) };
+  }
+  function seRefresh(){
+    const c = seCompute();
+    const el = $id('seWorkCalc');
+    if(el) el.textContent = c ? fmtElapsed(c.work) : '—';
+  }
+
   function num(id, fallback){
     const el = $id(id);
     const v = el ? parseInt(el.value, 10) : NaN;
@@ -3072,14 +3146,13 @@ PAWS.load();
     const base = isNew ? blankSession() : Object.assign({}, (data.sessions || [])[editIndex]);
     if(!base) return;
 
-    const dv = ($id('seDate') || {}).value || dateValue(base.ts);
-    const tv = ($id('seTime') || {}).value || timeValue(base.ts);
-    const ts = new Date(dv + 'T' + tv).getTime();
+    const c = seCompute();
+    const ts = c ? c.end : base.ts;
 
     const typeEl = $id('seType');
     const newType = typeEl ? typeEl.value : base.type;
-    const work = num('seWorkH', 0) * 3600 + num('seWorkM', 0) * 60;
-    const rest = num('seRestM', 0) * 60;
+    const work = c ? c.work : (base.work || 0);
+    const rest = c ? c.rest : (base.rest || 0);
     const initial = num('seInitM', 0) * 60 + num('seInitS', 0);
 
     // Keep the per-type split sensible when the total or the type changes.
@@ -3225,7 +3298,8 @@ PAWS.load();
     }
     if(phase === 'working' || phase === 'break'){
       const w = workElapsed();
-      const p = w / data.workGoalSec;
+      // The ring measures the whole day against the goal, not this stretch.
+      const p = dayTotalWork() / data.workGoalSec;
       return {
         main: fmtElapsed(w),
         label: phase === 'break' ? 'on a break' : 'in session',
@@ -3233,7 +3307,7 @@ PAWS.load();
         raw: p,
         color: typeColor(data.taskType || 'WORK'),
         sub: phase === 'break' ? 'break ' + fmtElapsed(restElapsed())
-                               : (restElapsed() > 0 ? 'break ' + fmtElapsed(restElapsed()) : null),
+                               : 'today ' + fmtElapsed(dayTotalWork()),
         lap: Math.floor(p),
         dogClass: phase === 'break' ? 'sit' : '',
         dogPos: p,
@@ -3241,11 +3315,12 @@ PAWS.load();
       };
     }
     if(phase === 'done'){
+      const dayP = dayTotalWork() / data.workGoalSec;
       return {
         main: fmtElapsed(workElapsed()),
         label: 'finished',
-        progress: Math.min(workElapsed() / data.workGoalSec, 1),
-        raw: workElapsed() / data.workGoalSec,
+        progress: Math.min(dayP, 1),
+        raw: dayP,
         color: typeColor(data.taskType || 'WORK'),
         sub: restElapsed() > 0 ? 'break ' + fmtElapsed(restElapsed()) : null,
         lap: 0, dogClass: 'sit', dogPos: workElapsed() / data.workGoalSec, live: false
@@ -3411,7 +3486,7 @@ PAWS.load();
                 const tip = many ? keys.map(k => `${typeLabel(k)} ${fmtElapsed(seg[k])}`).join(' · ') : '';
                 return `<span class="tag" style="background:${typeColor(s.type || 'WORK')}" title="${tip}">${typeLabel(s.type || 'WORK')}${many ? ' +' + (keys.length - 1) : ''}</span>`;
               })()}
-              ${fmtClock(s.ts)}
+              <span class="span"><b>${(new Date(sessStart(s)).getMonth()+1)}/${new Date(sessStart(s)).getDate()}</b> ${fmtClock(sessStart(s))} <i>→</i> ${fmtClock(s.ts)}</span>
             </div>
             <div class="right">
               <span class="work">${fmtElapsed(s.work)}</span>
@@ -3442,6 +3517,10 @@ PAWS.load();
     });
     bind('histToggle', () => { historyOpen = !historyOpen; render(); });
     bind('addSession', () => { editIndex = 'new'; historyOpen = true; render(); });
+    ['seDate','seStart','seEnd','seRestM'].forEach(id => {
+      const el = $id(id);
+      if(el){ el.addEventListener('input', seRefresh); el.addEventListener('change', seRefresh); }
+    });
     bind('seSave', onSessionSave);
     bind('seDel', onSessionDelete);
     bind('seCancel', () => { editIndex = null; render(); });
@@ -3530,9 +3609,9 @@ PAWS.load();
       positionPack(st.dogPos);
 
       // Reaching the session goal
-      if(!data.goalCelebrated && workElapsed() >= data.workGoalSec){
-        data.goalCelebrated = true;
-        banner = { text: `🎉 ${Math.round(data.workGoalSec/60)} minutes of work — goal reached!`, celebrate: true };
+      if(data.goalCelebratedOn !== dayKey5() && dayTotalWork() >= data.workGoalSec){
+        data.goalCelebratedOn = dayKey5();
+        banner = { text: `🎉 ${Math.round(data.workGoalSec/60)} minutes today — goal reached!`, celebrate: true };
         saveData();
         render();
         playBigFanfare();
@@ -4776,7 +4855,7 @@ PAWS.load();
     }
     const list = (data.tasks || []).slice().sort((a,b) => (a.time||'').localeCompare(b.time||''));
     return `<div class="pick-wrap">
-      <button class="action-btn" id="quickArm">Ready...
+      <button class="action-btn" id="quickArm">Get Set
         <svg class="btn-paw" viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg>
       </button>
       ${pickerOpen ? `<div class="pick-list">

@@ -1659,6 +1659,8 @@ window.PAWS = (function(){
   const OLD_SS   = 'start_tracker_data';
   const OLD_FM   = 'on_your_marks_v1';
   const SYNC_KEY = 'paw_suite_sync';
+  // The little window is only a view of another window's session.
+  const MINI = /[?&]mini=1/.test(window.location.search);
 
   const DEFAULT_TYPES = [
     { id:'WORK',  label:'WORK',  color:'#46AFC2', icon:'briefcase' },
@@ -1719,7 +1721,7 @@ window.PAWS = (function(){
   function save(bump){
     if(bump !== false) root.metaAt = Date.now();
     writeLS(KEY, JSON.stringify(root));
-    if(bump !== false) schedulePush();
+    if(bump !== false && !MINI) schedulePush();
   }
 
   function register(id, api){ mods[id] = api; }
@@ -2212,6 +2214,7 @@ window.PAWS = (function(){
     setTab(wanted === 'ss' ? 'ss' : 'fm');
     renderShared();
     save(false);          // persist the merged / migrated shape straight away
+    if(MINI) return;
     document.addEventListener('visibilitychange', () => {
       if(!document.hidden && syncCfg.auto && syncReady()) syncPull(true);
     });
@@ -3883,6 +3886,7 @@ PAWS.load();
   `;
 
   let pipWin = null, pipTimer = null;
+  let hostWin = null;       // the window whose session the little one shows
   let miniRoot = null;      // the .mini element, wherever it currently lives
   let pageMini = null;      // the copy that belongs to a ?mini=1 page
   const MINI_MODE = /[?&]mini=1/.test(location.search);
@@ -3910,16 +3914,35 @@ PAWS.load();
     +   '</div>'
     + '</div>';
 
+  // Handed a little-window element that lives in another window of this
+  // same app; from then on this session paints it.
+  window.__pawAttachMini = function(el){
+    try{
+      miniRoot = el;
+      startMiniPaint();
+      return true;
+    }catch(e){ return false; }
+  };
+  window.__pawMiniCmd = function(cmd){
+    if(cmd === 'toggle'){ if(data.phase === 'break') onRestart(); else onBreak(); }
+    else if(cmd === 'finish') onFinish();
+    paintMini();
+    return data.phase;
+  };
+  window.__pawPhase = function(){ return data.phase; };
+
   function buildMini(host, withPin){
     host.innerHTML = MINI_HTML;
     const root = host.querySelector('#miniHost');
     const g = id => root.querySelector('#' + id);
     g('mA').addEventListener('click', () => {
+      if(hostWin){ try{ hostWin.__pawMiniCmd('toggle'); return; }catch(e){} }
       if(data.phase === 'break') onRestart(); else onBreak();
       paintMini();
     });
     g('mB').addEventListener('click', () => {
-      onFinish();
+      if(hostWin){ try{ hostWin.__pawMiniCmd('finish'); }catch(e){} }
+      else onFinish();
       if(pipWin && !pipWin.closed) pipWin.close();
       if(MINI_MODE) window.close();
     });
@@ -3931,6 +3954,17 @@ PAWS.load();
 
   function paintMini(){
     if(!miniRoot) return;
+    // the window it lives in may have been closed since the last tick
+    try{
+      if(!miniRoot.isConnected) throw 0;
+      paintMiniInner();
+    }catch(e){
+      miniRoot = null;
+      clearInterval(pipTimer); pipTimer = null;
+    }
+  }
+
+  function paintMiniInner(){
     const d = miniRoot.ownerDocument;
     const st = dialState();
     const circ = 2 * Math.PI * 108;
@@ -4029,16 +4063,21 @@ PAWS.load();
       const stl = d.createElement('style');
       stl.textContent = MINI_CSS;
       d.head.appendChild(stl);
-      miniRoot = buildMini(d.body, false);
+      const root = buildMini(d.body, false);
       if(MINI_MODE) document.body.classList.add('pinned');
-      startMiniPaint();
+      if(hostWin){
+        try{ hostWin.__pawAttachMini(root); }catch(e){}
+      } else {
+        miniRoot = root;
+        startMiniPaint();
+      }
       w.addEventListener('pagehide', () => {
         clearInterval(pipTimer); pipTimer = null; pipWin = null;
         if(MINI_MODE && pageMini){
           document.body.classList.remove('pinned');
-          miniRoot = pageMini;
-          startMiniPaint();
-        } else {
+          if(hostWin){ try{ hostWin.__pawAttachMini(pageMini); }catch(e){} }
+          else { miniRoot = pageMini; startMiniPaint(); }
+        } else if(!hostWin){
           miniRoot = null;
         }
       });
@@ -4068,7 +4107,22 @@ PAWS.load();
     note.innerHTML = '小窓をいちばん手前に表示中です。<br>その小窓を閉じると、ここに戻ります。';
     document.body.appendChild(note);
     document.title = 'Timer';
-    startMiniPaint();
+    // Prefer the session of the window that opened us: the panel inside Tasks
+    // keeps its own storage, so our own copy would show something else.
+    let attached = false;
+    try{
+      const o = window.opener;
+      if(o && !o.closed && typeof o.__pawAttachMini === 'function'){
+        attached = o.__pawAttachMini(pageMini) === true;
+        if(attached) hostWin = o;
+      }
+    }catch(e){}
+    if(attached){
+      stopTicking();          // our own copy stays quiet
+      clearInterval(pipTimer); pipTimer = null;
+    } else {
+      startMiniPaint();
+    }
   }
 
   function openMini(){
@@ -4076,7 +4130,7 @@ PAWS.load();
       alert('計測を始めてから開いてください。');
       return;
     }
-    if(window.top !== window.self){
+    if(window.top !== window.self || MINI_MODE){
       // Inside the Tasks panel. A framed page cannot float a window, so give
       // it a page of its own that can.
       const url = location.href.split(/[?#]/)[0] + '?mini=1';
@@ -6489,6 +6543,9 @@ PAWS.load();
   }
 
   function init(){
+    // Inside the little window there is nothing of Ready to show, and a
+    // second copy must not fire alarms of its own.
+    if(/[?&]mini=1/.test(location.search)) return;
     loadData();
     PAWS.register('fm', {
       gistFile: 'on-your-marks.json',

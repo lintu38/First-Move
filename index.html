@@ -1415,6 +1415,8 @@
 
   /* ---------- suite shell ---------- */
   :root{ --line:#EAE1D3; --bg-soft:#F3EDE2; }
+  /* fireworks open outside the dial, so keep them from widening the page */
+  body{ overflow-x:hidden; }
   .tabbar{ display:flex; gap:6px; background:var(--bg-card); border:1px solid var(--line);
     border-radius:999px; padding:4px; }
   .tabbtn{ flex:1; border:none; background:none; border-radius:999px; padding:10px 0;
@@ -1436,6 +1438,8 @@
   /* the timer's button slot tucks under its dial; on the Ready tab there is
      no dial in the idle state, so the pull-up would jam it against the card
      above it */
+  /* the day's total, and the break clock, are worth reading at a glance */
+  #paneSs .sub-clock{ font-size:15px; color:var(--text-muted); letter-spacing:.01em; }
   #paneSs .log-item .span{ font-family:'Space Mono',monospace; white-space:nowrap; }
   #paneSs .log-item .span i{ font-style:normal; color:var(--text-faint); margin:0 1px; }
   #paneSs .log-item .span b{ font-weight:400; color:var(--text-faint); margin-right:3px; }
@@ -1488,6 +1492,123 @@
   @media (prefers-reduced-motion: reduce){
     .softwave::before,.softwave::after{ animation:none; opacity:0; }
   }
+  .type-pick{ display:flex; flex-direction:column; gap:10px; }
+  #paneFm .type-row{ display:flex; gap:6px; flex-wrap:wrap; }
+  #paneFm .type-row .type-btn{ flex:1 1 auto; }
+  .type-pick .settings{ font-size:12px; padding:7px 12px; }
+  #paneFm .checkin-wrap:not(.small){ width:152px; height:152px; }
+  #paneFm .checkin-wrap:not(.small) .halo{ width:124px; height:124px; }
+  #paneFm #fmGo{ width:124px; height:124px; font-size:29px; }
+  #paneFm #fmGo .go-steps svg{ width:28px; height:18px; }
+  .dog-bubble{ position:absolute; left:50%; top:-18px; margin-left:32px;
+    background:#fff; border:1px solid var(--line); border-radius:13px;
+    padding:6px 12px; font-family:'Comfortaa','Zen Kaku Gothic New',cursive;
+    font-size:12px; font-weight:500; color:#7C6247; white-space:nowrap;
+    text-align:center; line-height:1.5;
+    box-shadow:0 6px 16px -10px rgba(80,60,40,.6); pointer-events:none; z-index:6;
+    transition:opacity .45s ease, transform .45s cubic-bezier(.2,1.6,.4,1); }
+  .dog-bubble.hide{ opacity:0; transform:scale(.8); }
+  .dog-bubble .jp{ font-size:11.5px; color:var(--text-muted); }
+  /* the Session bubble walks with the dog, and flips side on the right half */
+  .dog-bubble.sess{ left:0; top:0; margin-left:0;
+    transform:translate(13px,-100%); white-space:normal;
+    width:max-content; max-width:150px; text-align:center; }
+  .dog-bubble.sess.hide{ transform:translate(13px,-100%) scale(.8); }
+  .dog-bubble.sess.flip{ transform:translate(calc(-100% - 13px),-100%); }
+  .dog-bubble.sess.flip.hide{ transform:translate(calc(-100% - 13px),-100%) scale(.8); }
+  .dog-bubble.sess::after{ left:11px; right:auto; }
+  .dog-bubble.sess.flip::after{ left:auto; right:11px; }
+  .dog-bubble::after{ content:""; position:absolute; left:11px; bottom:-5px;
+    width:9px; height:9px; background:#fff;
+    border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+    transform:rotate(-45deg); }
+  @media (prefers-reduced-motion: reduce){ .dog-bubble{ animation:none; } }
+  #paneFm .checkin-wrap.small{ width:142px; height:142px; }
+  #paneFm .checkin-wrap.small .halo{ width:112px; height:112px; }
+  #paneFm .checkin-btn.get-set{ width:112px; height:112px; font-size:19px;
+    letter-spacing:.03em; color:#6E563D; gap:2px; }
+  #paneFm .checkin-btn.get-set .go-steps svg{ width:22px; height:19px; }
+  #paneFm .checkin-btn.get-set .go-steps svg ellipse{ fill:currentColor; opacity:.75; }
+  .te-item.dragging{ opacity:.8; }
+  .te-item.dragging .te-row{ box-shadow:0 10px 22px -12px rgba(80,60,40,.6); border-radius:12px; }
+  .te-grip{ width:22px; height:30px; flex:0 0 22px; border:none; background:none;
+    color:var(--text-faint); cursor:grab; touch-action:none; padding:0;
+    display:flex; align-items:center; justify-content:center; }
+  .te-grip svg{ width:16px; height:16px; }
+  .te-grip:active{ cursor:grabbing; }
+  .type-pick input[type=number]{ width:54px; text-align:center;
+    font-family:'Space Mono',monospace; font-size:13.5px; color:var(--text);
+    background:var(--bg-soft); border:1px solid var(--line);
+    border-radius:9px; padding:5px 4px; }
+  .te-move{ width:24px; height:30px; flex:0 0 24px; border:1px solid var(--line);
+    background:var(--bg-soft); color:var(--text-faint); border-radius:8px;
+    font-size:10px; line-height:1; cursor:pointer; padding:0; }
+  .te-move:disabled{ opacity:.3; cursor:default; }
+  .icon-btn.paw{ background:linear-gradient(135deg,#EFE5D5,#E3D5BE 55%,#D6C3A6);
+    border-color:transparent; color:#6E563D;
+    animation:pawBreath 4.2s ease-in-out infinite; }
+  .icon-btn.paw svg{ fill:currentColor; stroke:none; width:17px; height:15px; }
+  @keyframes pawBreath{
+    0%,100%{ box-shadow:0 4px 10px -6px rgba(183,154,115,.5); filter:brightness(1); }
+    50%{ box-shadow:0 6px 14px -6px rgba(183,154,115,.85); filter:brightness(1.06); }
+  }
+  .task-row.spent{ background:#F1EDE6; box-shadow:none; }
+  .task-row.spent .nm{ color:var(--text-muted); }
+  .task-row.spent .icon-btn.paw{ animation:none; box-shadow:none;
+    background:var(--bg-soft); color:var(--text-faint); border-color:var(--line); }
+  .task-row .meta .skip-today{ color:var(--text-faint); }
+  .task-row .acts{ gap:4px; }
+  .task-row .icon-btn{ width:28px; height:28px; }
+  @media (prefers-reduced-motion: reduce){ .icon-btn.paw{ animation:none; } }
+  .snooze-note{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+    padding:13px 15px; display:grid; grid-template-columns:1fr auto; gap:4px 10px;
+    box-shadow:0 6px 18px -14px rgba(80,60,40,.5); }
+  .snooze-note .l{ font-size:13px; color:var(--text-muted); align-self:center; }
+  .snooze-note .z{ font-family:'Space Mono',monospace; color:var(--beige-deep); font-weight:700; }
+  .snooze-note .r{ font-family:'Space Mono',monospace; font-size:10.5px;
+    color:var(--text-faint); text-align:right; }
+  .snooze-note .r b{ display:block; font-size:17px; color:#7C6247; }
+  .snooze-note .row{ grid-column:1/-1; display:flex; gap:7px; margin-top:6px; }
+  /* the murmur reads as the dog's, so it gets a paw in front */
+  #paneSs .cheer::before{ content:""; display:inline-block; width:15px; height:13px;
+    margin-right:7px; vertical-align:-2px; opacity:.55;
+    background:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2040%2034%22%20fill=%22%23B09878%22%3E%3Cellipse%20cx=%2220%22%20cy=%2225%22%20rx=%228.6%22%20ry=%227%22/%3E%3Cellipse%20cx=%229.5%22%20cy=%2214.5%22%20rx=%224%22%20ry=%225.2%22%20transform=%22rotate%28-18%209.5%2014.5%29%22/%3E%3Cellipse%20cx=%2216.5%22%20cy=%228%22%20rx=%223.7%22%20ry=%225%22/%3E%3Cellipse%20cx=%2224.5%22%20cy=%228%22%20rx=%223.7%22%20ry=%225%22/%3E%3Cellipse%20cx=%2231%22%20cy=%2214.5%22%20rx=%224%22%20ry=%225.2%22%20transform=%22rotate%2818%2031%2014.5%29%22/%3E%3C/svg%3E") no-repeat center/contain; }
+  /* a small firework over the dial */
+  .fw{ position:absolute; width:0; height:0; pointer-events:none; z-index:2; }
+  /* the whistle: a spark climbing with a short tail behind it */
+  .fw-rise{ position:absolute; left:-.75px; width:1.5px; height:20px;
+    margin-top:-20px; border-radius:1px; transform-origin:50% 100%;
+    background:linear-gradient(to top, rgba(238,214,164,0), #F2DCA8);
+    box-shadow:0 0 4px rgba(240,208,138,.6);
+    animation:fwRise .85s cubic-bezier(.22,.58,.48,1) forwards; }
+  @keyframes fwRise{
+    0%{ transform:translate(var(--rx), var(--rise)) scaleY(.35); opacity:0 }
+    18%{ opacity:.85 }
+    78%{ opacity:.8 }
+    100%{ transform:translate(0,0) scaleY(1.05); opacity:0 }
+  }
+  .fw-core{ position:absolute; left:-2px; top:-2px; width:4px; height:4px;
+    border-radius:50%; background:currentColor; box-shadow:0 0 6px currentColor;
+    opacity:0; animation:fwCore .7s ease-out .85s forwards; }
+  @keyframes fwCore{ 0%{ opacity:0; transform:scale(.3) } 20%{ opacity:.7; transform:scale(1) }
+                     100%{ opacity:0; transform:scale(.4) } }
+  .fw-ray{ position:absolute; left:-.75px; width:1.5px; height:var(--len);
+    margin-top:calc(-1 * var(--len)); border-radius:1px;
+    background:currentColor; transform-origin:50% 100%; opacity:0;
+    animation:fwRay 1.5s cubic-bezier(.12,.75,.3,1) .85s forwards; }
+  .fw-ray::after{ content:""; position:absolute; left:-0.5px; top:-1.2px;
+    width:2.5px; height:2.5px; border-radius:50%; background:currentColor;
+    box-shadow:0 0 3px currentColor; }
+  @keyframes fwRay{
+    0%{ transform:rotate(var(--a)) scaleY(0); opacity:0 }
+    14%{ opacity:.78 }
+    55%{ transform:rotate(var(--a)) scaleY(1); opacity:.72 }
+    100%{ transform:rotate(var(--a)) scaleY(1.1) translateY(4px); opacity:0 }
+  }
+  @media (prefers-reduced-motion: reduce){ .fw{ display:none; } }
+  .bpaw{ display:inline-block; width:12px; height:10px; margin-left:5px;
+    vertical-align:-1px; opacity:.5;
+    background:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2040%2034%22%20fill=%22%23B09878%22%3E%3Cellipse%20cx=%2220%22%20cy=%2225%22%20rx=%228.6%22%20ry=%227%22/%3E%3Cellipse%20cx=%229.5%22%20cy=%2214.5%22%20rx=%224%22%20ry=%225.2%22%20transform=%22rotate%28-18%209.5%2014.5%29%22/%3E%3Cellipse%20cx=%2216.5%22%20cy=%228%22%20rx=%223.7%22%20ry=%225%22/%3E%3Cellipse%20cx=%2224.5%22%20cy=%228%22%20rx=%223.7%22%20ry=%225%22/%3E%3Cellipse%20cx=%2231%22%20cy=%2214.5%22%20rx=%224%22%20ry=%225.2%22%20transform=%22rotate%2818%2031%2014.5%29%22/%3E%3C/svg%3E") no-repeat center/contain; }
   .task-row .meta .done-today{ color:#5B9E6B; }
   #paneFm .task-row .meta{ white-space:normal; flex-wrap:wrap; row-gap:2px; }
   #paneFm .btn-slot{ margin-top:0; }
@@ -1844,15 +1965,18 @@ window.PAWS = (function(){
         </div>
         ${typeEditing ? `<div class="type-editor">
           ${list.map(t => `
-            <div class="te-row">
-              <input type="color" value="${esc(t.color)}" data-shcolor="${esc(t.id)}">
-              <button class="te-icon" data-shiconbtn="${esc(t.id)}" style="color:${esc(t.color)}" title="アイコンを選ぶ">${typeIcon(t)}</button>
-              <input type="text" value="${esc(t.label)}" maxlength="12" data-shlabel="${esc(t.id)}">
-              <button class="te-del" data-shdel="${esc(t.id)}" ${list.length <= 1 ? 'disabled' : ''} title="削除">×</button>
+            <div class="te-item" data-shrow="${esc(t.id)}">
+              <div class="te-row">
+                <button class="te-grip" data-shgrip="${esc(t.id)}" title="ドラッグで並べ替え">${GRIP}</button>
+                <input type="color" value="${esc(t.color)}" data-shcolor="${esc(t.id)}">
+                <button class="te-icon" data-shiconbtn="${esc(t.id)}" style="color:${esc(t.color)}" title="アイコンを選ぶ">${typeIcon(t)}</button>
+                <input type="text" value="${esc(t.label)}" maxlength="12" data-shlabel="${esc(t.id)}">
+                <button class="te-del" data-shdel="${esc(t.id)}" ${list.length <= 1 ? 'disabled' : ''} title="削除">×</button>
+              </div>
+              ${iconPickerFor === t.id ? `<div class="icon-grid">
+                ${keys.map(k => `<button data-shseticon="${esc(t.id)}" data-key="${k}" class="${t.icon === k ? 'on' : ''}">${TYPE_ICONS_REF[k]}</button>`).join('')}
+              </div>` : ''}
             </div>
-            ${iconPickerFor === t.id ? `<div class="icon-grid">
-              ${keys.map(k => `<button data-shseticon="${esc(t.id)}" data-key="${k}" class="${t.icon === k ? 'on' : ''}">${TYPE_ICONS_REF[k]}</button>`).join('')}
-            </div>` : ''}
           `).join('')}
           <button class="te-add" id="shTypeAdd">+ 種類を追加</button>
           <div class="te-note">名前や色を変えても、過去の記録はそのまま残ります。<br>2つのタブで同じ種類を使います。</div>
@@ -1944,6 +2068,7 @@ window.PAWS = (function(){
       b.addEventListener('click', () => editType(b.dataset.shseticon, { icon:b.dataset.key })));
     sharedEl.querySelectorAll('[data-shdel]').forEach(b =>
       b.addEventListener('click', () => deleteType(b.dataset.shdel)));
+    bindTypeDrag();
   }
 
   function readFields(){
@@ -1976,6 +2101,60 @@ window.PAWS = (function(){
                       icon:keys[root.types.length % keys.length] || 'leaf' });
     save(); refreshAll();
   }
+  const GRIP = '<svg viewBox="0 0 16 16" aria-hidden="true"><g fill="currentColor">'
+    + '<circle cx="6" cy="4" r="1.3"/><circle cx="10" cy="4" r="1.3"/>'
+    + '<circle cx="6" cy="8" r="1.3"/><circle cx="10" cy="8" r="1.3"/>'
+    + '<circle cx="6" cy="12" r="1.3"/><circle cx="10" cy="12" r="1.3"/></g></svg>';
+
+  // Drag by the grip. Rows are moved in the DOM as the finger passes them,
+  // and the new order is written back on release.
+  function bindTypeDrag(){
+    const wrap = sharedEl.querySelector('.type-editor');
+    if(!wrap) return;
+    let node = null;
+    sharedEl.querySelectorAll('[data-shgrip]').forEach(g => {
+      g.addEventListener('pointerdown', e => {
+        node = g.closest('.te-item');
+        if(!node) return;
+        node.classList.add('dragging');
+        try{ g.setPointerCapture(e.pointerId); }catch(err){}
+        e.preventDefault();
+      });
+      g.addEventListener('pointermove', e => {
+        if(!node) return;
+        const items = Array.prototype.slice.call(wrap.querySelectorAll('.te-item'));
+        for(let i = 0; i < items.length; i++){
+          const other = items[i];
+          if(other === node) continue;
+          const r = other.getBoundingClientRect();
+          if(e.clientY > r.top && e.clientY < r.bottom){
+            wrap.insertBefore(node, e.clientY > r.top + r.height / 2 ? other.nextSibling : other);
+            break;
+          }
+        }
+      });
+      const end = () => {
+        if(!node) return;
+        node.classList.remove('dragging');
+        node = null;
+        const order = Array.prototype.slice.call(wrap.querySelectorAll('.te-item'))
+          .map(el => el.dataset.shrow);
+        reorderTypes(order);
+      };
+      g.addEventListener('pointerup', end);
+      g.addEventListener('pointercancel', end);
+    });
+  }
+
+  function reorderTypes(order){
+    const map = {};
+    root.types.forEach(t => { map[t.id] = t; });
+    const next = order.map(id => map[id]).filter(Boolean);
+    if(next.length !== root.types.length) return;
+    root.types = next;
+    save(); refreshAll();
+  }
+
   function deleteType(id){
     if(root.types.length <= 1) return;
     if(!confirm('この種類を削除しますか？（過去の記録は残ります）')) return;
@@ -2618,39 +2797,38 @@ PAWS.load();
   }
 
   // ---- small encouragements, one every few minutes ----
+  const DOGGY = [
+    'おなかすいた…',
+    'おやつ、まだかな',
+    'おさんぽ、たのしい♪',
+    'ひなたぼっこ日和',
+    'しっぽがうずうずする',
+    'ちょっとねむい…',
+    'いいにおいがする',
+    'まったり',
+    'もふもふしたい'
+  ];
+
   const CHEERS = [
-    "Nice and steady.",
-    "You're doing the thing.",
-    "Still here. That counts.",
-    "One more stretch.",
-    "The hard part is behind you.",
-    "Keep going, gently.",
-    "Good pace.",
-    "No rush. Just keep at it.",
-    "You showed up, which is most of it.",
-    "Little by little.",
-    "This is what progress looks like.",
-    "Stay with it.",
-    "Slow is fine.",
-    "Every minute counts.",
-    "Look at you go.",
-    "Still moving forward.",
-    "The dog believes in you.",
-    "Doing fine, honestly.",
-    "Worth it already.",
-    "Halfway is a place too."
+    'がんばってるワン',
+    'その調子！',
+    '一歩一歩。',
+    'いい流れだワン',
+    'あせらなくていいワン',
+    'ちゃんと進んでる',
+    'えらい、続いてるね',
+    '半分まで来たら半分まで来たワン',
+    'ゆっくりでいいワン'
   ];
 
   let cheerText = null;
   let cheerSlot = -1;
 
+  // Mostly encouragement, and now and then something only a dog would say.
   function pickCheer(){
+    const pool = Math.random() < 0.5 ? DOGGY : CHEERS;
     let next = cheerText;
-    if(CHEERS.length > 1){
-      while(next === cheerText) next = CHEERS[Math.floor(Math.random() * CHEERS.length)];
-    } else {
-      next = CHEERS[0];
-    }
+    while(next === cheerText) next = pool[Math.floor(Math.random() * pool.length)];
     cheerText = next;
   }
 
@@ -2783,9 +2961,9 @@ PAWS.load();
 
   function currentSeason(){
     const m = new Date().getMonth() + 1;
-    if(m >= 3 && m <= 4)  return 'blossom';   // spring
-    if(m >= 5 && m <= 8)  return 'stars';     // summer nights
-    if(m >= 9 && m <= 11) return 'leaves';    // autumn
+    if(m >= 3 && m <= 4)   return 'blossom';  // spring
+    if(m >= 5 && m <= 9)   return 'fireworks'; // summer, September too
+    if(m >= 10 && m <= 11) return 'leaves';   // autumn
     return 'snow';                            // winter
   }
 
@@ -2822,6 +3000,41 @@ PAWS.load();
   };
 
   let lastSeasonal = 0;
+  let lastStar = 0;
+
+  // A small firework: a spark climbs, then opens into a wheel of rays.
+  const FW_HUES = [50, 190, 330, 0, 275, 25, 150];
+  function spawnFirework(){
+    const dial = $q('.dial-wrap');
+    if(!dial) return;
+    const hue = FW_HUES[Math.floor(Math.random() * FW_HUES.length)];
+    const rays = 14 + Math.floor(Math.random() * 3) * 2;   // 14, 16, 18
+    const reach = 14 + Math.random() * 7;
+    const el = document.createElement('div');
+    el.className = 'fw';
+    // opens outside the ring, anywhere across the upper sweep
+    const side = Math.random() < 0.5 ? -1 : 1;      // keeps clear of the dog at twelve
+    const ang = -Math.PI/2 + side * (0.42 + Math.random() * 1.35);
+    const rad = DIAL_R + 20 + Math.random() * 26;
+    el.style.left = (DIAL_SIZE/2 + Math.cos(ang) * rad).toFixed(0) + 'px';
+    el.style.top  = (DIAL_SIZE/2 + Math.sin(ang) * rad).toFixed(0) + 'px';
+    const climb = 58 + Math.random() * 42;
+    const sway  = (Math.random() - 0.5) * 18;
+    let html = '<span class="fw-rise" style="--rise:' + climb.toFixed(0) + 'px;'
+             + ' --rx:' + sway.toFixed(0) + 'px"></span>'
+             + '<span class="fw-core" style="color:hsl(' + hue + ', 95%, 78%)"></span>';
+    for(let i = 0; i < rays; i++){
+      const a = (360 / rays) * i;
+      const len = (i % 2 ? reach * 0.66 : reach).toFixed(1);
+      const light = (i % 2 ? 72 : 60);
+      html += '<span class="fw-ray" style="--a:' + a.toFixed(1) + 'deg;'
+            + ' --len:' + len + 'px;'
+            + ' color:hsl(' + hue + ', 92%, ' + light + '%)"></span>';
+    }
+    el.innerHTML = html;
+    dial.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
   function spawnDrift(season, delay){
     const dial = $q('.dial-wrap');
     if(!dial) return;
@@ -2858,19 +3071,26 @@ PAWS.load();
     if(data.phase !== 'working') return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const now = Date.now();
-    const season = currentSeason();
+    const hour = new Date().getHours();
 
-    if(season === 'stars'){
-      if(now - lastSeasonal < 300000) return;            // about once every five minutes
-      lastSeasonal = now;
+    // Any evening, whatever the season, a star may cross the sky.
+    if((hour >= 18 || hour < 2) && now - lastStar > 420000){
+      lastStar = now;
       spawnStreak();
       if(Math.random() < 0.15) setTimeout(spawnStreak, 800 + Math.random() * 600);
+    }
+
+    if(now - lastSeasonal < 300000) return;               // five minutes apart
+    lastSeasonal = now;
+    const season = currentSeason();
+
+    if(season === 'fireworks'){
+      const n = 3 + Math.floor(Math.random() * 2);
+      for(let i = 0; i < n; i++) setTimeout(spawnFirework, i * (500 + Math.random() * 700));
       return;
     }
 
     // petals, leaves and snow come down in little flurries
-    if(now - lastSeasonal < 5200) return;
-    lastSeasonal = now;
     const n = 3 + Math.floor(Math.random() * 4);          // 3–6 at a time
     for(let i = 0; i < n; i++) spawnDrift(season, i * (0.25 + Math.random() * 0.5));
   }
@@ -3443,11 +3663,11 @@ PAWS.load();
           ${st.sub ? `<div class="sub-clock">${st.sub}</div>` : ''}
         </div>
         <div class="walker ${st.dogClass}" id="walker">${DOG_SVG}</div>
+        ${data.phase === 'working' ? `<div class="dog-bubble sess hide" id="cheer">${cheerText || ''}<span class="bpaw"></span></div>` : ''}
         ${renderPups(st.dogClass)}
         ${renderBreakButterflies()}
       </div>
 
-      ${data.phase === 'working' && cheerText ? `<div class="cheer" id="cheer">${cheerText}</div>` : ''}
 
       <div class="btn-slot">${buttonMarkup()}</div>
 
@@ -3662,18 +3882,29 @@ PAWS.load();
         releaseButterfly();
       }
 
-      // a new line of encouragement on the same beat
-      if(flights !== cheerSlot){
-        cheerSlot = flights;
-        pickCheer();
-        const el = $id('cheer');
-        if(el){
-          el.textContent = cheerText;
-          el.style.animation = 'none';
-          void el.offsetWidth;
-          el.style.animation = '';
-        } else {
-          render();
+      // Once a minute the dog says something, for about five seconds,
+      // in a bubble that keeps up with it around the ring.
+      const bub = $id('cheer');
+      if(bub){
+        // half a minute out of step with the butterfly, which comes on
+        // the three-minute mark
+        const w = workElapsed() + 30;
+        const minute = Math.floor(w / 60);
+        if(minute !== cheerSlot){
+          cheerSlot = minute;
+          pickCheer();
+          bub.innerHTML = cheerText + '<span class="bpaw"></span>';
+        }
+        const show = (w % 60) < 5;
+        bub.classList.toggle('hide', !show);
+        if(show){
+          const t = ((st.dogPos % 1) + 1) % 1;
+          const ang = -Math.PI/2 + t * Math.PI * 2;
+          const x = DIAL_SIZE/2 + Math.cos(ang) * (DIAL_R + FEET_OFFSET);
+          const y = DIAL_SIZE/2 + Math.sin(ang) * (DIAL_R + FEET_OFFSET);
+          bub.style.left = x.toFixed(1) + 'px';
+          bub.style.top  = (y - 16).toFixed(1) + 'px';
+          bub.classList.toggle('flip', x > DIAL_SIZE/2);
         }
       }
 
@@ -4116,8 +4347,12 @@ PAWS.load();
     soundOn:true,
     autoArm:true,
     chartDays:14,
+    fmType:null,
+    fmGoalSec:300,
+    fmTrack:true,
     metaAt:0,
-    tombs:[]        // keys of deleted records, so a delete survives a sync
+    tombs:[],       // keys of deleted records, so a delete survives a sync
+    snoozed:null    // a countdown put on hold, waiting to come back
   };
 
   let data = null;
@@ -4261,7 +4496,40 @@ PAWS.load();
     { p:0.76, h:27, s:88, l:51 },
     { p:1.00, h:12, s:75, l:44 }
   ];
-  function ringParts(p){
+  function hexHsl(hex){
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if(!m) return null;
+    const n = parseInt(m[1],16);
+    const r = (n>>16)/255, g = ((n>>8)&255)/255, b = (n&255)/255;
+    const mx = Math.max(r,g,b), mn = Math.min(r,g,b);
+    let h = 0, s = 0; const l = (mx+mn)/2;
+    if(mx !== mn){
+      const d = mx-mn;
+      s = l > .5 ? d/(2-mx-mn) : d/(mx+mn);
+      if(mx === r) h = ((g-b)/d + (g<b?6:0));
+      else if(mx === g) h = (b-r)/d + 2;
+      else h = (r-g)/d + 4;
+      h /= 6;
+    }
+    return { h: h*360, s: s*100, l: l*100 };
+  }
+
+  // From the task's own colour to a deep red, taking the short way round
+  // the wheel — which for these hues runs through green, yellow, orange.
+  const RAMP_END = { h:12, s:75, l:44 };
+  function ringParts(p, base){
+    if(base){
+      const a = hexHsl(base);
+      if(a){
+        // eased, so it keeps its own colour for a good while and only
+        // turns towards red as the goal line approaches
+        const t = Math.pow(Math.min(Math.max(p,0),1), 1.6);
+        const dh = ((RAMP_END.h - a.h + 540) % 360) - 180;
+        return { h: (a.h + dh*t + 360) % 360,
+                 s: a.s + (RAMP_END.s - a.s)*t,
+                 l: a.l + (RAMP_END.l - a.l)*t };
+      }
+    }
     const t = Math.min(Math.max(p,0),1);
     let a = RAMP[0], b = RAMP[RAMP.length-1];
     for(let i=0;i<RAMP.length-1;i++){
@@ -4270,13 +4538,13 @@ PAWS.load();
     const span = b.p - a.p, k = span === 0 ? 0 : (t - a.p)/span;
     return { h:a.h+(b.h-a.h)*k, s:a.s+(b.s-a.s)*k, l:a.l+(b.l-a.l)*k };
   }
-  function ringColor(p){
-    const c = ringParts(p);
+  function ringColor(p, base){
+    const c = ringParts(p, base);
     return `hsl(${c.h.toFixed(1)}, ${c.s.toFixed(0)}%, ${c.l.toFixed(0)}%)`;
   }
-  function goButtonStyle(p){
-    const c = ringParts(p);
-    const s = Math.min(c.s+14, 90), base = Math.min(c.l, 51);
+  function goButtonStyle(p, tint){
+    const c = ringParts(p, tint);
+    const s = c.s, base = c.l;
     const hsl = l => `hsl(${c.h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`;
     return {
       background:`radial-gradient(circle at 34% 28%, ${hsl(base+14)}, ${hsl(base)} 58%, ${hsl(base-9)} 100%)`,
@@ -4519,14 +4787,20 @@ PAWS.load();
     d.setHours(hm.h, hm.m, 0, 0);
     return d;
   }
+  // An empty array means "no repeat"; a missing one is an older task and
+  // still means every day.
   function taskDays(task){
-    return (Array.isArray(task.days) && task.days.length) ? task.days : [0,1,2,3,4,5,6];
+    return Array.isArray(task.days) ? task.days : [0,1,2,3,4,5,6];
+  }
+  function hasSchedule(task){
+    return !!(task && /^\d{1,2}:\d{2}$/.test(task.time || '') && taskDays(task).length);
   }
   function runsOn(task, date){
     return taskDays(task).indexOf(jsDayToIdx(date.getDay())) >= 0;
   }
   // Next scheduled moment for a task, from `from` onward (exclusive of the past).
   function nextRun(task, from){
+    if(!hasSchedule(task)) return null;
     const base = from || new Date();
     const hm = parseHM(task.time);
     for(let i=0;i<8;i++){
@@ -4539,6 +4813,7 @@ PAWS.load();
   }
   // Most recent scheduled moment at or before now (today only).
   function lastRunToday(task, now){
+    if(!hasSchedule(task)) return null;
     const hm = parseHM(task.time);
     const cand = timeOn(now, hm);
     if(cand.getTime() <= now.getTime() && runsOn(task, cand)) return cand;
@@ -4556,13 +4831,40 @@ PAWS.load();
   }
   function daysLabel(task){
     const d = taskDays(task).slice().sort((a,b)=>a-b);
+    if(!d.length) return 'くり返しなし';
     if(d.length === 7) return '毎日';
     if(d.length === 5 && d.join() === '0,1,2,3,4') return '平日';
     if(d.length === 2 && d.join() === '5,6') return '週末';
     return d.map(i => DAY_LETTERS[i]).join('');
   }
 
+  const DAY_FLIP = 5;
+  function dayStart5(when){
+    const x = new Date(when == null ? Date.now() : when);
+    if(x.getHours() < DAY_FLIP) x.setDate(x.getDate() - 1);
+    x.setHours(DAY_FLIP, 0, 0, 0);
+    return x;
+  }
+  function dayKey5(when){
+    const d = dayStart5(when);
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+  }
+  // Finished with a GO, or set aside for today — either way it drops to
+  // the bottom of the list and goes quiet.
+  function isSpent(t){
+    const k = dayKey5();
+    return t.doneOn === k || t.skipOn === k;
+  }
+
   function goalOf(task){ return (task && task.goalSec) ? task.goalSec : 300; }
+
+  // Order by the 05:00 day: an 01:00 task belongs to the end of the night,
+  // not the beginning of the morning. Timeless tasks sit at the bottom.
+  function timeOrder(t){
+    if(!t.time) return 1e9;
+    const hm = parseHM(t.time);
+    return ((hm.h * 60 + hm.m) - 300 + 1440) % 1440;
+  }
 
   /* ---------------- arming ---------------- */
 
@@ -4572,6 +4874,7 @@ PAWS.load();
   }
 
   function armTask(task, plannedTs, auto){
+    if(task && !auto){ task.doneOn = null; task.skipOn = null; }
     data.phase = 'ready';
     data.armed = {
       taskId: task ? task.id : null,
@@ -4587,9 +4890,11 @@ PAWS.load();
     snoozeOpen = false;
     pickerOpen = false;
     data.lastResult = null;
-    if(task && auto){ task.firedOn = dayKey(plannedTs); }
+    data.snoozed = null;
+    if(task && auto){ task.firedOn = dayKey5(plannedTs); }
     saveData();
     stopReminder();
+    barkSlot = -1;
     if(data.soundOn !== false) startReminder(currentPlan());
     playArmTone();
     startTicking();
@@ -4602,6 +4907,10 @@ PAWS.load();
   const CATCH_UP = 30 * 60;
 
   function scheduleWatch(){
+    if(data.snoozed){
+      if(Date.now() >= data.snoozed.at){ resumeSnooze(); return; }
+      if(Date.now() - data.snoozed.paused > 12 * 3600 * 1000) data.snoozed = null;
+    }
     if(data.autoArm === false) return;
 
     // A countdown left running from hours ago would block every later task.
@@ -4613,10 +4922,11 @@ PAWS.load();
       render();
     }
     const now = new Date();
-    const today = dayKey(now);
+    const today = dayKey5(now);
     for(const t of (data.tasks || [])){
       if(t.on === false) continue;
       if(t.firedOn === today) continue;
+      if(isSpent(t)) continue;
       const last = lastRunToday(t, now);
       if(!last) continue;
       const age = (now.getTime() - last.getTime()) / 1000;
@@ -4706,7 +5016,19 @@ PAWS.load();
                   'That was quick.', 'Off you go!', 'Nicely started.'];
   let lastPraise = PRAISE[0];
   let handoffPending = false;
+  const FIRST_BARK = 'いつでもいいよ';
+  const BARKS = ['いつでもいいワン', '待ってるワン', 'まずは机の前まで',
+                 'お散歩いきたい', 'ワクワク', 'はじめの一歩'];
+  const PAW_TAG = '<span class="bpaw"></span>';
+  let barkText = BARKS[0];
+  let barkSlot = -1;
+  function pickBark(){
+    let next = barkText;
+    while(BARKS.length > 1 && next === barkText) next = BARKS[Math.floor(Math.random() * BARKS.length)];
+    barkText = next;
+  }
   let pickerOpen = false;
+  let askType = null;            // a type waiting on the "track it?" answer
   let iconPickerFor = null;
   let histOpen = false;
   let banner = null;      // { text, celebrate }
@@ -4749,7 +5071,7 @@ PAWS.load();
         label: left >= 0 ? 'get moving' : 'over goal',
         progress: Math.min(Math.max(p,0), 1),
         raw: p,
-        color: ringColor(p),
+        color: ringColor(p, typeColor(data.armed.type)),
         live: true
       };
     }
@@ -4805,15 +5127,89 @@ PAWS.load();
         <div class="dial-plan">予定 ${fmtClock(a.planned)} · 経過 ${fmtElapsed(armedElapsed())}</div>
       </div>
       <div class="walker still" id="fmWalker">${DOG_SVG}</div>
+      <div class="dog-bubble hide">${barkText}${PAW_TAG}</div>
       <div class="ring-bfly" id="fmBfly"><svg viewBox="0 0 20 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g class="wing"><ellipse cx="6" cy="7" rx="4.6" ry="5.4" fill="#F2D24B" opacity="0.92"/><ellipse cx="14" cy="7" rx="4.6" ry="5.4" fill="#F7DF74" opacity="0.92"/><ellipse cx="6.6" cy="12.6" rx="3.2" ry="3.6" fill="#EFC93B" opacity="0.88"/><ellipse cx="13.4" cy="12.6" rx="3.2" ry="3.6" fill="#F5D95E" opacity="0.88"/></g><rect x="9.3" y="5" width="1.4" height="9" rx="0.7" fill="#8A6C4F"/></svg></div>
     </div>`;
   }
 
-  function snoozeLeft(){
-    const u = data.armed && data.armed.snoozeUntil;
-    return u ? Math.max(0, (u - Date.now())/1000) : 0;
+  // A snooze puts the countdown away entirely: the clock stops, the screen
+  // goes back to standing by, and the whole thing returns at the chosen time.
+  function isSnoozing(){ return !!data.snoozed; }
+
+  function currentType(){
+    const list = typeList();
+    return list.find(t => t.id === data.fmType) ? data.fmType : list[0].id;
   }
-  function isSnoozing(){ return snoozeLeft() > 0; }
+  function typeBtn(t, attr, on){
+    return `<button class="type-btn ${on ? 'on' : ''}" ${attr}="${esc(t.id)}"
+      style="${on ? `background:linear-gradient(135deg,${shade(t.color,8)},${t.color} 55%,${shade(t.color,-8)}); box-shadow:0 6px 14px -7px ${shade(t.color,-8)}` : ''}">${esc(t.label)}</button>`;
+  }
+  function renderTypeRow(){
+    const cur = currentType();
+    return `<div class="type-row">
+      ${typeList().map(t => typeBtn(t, 'data-fmtype', t.id === cur)).join('')}
+    </div>`;
+  }
+
+  function renderTypeSettings(){
+    return `<div class="type-pick">
+      <div class="goal-row">
+        <div class="settings">
+          <span class="lbl">${ICON.clock}Session</span>
+          <button class="toggle ${data.fmTrack === false ? '' : 'on'}" id="fmTrack">${data.fmTrack === false ? 'OFF' : 'ON'}</button>
+        </div>
+        <div class="settings">
+          <span class="lbl">${ICON.sound}Sound</span>
+          <button class="toggle ${data.soundOn === false ? '' : 'on'}" id="fmSound">${data.soundOn === false ? 'OFF' : 'ON'}</button>
+        </div>
+      </div>
+      <div class="settings">
+        <span class="lbl">${ICON.target}開始目標</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="number" id="fmGoal" min="1" max="120" value="${Math.round((data.fmGoalSec || 300)/60)}"> 分以内
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Starting from a type alone: no task, so we have to ask whether the
+  // work afterwards should be timed.
+  function armType(typeId, track){
+    ensureAudio();
+    data.phase = 'ready';
+    data.armed = {
+      taskId: null, label: typeLabel(typeId), type: typeId,
+      planned: Date.now(), opened: Date.now(),
+      goalSec: data.fmGoalSec || 300, auto: false,
+      snoozeUntil: null, snoozeCount: 0, snoozedTotal: 0,
+      session: !!track
+    };
+    data.fmType = typeId;
+    data.lastResult = null;
+    data.snoozed = null;
+    pickerOpen = false;
+    askType = null;
+    saveData();
+    stopReminder();
+    if(data.soundOn !== false) startReminder(currentPlan());
+    playArmTone();
+    startTicking();
+    render();
+  }
+
+  function renderSnoozeNotice(){
+    const s = data.snoozed;
+    if(!s) return '';
+    const d = new Date(s.at);
+    return `<div class="snooze-note">
+      <div class="l"><span class="z">zzz</span> ${esc(s.label)} · ${fmtElapsed((s.paused - s.planned)/1000)} で一時停止中</div>
+      <div class="r"><b>${pad2(d.getHours())}:${pad2(d.getMinutes())}</b> に再開</div>
+      <div class="row">
+        <button class="mini-btn solid" id="snResume">いま再開</button>
+        <button class="mini-btn" id="snDrop">やめる</button>
+      </div>
+    </div>`;
+  }
 
   function renderSnoozePanel(){
     const now = new Date();
@@ -4833,14 +5229,13 @@ PAWS.load();
         <input type="time" id="snTime" value="${pad2(soon.getHours())}:${pad2(soon.getMinutes())}">
         <button class="mini-btn solid" id="snTimeGo">設定</button>
       </div>
-      ${isSnoozing() ? '<button class="mini-btn" id="snClear">スヌーズを解除</button>' : ''}
-      <div class="te-note">音は止まりますが、計測は予定時刻から続いています。<br>再通知の時刻になると、もう一度お知らせします。</div>
+      <div class="te-note">いったん計測を止めて、待機前の画面に戻ります。<br>指定した時刻になると、止めたところから再開します。</div>
     </div>`;
   }
 
   function renderButtons(st){
     if(data.phase === 'ready'){
-      const go = goButtonStyle(st.raw);
+      const go = goButtonStyle(st.raw, data.armed ? typeColor(data.armed.type) : null);
       return `<div style="display:flex; flex-direction:column; align-items:center; gap:10px">
         <div class="checkin-wrap">
           <span class="halo" style="border-color:${go.halo}"></span>
@@ -4848,12 +5243,8 @@ PAWS.load();
           <span class="halo d3" style="border-color:${go.halo}"></span>
           <button class="checkin-btn" id="fmGo" style="background:${go.background}; box-shadow:${go.shadow}">GO!<span class="go-steps">${ICON.steps}</span></button>
         </div>
-        ${isSnoozing() ? `<div class="snooze-badge">
-            <span class="z">zzz</span>
-            <span>あと <b id="snoozeLeft">${fmtElapsed(snoozeLeft())}</b> で再通知</span>
-          </div>` : ''}
         <div class="ready-tools">
-          <button class="mini-btn ${snoozeOpen ? 'solid' : ''}" id="snoozeBtn">${isSnoozing() ? 'スヌーズ変更' : 'スヌーズ'}</button>
+          <button class="mini-btn ${snoozeOpen ? 'solid' : ''}" id="snoozeBtn">スヌーズ</button>
           <button class="mini-btn" id="cancelArm">記録せずにやめる</button>
         </div>
         ${snoozeOpen ? renderSnoozePanel() : ''}
@@ -4867,7 +5258,7 @@ PAWS.load();
           ? '<div class="medal">🏅</div>'
           : `<div class="paw-badge"><svg viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg></div>`}
         <div class="big">${fast ? esc(lastPraise) : 'You got going.'}</div>
-        <div class="lagbig" style="color:${ringColor(r.lag/(r.goalSec||300))}">${fmtElapsed(r.lag)}</div>
+        <div class="lagbig" style="color:${ringColor(r.lag/(r.goalSec||300), typeColor(r.type))}">${fmtElapsed(r.lag)}</div>
         <div class="small">${fast
           ? `${esc(r.label)} · started ${fmtElapsed(r.lag)} after the plan.<br>Inside your ${Math.round((r.goalSec||300)/60)}-minute line.`
           : `${esc(r.label)} · ${fmtElapsed(r.lag)} after the plan.<br>Starting is the part that counts.`}</div>
@@ -4881,37 +5272,25 @@ PAWS.load();
         <button class="msg-reset" id="fmDone">OK</button>
       </div>`;
     }
-    const list = (data.tasks || []).slice().sort((a,b) => (a.time||'').localeCompare(b.time||''));
-    return `<div class="pick-wrap">
-      <button class="action-btn" id="quickArm">Get Set
-        <svg class="btn-paw" viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg>
-      </button>
-      ${pickerOpen ? `<div class="pick-list">
-        <div class="ed-title">どれを待機しますか</div>
-        ${list.map(t => `<button class="pick-row" data-arm="${esc(t.id)}">
-            <span class="tm">${esc(t.time)}</span>
-            <span class="dot" style="background:${typeColor(t.type)}"></span>
-            <span class="nm">${esc(t.label)}</span>
-            <span class="gl">目標${Math.round(goalOf(t)/60)}分</span>
-          </button>`).join('')}
-        <button class="pick-row" data-arm="__none__">
-          <span class="tm">—</span>
-          <span class="dot" style="background:#C7AC87"></span>
-          <span class="nm">指定なし</span>
-          <span class="gl">目標5分</span>
-        </button>
-      </div>` : ''}
+    const list = (data.tasks || []).slice().sort((a,b) => (isSpent(a) - isSpent(b)) || (timeOrder(a) - timeOrder(b)));
+    const wave = '#D2BE9E';
+    return `<div class="checkin-wrap small">
+      <span class="halo" style="border-color:${wave}"></span>
+      <span class="halo d2" style="border-color:${wave}"></span>
+      <span class="halo d3" style="border-color:${wave}"></span>
+      <button class="checkin-btn get-set" id="quickArm"
+              style="background:radial-gradient(circle at 34% 28%, #F5EEE2, #E3D5BE 58%, #D0BB9A 100%); box-shadow:0 10px 24px -10px rgba(170,142,105,.5), inset 0 -3px 8px rgba(150,124,90,.18)">Get Set<span class="go-steps"><svg viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg></span></button>
     </div>`;
   }
 
   function renderTasks(){
-    const rows = (data.tasks || []).slice().sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const rows = (data.tasks || []).slice().sort((a,b) => (isSpent(a) - isSpent(b)) || (timeOrder(a) - timeOrder(b)));
     if(!rows.length){
       return `<div class="empty-state">まだタスクがありません。<br>「+ 追加」で開始時間を決めましょう。</div>`;
     }
     return `<div class="task-list">${rows.map(t => `
-      <div class="task-row ${t.on === false ? 'off' : ''}">
-        <div class="tm">${esc(t.time || '--:--')}</div>
+      <div class="task-row ${t.on === false ? 'off' : ''} ${isSpent(t) ? 'spent' : ''}">
+        <div class="tm">${t.time ? esc(t.time) : '—'}</div>
         <div class="mid">
           <div class="nm">${esc(t.label)}</div>
           <div class="meta">
@@ -4922,11 +5301,13 @@ PAWS.load();
             <span>·</span>
             <span>目標${Math.round(goalOf(t)/60)}分</span>
             ${t.session === false ? '<span>·</span><span>計測なし</span>' : ''}
-            ${t.firedOn === dayKey(Date.now()) ? '<span>·</span><span class="done-today">実行済み</span>' : ''}
+            ${t.doneOn === dayKey5() ? '<span>·</span><span class="done-today">完了</span>' : ''}
+            ${t.skipOn === dayKey5() ? '<span>·</span><span class="skip-today">今日はなし</span>' : ''}
           </div>
         </div>
         <div class="acts">
-          ${t.firedOn === dayKey(Date.now()) ? `<button class="icon-btn" data-rearm="${esc(t.id)}" title="今日もう一度">${ICON.clock}</button>` : ''}
+          <button class="icon-btn paw" data-startnow="${esc(t.id)}" title="いま待機を始める"><svg viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg></button>
+          <button class="icon-btn" data-skip="${esc(t.id)}" title="${isSpent(t) ? '今日の分に戻す' : '今日はやらない'}">${isSpent(t) ? '↺' : '✕'}</button>
           <button class="icon-btn ${t.on === false ? '' : 'on'}" data-toggle="${esc(t.id)}" title="有効/無効">${ICON.power}</button>
           <button class="icon-btn" data-edit="${esc(t.id)}" title="編集">${ICON.pen}</button>
         </div>
@@ -4947,7 +5328,9 @@ PAWS.load();
       </div>
       <div class="ed-field">
         <label>開始時間</label>
-        <input type="time" id="edTime" value="${esc(t.time)}">
+        ${t.time ? `<input type="time" id="edTime" value="${esc(t.time)}">`
+                 : '<span class="unit" style="flex:1">指定なし（手動で使う）</span>'}
+        <button class="toggle ${t.time ? 'on' : ''}" id="edTimeOn">${t.time ? 'ON' : 'OFF'}</button>
       </div>
       <div class="ed-field">
         <label>くり返し</label>
@@ -5150,9 +5533,11 @@ PAWS.load();
 
     app.innerHTML = `
 
-      ${data.phase === 'idle' ? renderNextUp() : ''}
+      ${data.phase === 'idle' ? renderTypeRow() : ''}
+      ${data.phase === 'idle' && data.snoozed ? renderSnoozeNotice() : ''}
       ${data.phase === 'ready' ? renderDial(st) : ''}
       <div class="btn-slot">${renderButtons(st)}</div>
+      ${data.phase === 'idle' ? renderTypeSettings() : ''}
       ${banner ? `<div class="banner ${banner.celebrate ? 'celebrate' : ''}">${esc(banner.text)}</div>` : ''}
 
       <div>
@@ -5211,7 +5596,8 @@ PAWS.load();
     bind('fmGo', onGo);
     bind('cancelArm', onCancelArm);
     bind('snoozeBtn', () => { snoozeOpen = !snoozeOpen; render(); });
-    bind('snClear', clearSnooze);
+    bind('snResume', () => resumeSnooze(true));
+    bind('snDrop', dropSnooze);
     bind('snMinGo', () => {
       const el = $id('snMin');
       let v = el ? parseInt(el.value, 10) : NaN;
@@ -5230,6 +5616,41 @@ PAWS.load();
       b.addEventListener('click', () => applySnooze(Date.now() + parseInt(b.dataset.snooze,10)*60000));
     });
     bind('quickArm', onQuickArm);
+    $qa('[data-fmtype]').forEach(b => b.addEventListener('click', () => {
+      data.fmType = b.dataset.fmtype;
+      saveData();
+      render();
+    }));
+    const fg = $id('fmGoal');
+    if(fg) fg.addEventListener('change', () => {
+      let v = parseInt(fg.value, 10);
+      if(isNaN(v) || v < 1) v = 1;
+      if(v > 120) v = 120;
+      data.fmGoalSec = v * 60;
+      saveData();
+      render();
+    });
+    bind('fmTrack', () => { data.fmTrack = data.fmTrack === false; saveData(); render(); });
+    bind('fmSound', () => {
+      data.soundOn = data.soundOn === false;
+      if(!data.soundOn) stopReminder();
+      saveData();
+      PAWS.refreshAll();
+      if(data.soundOn){ ensureAudio(); playChime(); }
+    });
+    $qa('[data-skip]').forEach(b => b.addEventListener('click', () => {
+      const t = (data.tasks || []).find(x => x.id === b.dataset.skip);
+      if(!t) return;
+      const k = dayKey5();
+      if(t.doneOn === k || t.skipOn === k){ t.doneOn = null; t.skipOn = null; }
+      else t.skipOn = k;
+      saveData();
+      render();
+    }));
+    $qa('[data-startnow]').forEach(b => b.addEventListener('click', () => {
+      const t = (data.tasks || []).find(x => x.id === b.dataset.startnow);
+      if(t) armTask(t, Date.now(), false);
+    }));
     app.querySelectorAll('[data-arm]').forEach(b => b.addEventListener('click', () => {
       ensureAudio();
       pickerOpen = false;
@@ -5239,6 +5660,12 @@ PAWS.load();
     }));
     bind('fmDone', onDoneReset);
     bind('addTask', onAddTask);
+    bind('edTimeOn', () => {
+      if(!draft) return;
+      syncDraftFromForm();
+      draft.time = draft.time ? '' : '09:00';
+      render();
+    });
     bind('edSession', () => { if(!draft) return; syncDraftFromForm(); draft.session = draft.session === false; render(); });
     bind('edSave', onSaveTask);
     bind('edDel', onDeleteTask);
@@ -5293,7 +5720,7 @@ PAWS.load();
       const i = parseInt(b.dataset.day, 10);
       const d = taskDays(draft).slice();
       const at = d.indexOf(i);
-      if(at >= 0){ if(d.length > 1) d.splice(at,1); } else d.push(i);
+      if(at >= 0) d.splice(at, 1); else d.push(i);
       draft.days = d.sort((a,b)=>a-b);
       syncDraftFromForm();
       render();
@@ -5373,28 +5800,23 @@ PAWS.load();
     if(glow) glow.style.background = `radial-gradient(circle, ${st.color} 0%, transparent 70%)`;
     if(plan && data.armed) plan.textContent = `予定 ${fmtClock(data.armed.planned)} · 経過 ${fmtElapsed(armedElapsed())}`;
 
-    const go = goButtonStyle(st.raw);
+    const go = goButtonStyle(st.raw, data.armed ? typeColor(data.armed.type) : null);
     const goBtn = $id('fmGo');
     if(goBtn){ goBtn.style.background = go.background; goBtn.style.boxShadow = go.shadow; }
     $qa('.halo').forEach(h => { h.style.borderColor = go.halo; });
     placeFly($id('fmBfly'), Math.min(st.raw, 1));
 
-    // While snoozed the nudges stay quiet; when it runs out, we call again.
-    if(data.armed && data.armed.snoozeUntil){
-      if(Date.now() >= data.armed.snoozeUntil){
-        data.armed.snoozeUntil = null;
-        saveData();
-        playSnoozeAlert();
-        notify('そろそろ、はじめましょう', data.armed.label);
-        banner = { text:'スヌーズ終了。まだ間に合います。', celebrate:false };
-        render();
-        setTimeout(() => { banner = null; if(data.phase === 'ready') render(); }, 6000);
-        return;
+    // five seconds of talking, five of quiet, then something new
+    const bub = $q('.dog-bubble');
+    if(bub){
+      const e = armedElapsed();
+      const slot = Math.floor(e / 15);
+      if(slot !== barkSlot){
+        barkSlot = slot;
+        if(slot <= 0) barkText = FIRST_BARK; else pickBark();
+        bub.innerHTML = barkText + PAW_TAG;
       }
-      stopReminder();
-      const left = $id('snoozeLeft');
-      if(left) left.textContent = fmtElapsed(snoozeLeft());
-      return;
+      bub.classList.toggle('hide', (e % 15) >= 5);
     }
 
     if(data.soundOn !== false) startReminder(currentPlan());
@@ -5415,13 +5837,7 @@ PAWS.load();
 
   function onQuickArm(){
     ensureAudio();
-    // With tasks on file, standing by should inherit that task's own goal.
-    if((data.tasks || []).length){
-      pickerOpen = !pickerOpen;
-      render();
-      return;
-    }
-    armTask(null, Date.now(), false);
+    armType(currentType(), data.fmTrack !== false);
   }
 
   function onGo(){
@@ -5440,10 +5856,16 @@ PAWS.load();
       lag: lag,
       openDelay: Math.max(0, (a.opened - a.planned)/1000),
       goalSec: a.goalSec || 300,
-      snoozes: a.snoozeCount || 0
+      session: a.session === true,
+      snoozes: a.snoozeCount || 0,
+      snoozedSec: Math.round(a.snoozedTotal || 0)
     };
     data.logs = data.logs || [];
     data.logs.push(rec);
+    if(rec.taskId){
+      const t = (data.tasks || []).find(x => x.id === rec.taskId);
+      if(t){ t.doneOn = dayKey5(); t.skipOn = null; }
+    }
     data.lastResult = rec;
     data.phase = 'done';
     data.armed = null;
@@ -5459,8 +5881,8 @@ PAWS.load();
     if(fast) celebrate();
     else celebrate({ waves:1, per:14, reach:.62,
                      palette:['#D9C08F','#C7AC87','#E3D2AE','#B79A73','#CFA96A'] });
-    const src = (data.tasks || []).find(t => t.id === rec.taskId);
-    const wants = PAWS.handoff() && (!src || src.session !== false);
+    const src = rec.taskId ? (data.tasks || []).find(t => t.id === rec.taskId) : null;
+    const wants = PAWS.handoff() && (src ? src.session !== false : rec.session === true);
     if(wants && window.__startSession){
       handoffPending = true;
       render();
@@ -5474,24 +5896,55 @@ PAWS.load();
   }
 
   function applySnooze(untilTs){
-    if(!data.armed) return;
+    const a = data.armed;
+    if(!a) return;
     ensureAudio();
-    data.armed.snoozeUntil = untilTs;
-    data.armed.snoozeCount = (data.armed.snoozeCount || 0) + 1;
+    data.snoozed = {
+      taskId: a.taskId, label: a.label, type: a.type, goalSec: a.goalSec,
+      planned: a.planned, opened: a.opened,
+      count: (a.snoozeCount || 0) + 1,
+      held: a.snoozedTotal || 0,
+      paused: Date.now(), at: untilTs
+    };
+    data.phase = 'idle';
+    data.armed = null;
     snoozeOpen = false;
     stopReminder();
+    stopTicking();
     playSnoozeSet();
     const d = new Date(untilTs);
-    banner = { text: `${pad2(d.getHours())}:${pad2(d.getMinutes())} にもう一度お知らせします。`, celebrate:false };
+    banner = { text: `一時停止しました。${pad2(d.getHours())}:${pad2(d.getMinutes())} に再開します。`, celebrate:false };
     saveData();
     render();
-    setTimeout(() => { banner = null; if(data.phase === 'ready') render(); }, 5000);
+    setTimeout(() => { banner = null; if(data.phase === 'idle') render(); }, 5000);
   }
 
-  function clearSnooze(){
-    if(!data.armed) return;
-    data.armed.snoozeUntil = null;
-    snoozeOpen = false;
+  // Coming back: the planned moment is pushed forward by however long the
+  // snooze lasted, so the clock picks up exactly where it stopped.
+  function resumeSnooze(quiet){
+    const s = data.snoozed;
+    if(!s) return;
+    const held = Date.now() - s.paused;
+    data.phase = 'ready';
+    data.armed = {
+      taskId: s.taskId, label: s.label, type: s.type,
+      planned: s.planned + held, opened: s.opened + held,
+      goalSec: s.goalSec, auto: true,
+      snoozeCount: s.count, snoozedTotal: (s.held || 0) + held / 1000
+    };
+    data.snoozed = null;
+    saveData();
+    startTicking();
+    render();
+    if(!quiet){
+      playSnoozeAlert();
+      notify('そろそろ、はじめましょう', data.armed.label);
+      PAWS.setTab('fm');
+    }
+  }
+
+  function dropSnooze(){
+    data.snoozed = null;
     saveData();
     render();
   }
@@ -5546,7 +5999,7 @@ PAWS.load();
     syncDraftFromForm();
     if(!draft.label || !draft.label.trim()) draft.label = '名称未設定';
     draft.label = draft.label.trim();
-    if(!/^\d{1,2}:\d{2}$/.test(draft.time || '')) draft.time = '09:00';
+    if(draft.time && !/^\d{1,2}:\d{2}$/.test(draft.time)) draft.time = '';
     data.tasks = data.tasks || [];
     if(editId === 'new'){
       data.tasks.push(draft);

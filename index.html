@@ -1724,6 +1724,31 @@ window.PAWS = (function(){
 
   function register(id, api){ mods[id] = api; }
 
+  // Another window of the same app — the little floating timer, or a second
+  // tab — wrote to the store. Adopt it in place, so each pane keeps the very
+  // object it is already holding.
+  function adoptExternal(next){
+    if(!next || typeof next !== 'object') return;
+    Object.keys(root).forEach(k => { if(!(k in next)) delete root[k]; });
+    Object.keys(next).forEach(k => {
+      const a = root[k], b = next[k];
+      if(a && b && typeof a === 'object' && typeof b === 'object'
+         && !Array.isArray(a) && !Array.isArray(b)){
+        Object.keys(a).forEach(x => { if(!(x in b)) delete a[x]; });
+        Object.assign(a, b);
+      } else {
+        root[k] = b;
+      }
+    });
+    refreshAll();
+  }
+  window.addEventListener('storage', e => {
+    if(e.key !== KEY || !e.newValue || !root) return;
+    let next = null;
+    try{ next = JSON.parse(e.newValue); }catch(err){ return; }
+    adoptExternal(next);
+  });
+
   /* ---------------- shared audio ---------------- */
 
   function audio(){
@@ -3018,8 +3043,8 @@ PAWS.load();
     const list = [];
     const a = $q('.dial-wrap');
     if(a) list.push(a);
-    if(pipWin && !pipWin.closed){
-      const b = pipWin.document.querySelector('.dial-wrap');
+    if(miniRoot){
+      const b = miniRoot.querySelector('.dial-wrap');
       if(b) list.push(b);
     }
     return list;
@@ -3858,13 +3883,58 @@ PAWS.load();
   `;
 
   let pipWin = null, pipTimer = null;
+  let miniRoot = null;      // the .mini element, wherever it currently lives
+  let pageMini = null;      // the copy that belongs to a ?mini=1 page
+  const MINI_MODE = /[?&]mini=1/.test(location.search);
+
+  const MINI_HTML =
+      '<div class="mini" id="miniHost">'
+    +   '<div class="mini-dial"><div class="dial-wrap">'
+    +     '<div class="glow"></div>'
+    +     '<svg class="ring" width="260" height="260" viewBox="0 0 260 260">'
+    +       '<circle class="ring-track" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
+    +       '<circle class="ring-fill" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
+    +     '</svg>'
+    +     '<div class="dial-center">'
+    +       '<div class="type-badge"></div>'
+    +       '<div class="time-display">0:00</div>'
+    +       '<div class="state-label"></div>'
+    +       '<div class="sub-clock"></div>'
+    +     '</div>'
+    +     '<div class="walker" id="mWalker">' + DOG_SVG + '</div>'
+    +     '<div class="dog-bubble sess hide" id="mCheer"></div>'
+    +   '</div></div>'
+    +   '<div class="m-btns">'
+    +     '<button id="mA">BREAK</button><button id="mB">FINISH</button>'
+    +     '<button id="mPin" title="いちばん手前に浮かべる">' + ICON.window + '</button>'
+    +   '</div>'
+    + '</div>';
+
+  function buildMini(host, withPin){
+    host.innerHTML = MINI_HTML;
+    const root = host.querySelector('#miniHost');
+    const g = id => root.querySelector('#' + id);
+    g('mA').addEventListener('click', () => {
+      if(data.phase === 'break') onRestart(); else onBreak();
+      paintMini();
+    });
+    g('mB').addEventListener('click', () => {
+      onFinish();
+      if(pipWin && !pipWin.closed) pipWin.close();
+      if(MINI_MODE) window.close();
+    });
+    const pin = g('mPin');
+    if(withPin) pin.addEventListener('click', openPip);
+    else pin.remove();
+    return root;
+  }
 
   function paintMini(){
-    if(!pipWin || pipWin.closed) return;
-    const d = pipWin.document;
+    if(!miniRoot) return;
+    const d = miniRoot.ownerDocument;
     const st = dialState();
     const circ = 2 * Math.PI * 108;
-    const q = sel => d.querySelector(sel);
+    const q = sel => miniRoot.querySelector(sel);
     const fill = q('.ring-fill');
     if(fill){
       fill.setAttribute('stroke', st.color);
@@ -3883,17 +3953,6 @@ PAWS.load();
     set('.time-display', st.main);
     set('.state-label', st.label);
     set('.sub-clock', st.sub || '');
-    const w = d.getElementById('mWalker');
-    if(w){
-      w.className = 'walker ' + (st.dogClass || '');
-      const t = ((st.dogPos % 1) + 1) % 1;
-      const a = -Math.PI/2 + t * Math.PI * 2;
-      const x = DIAL_SIZE/2 + Math.cos(a) * (DIAL_R + FEET_OFFSET);
-      const y = DIAL_SIZE/2 + Math.sin(a) * (DIAL_R + FEET_OFFSET);
-      w.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px) rotate('
-                        + (a * 180 / Math.PI + 90).toFixed(1) + 'deg)';
-    }
-    // the pack keeps up too — one puppy per hour, trailing behind
     const place = (el, p) => {
       const t = ((p % 1) + 1) % 1;
       const a = -Math.PI/2 + t * Math.PI * 2;
@@ -3902,9 +3961,15 @@ PAWS.load();
       el.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px) rotate('
                          + (a * 180 / Math.PI + 90).toFixed(1) + 'deg)';
     };
-    const wrap = d.querySelector('.dial-wrap');
+    const w = q('#mWalker');
+    if(w){
+      w.className = 'walker ' + (st.dogClass || '');
+      place(w, st.dogPos);
+    }
+    // the pack keeps up too — one puppy per hour, trailing behind
+    const wrap = q('.dial-wrap');
     const want = pupCount();
-    let pups = d.querySelectorAll('[data-pup]');
+    let pups = miniRoot.querySelectorAll('[data-pup]');
     if(wrap && pups.length !== want){
       pups.forEach(e => e.remove());
       for(let i = 0; i < want; i++){
@@ -3913,7 +3978,7 @@ PAWS.load();
         el.innerHTML = DOG_SVG;
         wrap.appendChild(el);
       }
-      pups = d.querySelectorAll('[data-pup]');
+      pups = miniRoot.querySelectorAll('[data-pup]');
     }
     const trail = PUP_TRAIL / 360;
     pups.forEach(el => {
@@ -3922,8 +3987,7 @@ PAWS.load();
                    + coatFor(i) + ' ' + (st.dogClass || '');
       place(el, st.dogPos - trail * (i + 1));
     });
-
-    const src = $id('cheer'), dst = d.getElementById('mCheer');
+    const src = $id('cheer'), dst = q('#mCheer');
     if(dst){
       if(src){
         dst.innerHTML = src.innerHTML;
@@ -3934,20 +3998,24 @@ PAWS.load();
         dst.classList.add('hide');
       }
     }
-    const btn = d.getElementById('mA');
+    const btn = q('#mA');
     if(btn) btn.textContent = data.phase === 'break' ? 'ReSTART' : 'BREAK';
   }
 
-  function openMini(){
+  function startMiniPaint(){
+    clearInterval(pipTimer);
+    paintMini();
+    pipTimer = setInterval(paintMini, 250);
+  }
+
+  // The floating window itself. Browsers only grant this to a page of its
+  // own, never to one inside a frame.
+  function openPip(){
     if(!('documentPictureInPicture' in window)){
       alert('この小窓は、パソコンの Edge か Chrome でだけ使えます。');
       return;
     }
     if(pipWin && !pipWin.closed){ pipWin.focus(); return; }
-    if(data.phase !== 'working' && data.phase !== 'break'){
-      alert('計測を始めてから開いてください。');
-      return;
-    }
     window.documentPictureInPicture.requestWindow({ width: 190, height: 232 }).then(w => {
       pipWin = w;
       const d = w.document;
@@ -3958,39 +4026,66 @@ PAWS.load();
       // the app's own stylesheet, so the dial looks exactly the same
       const base = document.querySelector('style');
       if(base) d.head.appendChild(base.cloneNode(true));
-      const st = d.createElement('style');
-      st.textContent = MINI_CSS;
-      d.head.appendChild(st);
-      d.body.innerHTML =
-        '<div class="mini">'
-      +   '<div class="mini-dial"><div class="dial-wrap">'
-      +     '<div class="glow"></div>'
-      +     '<svg class="ring" width="260" height="260" viewBox="0 0 260 260">'
-      +       '<circle class="ring-track" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
-      +       '<circle class="ring-fill" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
-      +     '</svg>'
-      +     '<div class="dial-center">'
-      +       '<div class="type-badge"></div>'
-      +       '<div class="time-display">0:00</div>'
-      +       '<div class="state-label"></div>'
-      +       '<div class="sub-clock"></div>'
-      +     '</div>'
-      +     '<div class="walker" id="mWalker">' + DOG_SVG + '</div>'
-      +     '<div class="dog-bubble sess hide" id="mCheer"></div>'
-      +   '</div></div>'
-      +   '<div class="m-btns"><button id="mA">BREAK</button><button id="mB">FINISH</button></div>'
-      + '</div>';
-      d.getElementById('mA').addEventListener('click', () => {
-        if(data.phase === 'break') onRestart(); else onBreak();
-        paintMini();
-      });
-      d.getElementById('mB').addEventListener('click', () => { onFinish(); w.close(); });
-      paintMini();
-      pipTimer = setInterval(paintMini, 250);
+      const stl = d.createElement('style');
+      stl.textContent = MINI_CSS;
+      d.head.appendChild(stl);
+      miniRoot = buildMini(d.body, false);
+      if(MINI_MODE) document.body.classList.add('pinned');
+      startMiniPaint();
       w.addEventListener('pagehide', () => {
         clearInterval(pipTimer); pipTimer = null; pipWin = null;
+        if(MINI_MODE && pageMini){
+          document.body.classList.remove('pinned');
+          miniRoot = pageMini;
+          startMiniPaint();
+        } else {
+          miniRoot = null;
+        }
       });
     }).catch(() => {});
+  }
+
+  // A page that is nothing but the little window: what the panel inside
+  // Tasks opens, since a framed page may not float one itself.
+  function mountMiniPage(){
+    const stl = document.createElement('style');
+    stl.textContent = MINI_CSS + `
+      #app{ display:none !important; }
+      .pin-note{ display:none; padding:30px 20px; text-align:center; color:#8C8073;
+        font-family:'Zen Kaku Gothic New', sans-serif; font-size:12px; line-height:1.8; }
+      body.pinned #miniHost{ display:none; }
+      body.pinned .pin-note{ display:block; }
+      .m-btns #mPin{ flex:0 0 34px; display:flex; align-items:center; justify-content:center; }
+      .m-btns #mPin svg{ width:14px; height:14px; fill:none; stroke:currentColor;
+        stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+    `;
+    document.head.appendChild(stl);
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    pageMini = miniRoot = buildMini(host, true);
+    const note = document.createElement('div');
+    note.className = 'pin-note';
+    note.innerHTML = '小窓をいちばん手前に表示中です。<br>その小窓を閉じると、ここに戻ります。';
+    document.body.appendChild(note);
+    document.title = 'Timer';
+    startMiniPaint();
+  }
+
+  function openMini(){
+    if(data.phase !== 'working' && data.phase !== 'break'){
+      alert('計測を始めてから開いてください。');
+      return;
+    }
+    if(window.top !== window.self){
+      // Inside the Tasks panel. A framed page cannot float a window, so give
+      // it a page of its own that can.
+      const url = location.href.split(/[?#]/)[0] + '?mini=1';
+      const w = window.open(url, 'pawMini', 'width=206,height=278,menubar=no,toolbar=no,location=no,status=no');
+      if(w) w.focus();
+      else alert('小窓がブロックされました。ポップアップを許可してから、もう一度どうぞ。');
+      return;
+    }
+    openPip();
   }
 
   /* ---------------- tick ---------------- */
@@ -4506,6 +4601,7 @@ PAWS.load();
     if(data.phase === 'ready' || data.phase === 'working' || data.phase === 'break') startTicking();
     startStatus();
     render();
+    if(MINI_MODE) mountMiniPage();
   }
 
   init();

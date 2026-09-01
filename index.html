@@ -2258,6 +2258,7 @@ PAWS.load();
     sound: '<svg viewBox="0 0 16 16"><path d="M3.5 6h2.2L9.5 3v10L5.7 10H3.5z"/><path d="M11.8 6.2a3.6 3.6 0 0 1 0 3.6"/></svg>',
     finish:'<svg viewBox="0 0 16 16"><path d="M4 14V2.4"/><path d="M4 3.2h8.4l-2.1 2.9 2.1 2.9H4"/><path d="M2.6 14h4"/></svg>',
     steps: '<svg viewBox="1.5 1 23 16"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>',
+    window:'<svg viewBox="0 0 16 16"><rect x="1.8" y="3.2" width="12.4" height="9.6" rx="1.6"/><rect x="8.2" y="8" width="5" height="4" rx="1"/></svg>',
     coffee:'<svg viewBox="0 0 16 16"><path d="M2.8 6h8.4v3.4a3 3 0 0 1-3 3H5.8a3 3 0 0 1-3-3z"/><path d="M11.2 6.8h1.3a1.6 1.6 0 0 1 0 3.2h-1.3"/><path d="M5.4 3.6c.5.6.5 1.1 0 1.7M8 3.2c.5.6.5 1.1 0 1.7"/></svg>'
   };
 
@@ -2913,12 +2914,12 @@ PAWS.load();
     const b = document.createElement('div');
     b.className = 'butterfly';
     b.innerHTML = butterflySvg(pickBfColor());
+    void 0;
     b.style.setProperty('--x', x.toFixed(0) + 'px');
     b.style.setProperty('--y', y.toFixed(0) + 'px');
     b.style.setProperty('--dx', ((Math.random() - 0.5) * 70).toFixed(0) + 'px');
     b.style.setProperty('--dy', (-30 - Math.random() * 45).toFixed(0) + 'px');
-    dial.appendChild(b);
-    setTimeout(() => b.remove(), 6800);
+    addToDials(b, 6800);
   }
 
   function flyerAt(){
@@ -2946,6 +2947,16 @@ PAWS.load();
   }
 
   // Same spot as the dog, but without the ring rotation.
+  function placeBubble(el, p){
+    const t = ((p % 1) + 1) % 1;
+    const ang = -Math.PI/2 + t * Math.PI * 2;
+    const x = DIAL_SIZE/2 + Math.cos(ang) * (DIAL_R + FEET_OFFSET);
+    const y = DIAL_SIZE/2 + Math.sin(ang) * (DIAL_R + FEET_OFFSET);
+    el.style.left = x.toFixed(1) + 'px';
+    el.style.top  = (y - 16).toFixed(1) + 'px';
+    el.classList.toggle('flip', x > DIAL_SIZE/2);
+  }
+
   function placePoint(el, p){
     if(!el) return;
     const t = ((p % 1) + 1) % 1;
@@ -3002,11 +3013,28 @@ PAWS.load();
   let lastSeasonal = 0;
   let lastStar = 0;
 
+  // The dial exists twice while the little window is open.
+  function dials(){
+    const list = [];
+    const a = $q('.dial-wrap');
+    if(a) list.push(a);
+    if(pipWin && !pipWin.closed){
+      const b = pipWin.document.querySelector('.dial-wrap');
+      if(b) list.push(b);
+    }
+    return list;
+  }
+  function addToDials(el, life){
+    dials().forEach((d, i) => {
+      const n = i === 0 ? el : el.cloneNode(true);
+      d.appendChild(n);
+      setTimeout(() => n.remove(), life);
+    });
+  }
+
   // A small firework: a spark climbs, then opens into a wheel of rays.
   const FW_HUES = [50, 190, 330, 0, 275, 25, 150];
   function spawnFirework(){
-    const dial = $q('.dial-wrap');
-    if(!dial) return;
     const hue = FW_HUES[Math.floor(Math.random() * FW_HUES.length)];
     const rays = 14 + Math.floor(Math.random() * 3) * 2;   // 14, 16, 18
     const reach = 14 + Math.random() * 7;
@@ -3032,12 +3060,9 @@ PAWS.load();
             + ' color:hsl(' + hue + ', 92%, ' + light + '%)"></span>';
     }
     el.innerHTML = html;
-    dial.appendChild(el);
-    setTimeout(() => el.remove(), 2600);
+    addToDials(el, 2600);
   }
   function spawnDrift(season, delay){
-    const dial = $q('.dial-wrap');
-    if(!dial) return;
     const el = document.createElement('div');
     el.innerHTML = SEASON_ART[season]();
     el.className = 'season drift';
@@ -3047,13 +3072,10 @@ PAWS.load();
     el.style.setProperty('--peak', season === 'snow' ? '0.95' : '0.85');
     el.style.animationDelay = delay.toFixed(2) + 's';
     el.style.width = (season === 'snow' ? 11 : 12 + Math.random() * 4).toFixed(0) + 'px';
-    dial.appendChild(el);
-    setTimeout(() => el.remove(), 15000 + delay * 1000);
+    addToDials(el, 15000 + delay * 1000);
   }
 
   function spawnStreak(){
-    const dial = $q('.dial-wrap');
-    if(!dial) return;
     const el = document.createElement('div');
     el.innerHTML = SEASON_ART.stars();
     el.className = 'season streak';
@@ -3063,8 +3085,7 @@ PAWS.load();
     el.style.setProperty('--dy', (120 + Math.random() * 80).toFixed(0) + 'px');
     el.style.setProperty('--ang', (26 + Math.random() * 12).toFixed(0) + 'deg');
     el.style.width = '110px';
-    dial.appendChild(el);
-    setTimeout(() => el.remove(), 2200);
+    addToDials(el, 2200);
   }
 
   function seasonalTick(){
@@ -3663,7 +3684,9 @@ PAWS.load();
           ${st.sub ? `<div class="sub-clock">${st.sub}</div>` : ''}
         </div>
         <div class="walker ${st.dogClass}" id="walker">${DOG_SVG}</div>
-        ${data.phase === 'working' ? `<div class="dog-bubble sess hide" id="cheer">${cheerText || ''}<span class="bpaw"></span></div>` : ''}
+        ${(data.phase === 'working' || data.phase === 'break')
+            ? `<div class="dog-bubble sess ${data.phase === 'break' ? '' : 'hide'}" id="cheer">${data.phase === 'break' ? 'ひとやすみ' : (cheerText || '')}<span class="bpaw"></span></div>`
+            : ''}
         ${renderPups(st.dogClass)}
         ${renderBreakButterflies()}
       </div>
@@ -3679,6 +3702,10 @@ PAWS.load();
           <div style="display:flex; align-items:center; gap:6px;">
             <input type="number" id="workGoalInput" min="1" max="1440" value="${Math.round(data.workGoalSec/60)}"> min
           </div>
+        </div>
+        <div class="settings">
+          <span class="lbl">${ICON.window}Mini Window</span>
+          <button class="toggle" id="miniBtn">Open</button>
         </div>
         <div class="settings">
           <span class="lbl">${ICON.sound}Sound</span>
@@ -3747,6 +3774,7 @@ PAWS.load();
     `;
 
     bind('startBtn', onStartWork);
+    bind('miniBtn', openMini);
     bind('soundToggle', () => { data.soundOn = data.soundOn === false; saveData(); PAWS.refreshAll(); if(data.soundOn){ ensureAudio(); playChime(); } });
     bind('goBtn', onGo);
     bind('breakBtn', onBreak);
@@ -3808,6 +3836,163 @@ PAWS.load();
     if(el) el.addEventListener('click', fn);
   }
 
+  /* ---------------- the little window ---------------- */
+
+  // Picture-in-picture: a real copy of the dial that floats above everything.
+  const MINI_CSS = `
+    body{ margin:0; padding:0; display:block; min-height:0;
+      background:#FAF6EF; overflow:hidden; }
+    .mini{ display:flex; flex-direction:column; align-items:center;
+      gap:7px; padding:12px 14px 10px; }
+    .mini-dial{ width:161px; height:161px; flex:0 0 auto; }
+    .mini-dial .dial-wrap{ transform:scale(.62); transform-origin:0 0; }
+    .m-btns{ display:flex; gap:7px; width:100%; }
+    .m-btns button{ flex:1; border:1px solid #EAE1D3; background:#fff; color:#7C7064;
+      border-radius:11px; padding:9px 0; cursor:pointer;
+      font-family:'Space Mono', ui-monospace, monospace; font-size:11px;
+      font-weight:700; letter-spacing:.1em; }
+    .m-btns button:hover{ background:#F3EDE2; color:#2A231C; }
+    .m-btns #mB{ background:linear-gradient(135deg,#D2BB99,#C7AC87 60%,#B79A73);
+      border-color:transparent; color:#FFFCF6; }
+    .m-btns #mB:hover{ filter:brightness(1.05); color:#FFFCF6; }
+  `;
+
+  let pipWin = null, pipTimer = null;
+
+  function paintMini(){
+    if(!pipWin || pipWin.closed) return;
+    const d = pipWin.document;
+    const st = dialState();
+    const circ = 2 * Math.PI * 108;
+    const q = sel => d.querySelector(sel);
+    const fill = q('.ring-fill');
+    if(fill){
+      fill.setAttribute('stroke', st.color);
+      fill.setAttribute('stroke-dasharray', circ);
+      fill.setAttribute('stroke-dashoffset', circ * (1 - st.progress));
+    }
+    const glow = q('.glow');
+    if(glow) glow.style.background = 'radial-gradient(circle, ' + st.color + ' 0%, transparent 70%)';
+    const tid = data.taskType || 'WORK';
+    const badge = q('.type-badge');
+    if(badge){
+      badge.style.color = data.phase === 'break' ? '#A79B8D' : typeColor(tid);
+      badge.innerHTML = data.phase === 'break' ? ICON.coffee : typeIcon(tid);
+    }
+    const set = (sel, t) => { const e = q(sel); if(e) e.textContent = t; };
+    set('.time-display', st.main);
+    set('.state-label', st.label);
+    set('.sub-clock', st.sub || '');
+    const w = d.getElementById('mWalker');
+    if(w){
+      w.className = 'walker ' + (st.dogClass || '');
+      const t = ((st.dogPos % 1) + 1) % 1;
+      const a = -Math.PI/2 + t * Math.PI * 2;
+      const x = DIAL_SIZE/2 + Math.cos(a) * (DIAL_R + FEET_OFFSET);
+      const y = DIAL_SIZE/2 + Math.sin(a) * (DIAL_R + FEET_OFFSET);
+      w.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px) rotate('
+                        + (a * 180 / Math.PI + 90).toFixed(1) + 'deg)';
+    }
+    // the pack keeps up too — one puppy per hour, trailing behind
+    const place = (el, p) => {
+      const t = ((p % 1) + 1) % 1;
+      const a = -Math.PI/2 + t * Math.PI * 2;
+      const x = DIAL_SIZE/2 + Math.cos(a) * (DIAL_R + FEET_OFFSET);
+      const y = DIAL_SIZE/2 + Math.sin(a) * (DIAL_R + FEET_OFFSET);
+      el.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px) rotate('
+                         + (a * 180 / Math.PI + 90).toFixed(1) + 'deg)';
+    };
+    const wrap = d.querySelector('.dial-wrap');
+    const want = pupCount();
+    let pups = d.querySelectorAll('[data-pup]');
+    if(wrap && pups.length !== want){
+      pups.forEach(e => e.remove());
+      for(let i = 0; i < want; i++){
+        const el = d.createElement('div');
+        el.dataset.pup = i;
+        el.innerHTML = DOG_SVG;
+        wrap.appendChild(el);
+      }
+      pups = d.querySelectorAll('[data-pup]');
+    }
+    const trail = PUP_TRAIL / 360;
+    pups.forEach(el => {
+      const i = parseInt(el.dataset.pup, 10);
+      el.className = 'walker pup ' + (i >= 4 ? 'p3' : i >= 2 ? 'p2' : '') + ' '
+                   + coatFor(i) + ' ' + (st.dogClass || '');
+      place(el, st.dogPos - trail * (i + 1));
+    });
+
+    const src = $id('cheer'), dst = d.getElementById('mCheer');
+    if(dst){
+      if(src){
+        dst.innerHTML = src.innerHTML;
+        dst.className = src.className;
+        dst.style.left = src.style.left;
+        dst.style.top  = src.style.top;
+      } else {
+        dst.classList.add('hide');
+      }
+    }
+    const btn = d.getElementById('mA');
+    if(btn) btn.textContent = data.phase === 'break' ? 'ReSTART' : 'BREAK';
+  }
+
+  function openMini(){
+    if(!('documentPictureInPicture' in window)){
+      alert('この小窓は、パソコンの Edge か Chrome でだけ使えます。');
+      return;
+    }
+    if(pipWin && !pipWin.closed){ pipWin.focus(); return; }
+    if(data.phase !== 'working' && data.phase !== 'break'){
+      alert('計測を始めてから開いてください。');
+      return;
+    }
+    window.documentPictureInPicture.requestWindow({ width: 190, height: 232 }).then(w => {
+      pipWin = w;
+      const d = w.document;
+      const fonts = d.createElement('link');
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap';
+      d.head.appendChild(fonts);
+      // the app's own stylesheet, so the dial looks exactly the same
+      const base = document.querySelector('style');
+      if(base) d.head.appendChild(base.cloneNode(true));
+      const st = d.createElement('style');
+      st.textContent = MINI_CSS;
+      d.head.appendChild(st);
+      d.body.innerHTML =
+        '<div class="mini">'
+      +   '<div class="mini-dial"><div class="dial-wrap">'
+      +     '<div class="glow"></div>'
+      +     '<svg class="ring" width="260" height="260" viewBox="0 0 260 260">'
+      +       '<circle class="ring-track" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
+      +       '<circle class="ring-fill" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>'
+      +     '</svg>'
+      +     '<div class="dial-center">'
+      +       '<div class="type-badge"></div>'
+      +       '<div class="time-display">0:00</div>'
+      +       '<div class="state-label"></div>'
+      +       '<div class="sub-clock"></div>'
+      +     '</div>'
+      +     '<div class="walker" id="mWalker">' + DOG_SVG + '</div>'
+      +     '<div class="dog-bubble sess hide" id="mCheer"></div>'
+      +   '</div></div>'
+      +   '<div class="m-btns"><button id="mA">BREAK</button><button id="mB">FINISH</button></div>'
+      + '</div>';
+      d.getElementById('mA').addEventListener('click', () => {
+        if(data.phase === 'break') onRestart(); else onBreak();
+        paintMini();
+      });
+      d.getElementById('mB').addEventListener('click', () => { onFinish(); w.close(); });
+      paintMini();
+      pipTimer = setInterval(paintMini, 250);
+      w.addEventListener('pagehide', () => {
+        clearInterval(pipTimer); pipTimer = null; pipWin = null;
+      });
+    }).catch(() => {});
+  }
+
   /* ---------------- tick ---------------- */
 
   let warned = false;
@@ -3850,6 +4035,16 @@ PAWS.load();
       $qa('.halo').forEach(h => { h.style.borderColor = go.halo; });
       positionWalker(0);
       return;
+    }
+
+    if(phase === 'break'){
+      // the dog sits down and says so, for as long as the break lasts
+      const bub = $id('cheer');
+      if(bub){
+        bub.innerHTML = 'ひとやすみ<span class="bpaw"></span>';
+        bub.classList.remove('hide');
+        placeBubble(bub, st.dogPos);
+      }
     }
 
     if(phase === 'working'){
@@ -3897,15 +4092,7 @@ PAWS.load();
         }
         const show = (w % 60) < 5;
         bub.classList.toggle('hide', !show);
-        if(show){
-          const t = ((st.dogPos % 1) + 1) % 1;
-          const ang = -Math.PI/2 + t * Math.PI * 2;
-          const x = DIAL_SIZE/2 + Math.cos(ang) * (DIAL_R + FEET_OFFSET);
-          const y = DIAL_SIZE/2 + Math.sin(ang) * (DIAL_R + FEET_OFFSET);
-          bub.style.left = x.toFixed(1) + 'px';
-          bub.style.top  = (y - 16).toFixed(1) + 'px';
-          bub.classList.toggle('flip', x > DIAL_SIZE/2);
-        }
+        if(show) placeBubble(bub, st.dogPos);
       }
 
       seasonalTick();
@@ -4101,6 +4288,7 @@ PAWS.load();
   }
 
   async function onRestart(){
+    cheerSlot = -1;                 // back to the murmur rhythm
     data.breakAccum = restElapsed();
     data.breakStart = null;
     data.workStart = Date.now();

@@ -1424,13 +1424,13 @@
   /* fireworks open outside the dial, so keep them from widening the page */
   body{ overflow-x:hidden; }
   .tabbar{ display:flex; gap:3px; background:var(--bg-card); border:1px solid var(--line);
-    border-radius:999px; padding:4px; }
-  .tabbtn{ flex:1; border:none; background:none; border-radius:999px; padding:10px 0;
+    border-radius:999px; padding:3px; }
+  .tabbtn{ flex:1; border:none; background:none; border-radius:999px; padding:8px 0;
     font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:12.5px; font-weight:700;
     color:var(--text-faint); cursor:pointer; display:flex; align-items:center;
     justify-content:center; gap:5px; transition:background .18s ease, color .18s ease; }
   .tabbtn svg{ width:17px; height:15px; fill:currentColor; opacity:.75; }
-  .tabbtn.glyph{ flex:1; padding:11px 0; }
+  .tabbtn.glyph{ flex:1; padding:8px 0; }
   /* the title carries its own paw, and takes less room */
   .head-block{ gap:5px !important; margin-bottom:11px !important; }
   h1{ font-size:19px !important; display:flex; align-items:center; justify-content:center; gap:7px; }
@@ -1443,6 +1443,41 @@
   .ready-block{ padding-top:6px; margin-top:2px;
     display:flex; flex-direction:column; gap:16px; }
   /* Ready keeps its own outline, from its name down to the alarms */
+  /* the little pickers in the settings pane */
+  .sync-fields .rep-picker{ display:flex; gap:5px; flex:1; flex-wrap:wrap; }
+  .sync-fields .rep-picker button{ flex:1 1 auto; min-width:56px; border:1px solid var(--line);
+    background:var(--bg-soft); border-radius:9px; padding:8px 6px; cursor:pointer;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px; color:var(--text-faint); }
+  .sync-fields .rep-picker button.on{ background:var(--bg-card-hover); border-color:#E0D3BF;
+    color:var(--text); font-weight:700; }
+
+  /* BREAK wears its hover shade from the start; FINISH wears Get Set's */
+  #paneSs .pill.quiet{ background:var(--bg-card-hover); color:var(--text); }
+  #paneSs .pill.quiet:hover{ background:#F0E8DA; color:#2A231C; }
+  #paneSs .pill.beige{ color:#6E563D;
+    background:radial-gradient(circle at 34% 28%, #F5EEE2, #E3D5BE 58%, #D0BB9A 100%);
+    box-shadow:0 8px 20px -10px rgba(183,154,115,.55); }
+  #paneSs .pill.beige:hover{ filter:brightness(1.02); }
+  /* the ripple fades in and out; no flash as it restarts */
+  .softwave::before, .softwave::after{ animation-timing-function:cubic-bezier(.25,.6,.35,1) !important; }
+  @keyframes softwave{
+    0%{ inset:0; opacity:0; }
+    16%{ opacity:.4; }
+    100%{ inset:-15px; opacity:0; }
+  }
+
+  /* short or long, chosen while the break is on */
+  .brk-stack{ display:flex; flex-direction:column; align-items:center; gap:13px; }
+  .brk-kind{ display:flex; gap:8px; justify-content:center; }
+  .brk-kind button{ display:inline-flex; align-items:baseline; gap:2px;
+    border:1px solid var(--line); background:var(--bg-card); border-radius:999px;
+    padding:6px 11px; cursor:pointer;
+    font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.04em;
+    color:var(--text-faint); }
+  .brk-kind button span{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:9.5px;
+    letter-spacing:0; opacity:.8; }
+  .brk-kind button.on{ background:var(--bg-card-hover); border-color:#E0D3BF;
+    color:var(--text); font-weight:700; }
   .poops{ position:absolute; inset:0; pointer-events:none; z-index:4; }
   .poop{ position:absolute; width:11px; height:9px; transform:translate(-50%,-50%);
     animation:poopFade .4s ease; }
@@ -1862,7 +1897,7 @@
     rgba(224,146,116,0) 0%, rgba(224,146,116,.16) 30%, rgba(230,172,140,.06) 66%,
     rgba(230,172,140,0) 100%); }
   .home-stage.night .sky{ background:linear-gradient(180deg,
-    rgba(64,84,126,0) 0%, rgba(64,84,126,.10) 30%, rgba(64,84,126,.035) 66%,
+    rgba(64,84,126,0) 0%, rgba(64,84,126,.24) 30%, rgba(64,84,126,.09) 66%,
     rgba(64,84,126,0) 100%); }
   .orb{ position:absolute; width:26px; height:26px; border-radius:999px; z-index:0;
     transform:translateX(-50%); pointer-events:none; }
@@ -1886,11 +1921,11 @@
 
   .home-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
     padding:14px 16px; }
-  .home-card.wx{ padding:9px 14px; }
+  .home-card.wx{ padding:7px 12px; border-radius:15px; }
 
-  .home-card.wx{ display:flex; flex-direction:column; gap:8px; }
+  .home-card.wx{ display:flex; flex-direction:column; gap:6px; }
   .wx-line{ display:flex; flex-direction:row; align-items:center; gap:11px; flex-wrap:wrap; }
-  .wx-art{ flex:0 0 40px; width:40px; height:40px; }
+  .wx-art{ flex:0 0 34px; width:34px; height:34px; }
   .wx-art svg{ width:100%; height:100%; display:block; }
   .w-sun{ fill:#E7BE72; }
   .w-ray{ stroke:#E7BE72; stroke-width:2.4; stroke-linecap:round; }
@@ -1900,10 +1935,11 @@
   .w-flake{ fill:#B9CEDA; }
   .w-bolt{ fill:#D9A94F; }
   .wx-body{ flex:1; min-width:110px; }
-  .wx-label{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; color:var(--text); }
-  .wx-temp{ font-family:'Space Mono',monospace; font-size:22px; color:#4B4038; line-height:1.1; }
-  .wx-sub{ display:flex; gap:10px; flex-wrap:wrap; font-family:'Space Mono',monospace;
-    font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .wx-label{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; color:var(--text);
+    line-height:1.3; }
+  .wx-temp{ font-family:'Space Mono',monospace; font-size:19px; color:#4B4038; line-height:1.15; }
+  .wx-sub{ display:flex; gap:9px; flex-wrap:wrap; font-family:'Space Mono',monospace;
+    font-size:10px; color:var(--text-faint); margin-top:1px; }
   .wx-sub .hi{ color:#C08A72; }
   .wx-sub .lo{ color:#7E9BB0; }
   .wx-place{ display:flex; gap:6px; align-items:center; margin-left:auto; }
@@ -1958,6 +1994,9 @@
     font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .alarm-row .ar-when{ flex:0 0 auto; font-family:'Space Mono',monospace; font-size:11px;
     color:var(--text-muted); }
+
+  .home-card.wx .mini-btn{ padding:5px 10px; font-size:10px; }
+  .wx-line{ gap:10px; }
 </style>
 </head>
 <body>
@@ -2265,6 +2304,122 @@ window.PAWS = (function(){
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
 
+  /* ---------------- automatic export to a folder ---------------- */
+  // The browser can write into one folder you choose, and remembers it.
+  // Edge and Chrome on a computer only; iPhone has no such thing.
+
+  const AUTO_KEY = 'paw_auto_export';
+  const DB_NAME = 'paw_fs', DB_STORE = 'handles';
+  let autoCfg = { on:false, everyMin:60, at:0, msg:null };
+  let dirHandle = null;
+  let autoTimer = null;
+
+  function fmtWhen(ts){
+    const d = new Date(ts);
+    return (d.getMonth()+1) + '/' + d.getDate() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+  function loadAuto(){
+    try{
+      const raw = readLS(AUTO_KEY);
+      if(raw) autoCfg = Object.assign(autoCfg, JSON.parse(raw));
+    }catch(e){}
+  }
+  function saveAuto(){ writeLS(AUTO_KEY, JSON.stringify({ on:autoCfg.on, everyMin:autoCfg.everyMin, at:autoCfg.at })); }
+
+  function fsSupported(){ return typeof window.showDirectoryPicker === 'function'; }
+
+  function idb(){
+    return new Promise((res, rej) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
+      req.onsuccess = () => res(req.result);
+      req.onerror = () => rej(req.error);
+    });
+  }
+  async function putHandle(h){
+    const db = await idb();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      tx.objectStore(DB_STORE).put(h, 'exportDir');
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  }
+  async function getHandle(){
+    try{
+      const db = await idb();
+      return await new Promise((res, rej) => {
+        const tx = db.transaction(DB_STORE, 'readonly');
+        const rq = tx.objectStore(DB_STORE).get('exportDir');
+        rq.onsuccess = () => res(rq.result || null);
+        rq.onerror = () => rej(rq.error);
+      });
+    }catch(e){ return null; }
+  }
+
+  async function pickExportDir(){
+    if(!fsSupported()){
+      autoCfg.msg = 'この端末では使えません。パソコンの Edge か Chrome でどうぞ。';
+      renderShared(); return;
+    }
+    try{
+      const h = await window.showDirectoryPicker({ mode:'readwrite', id:'pawExport' });
+      dirHandle = h;
+      await putHandle(h);
+      autoCfg.on = true;
+      autoCfg.msg = null;
+      saveAuto();
+      renderShared();
+      autoExport(true);
+    }catch(e){ /* the picker was closed */ }
+  }
+
+  async function dirReady(ask){
+    if(!dirHandle) dirHandle = await getHandle();
+    if(!dirHandle) return false;
+    try{
+      let p = await dirHandle.queryPermission({ mode:'readwrite' });
+      if(p === 'prompt' && ask) p = await dirHandle.requestPermission({ mode:'readwrite' });
+      return p === 'granted';
+    }catch(e){ return false; }
+  }
+
+  // One file per day, rewritten as the day goes on.
+  async function autoExport(force){
+    if(!autoCfg.on) return;
+    const due = force || !autoCfg.at ||
+      (Date.now() - autoCfg.at) >= Math.max(5, autoCfg.everyMin) * 60000;
+    if(!due) return;
+    if(!(await dirReady(false))){
+      autoCfg.msg = dirHandle ? 'フォルダへの許可が切れています。「許可する」を押してください。'
+                              : 'フォルダが選ばれていません。';
+      renderShared();
+      return;
+    }
+    try{
+      const d = new Date();
+      const stamp = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+      const name = 'one-step-' + stamp + '.json';
+      const payload = { app:'first-move-suite', version:1, exportedAt:d.toISOString(), data:root };
+      const file = await dirHandle.getFileHandle(name, { create:true });
+      const w = await file.createWritable();
+      await w.write(JSON.stringify(payload, null, 2));
+      await w.close();
+      autoCfg.at = Date.now();
+      autoCfg.msg = null;
+      saveAuto();
+      renderShared();
+    }catch(e){
+      autoCfg.msg = '書き出せませんでした。フォルダを選び直してください。';
+      renderShared();
+    }
+  }
+
+  function startAutoExport(){
+    if(autoTimer) clearInterval(autoTimer);
+    autoTimer = setInterval(() => autoExport(false), 5 * 60000);
+    setTimeout(() => autoExport(false), 4000);
+  }
+
   function importAll(file){
     const reader = new FileReader();
     reader.onload = () => {
@@ -2396,6 +2551,28 @@ window.PAWS = (function(){
         </div>` : ''}
       </div>
 
+      <div>
+        <div class="section-title"><span>Auto Export</span></div>
+        <div class="sync-status">
+          <b>${autoCfg.on ? '自動書き出し ON' : 'OFF'}</b>${autoCfg.at ? ' · 最終 ' + fmtWhen(autoCfg.at) : ' · まだ書き出していません'}
+          ${autoCfg.msg ? `<br><span class="warn">${esc(autoCfg.msg)}</span>` : ''}
+        </div>
+        <div class="sync-fields">
+          <div class="ed-field"><label>間隔</label>
+            <div class="rep-picker">
+              ${[30,60,180,720,1440].map(m => `<button data-auto="${m}" class="${autoCfg.everyMin === m ? 'on' : ''}">${
+                m < 60 ? m + '分' : (m/60) + '時間'}</button>`).join('')}
+            </div>
+          </div>
+          <div class="ed-actions">
+            <button class="ed-save" id="shPickDir">フォルダを選ぶ</button>
+            <button class="ed-cancel" id="shAutoNow">今すぐ書き出す</button>
+            <button class="ed-cancel" id="shAutoOff">${autoCfg.on ? 'OFF にする' : 'ON にする'}</button>
+          </div>
+          <div class="te-note">選んだフォルダに「one-step-2026-09-02.json」のような名前で保存し、同じ日は上書きします。パソコンの Edge / Chrome でのみ使えます（アプリとして開いたときが確実です）。</div>
+        </div>
+      </div>
+
       <div class="backup-row">
         <span class="hint">記録はこの端末のブラウザにだけ保存されます。<br>ときどき書き出して保管しておくと安心です。</span>
         <span class="backup-btns">
@@ -2416,6 +2593,13 @@ window.PAWS = (function(){
     on('shSyncPull', () => { readFields(); syncPull(false); });
     on('shHelp', () => { helpOpen = !helpOpen; renderShared(); });
     on('shExport', exportAll);
+    on('shPickDir', pickExportDir);
+    on('shAutoNow', async () => { if(await dirReady(true)) autoExport(true); else pickExportDir(); });
+    on('shAutoOff', () => { autoCfg.on = !autoCfg.on; autoCfg.msg = null; saveAuto(); renderShared();
+      if(autoCfg.on) autoExport(true); });
+    sharedEl.querySelectorAll('[data-auto]').forEach(b => b.addEventListener('click', () => {
+      autoCfg.everyMin = parseInt(b.dataset.auto, 10) || 60; saveAuto(); renderShared();
+    }));
     on('shImport', () => { const f = sharedEl.querySelector('#shImportFile'); if(f) f.click(); });
     const imp = sharedEl.querySelector('#shImportFile');
     if(imp) imp.addEventListener('change', e => {
@@ -2558,12 +2742,16 @@ window.PAWS = (function(){
     document.querySelectorAll('.tabbtn').forEach(b =>
       b.addEventListener('click', () => setTab(b.dataset.tab)));
     const q = new URLSearchParams(window.location.search);
+    // On its own it opens on Today; inside the Tasks panel, on Session.
+    const framed = (function(){ try{ return window.top !== window.self; }catch(e){ return true; } })();
     const wanted = (window.__fmArmedByUrl || q.get('go') || q.get('start') || q.get('task')) ? 'home'
-                 : (q.get('tab') || readLS('paw_suite_tab') || 'home');
+                 : (q.get('tab') || (framed ? 'ss' : 'home'));
     setTab(wanted);
     renderShared();
     save(false);          // persist the merged / migrated shape straight away
     if(MINI) return;
+    loadAuto();
+    startAutoExport();
     document.addEventListener('visibilitychange', () => {
       if(!document.hidden && syncCfg.auto && syncReady()) syncPull(true);
     });
@@ -2598,6 +2786,8 @@ PAWS.load();
     workAccum: 0,
     typeAccum: {},           // work seconds banked before the current stretch
     breakStart: null,
+    breakMin: 5,             // 5, 10, 15, 30 or 60 minutes
+    breakChimed: false,
     breakAccum: 0,
     hoursChimed: 0,
     goalCelebrated: false,
@@ -2977,6 +3167,21 @@ PAWS.load();
     playNote(ctx, 1318.5, t + 0.16, 1.4, 0.02);     // a little shimmer
   }
   // A bright little rise to close the session out.
+  // A wind bell: two little glass strikes that hang in the air.
+  function playWindBell(){
+    if(data.soundOn === false) return;
+    const ctx = ensureAudio(); if(!ctx) return;
+    const t = ctx.currentTime + 0.04;
+    const strike = (at, f) => {
+      playNote(ctx, f, at, 3.4, 0.05);
+      playNote(ctx, f * 1.5, at + 0.01, 2.6, 0.02);
+      playNote(ctx, f * 2.02, at + 0.02, 1.8, 0.012);
+    };
+    strike(t, 2093.0);          // C7
+    strike(t + 0.42, 2637.0);   // E7
+    strike(t + 1.15, 2093.0);
+  }
+
   function playClose(){
     if(data.soundOn === false) return;
     const ctx = ensureAudio(); if(!ctx) return;
@@ -4087,10 +4292,16 @@ PAWS.load();
     }
     if(phase === 'break'){
       const tid = data.taskType || 'WORK';
-      return `<div class="btn-row">
+      const bm = breakMin();
+      return `<div class="brk-stack">
+      <div class="brk-kind">
+        ${BREAK_MINS.map(m => `<button data-brk="${m}" class="${bm === m ? 'on' : ''}">${m}<span>分</span></button>`).join('')}
+      </div>
+      <div class="btn-row">
         <button class="pill primary softwave" id="restartBtn"
                 style="background:${typeGradient(tid)}; box-shadow:0 8px 20px -9px ${typeDeep(tid)}; --wave:${typeColor(tid)}"><span class="lbl">${ICON.steps}ReSTART</span></button>
         <button class="pill beige" id="finishBtn"><span class="lbl">${ICON.finish}FINISH</span></button>
+      </div>
       </div>`;
     }
     // done
@@ -4152,7 +4363,7 @@ PAWS.load();
         </div>
         <div class="walker ${st.dogClass}" id="walker">${DOG_SVG}</div>
         ${(data.phase === 'working' || data.phase === 'break')
-            ? `<div class="dog-bubble sess ${data.phase === 'break' ? '' : 'hide'}" id="cheer">${data.phase === 'break' ? 'ひとやすみ' : (cheerText || '')}<span class="bpaw"></span></div>`
+            ? `<div class="dog-bubble sess ${data.phase === 'break' ? '' : 'hide'}" id="cheer">${data.phase === 'break' ? (data.breakChimed ? 'そろそろ始める？' : 'ひとやすみ') : (cheerText || '')}<span class="bpaw"></span></div>`
             : ''}
         ${renderPups(st.dogClass)}
         ${renderBreakButterflies()}
@@ -4247,6 +4458,7 @@ PAWS.load();
     bind('breakBtn', onBreak);
     bind('restartBtn', onRestart);
     bind('finishBtn', onFinish);
+    $qa('[data-brk]').forEach(b => b.addEventListener('click', () => onBreakKind(parseInt(b.dataset.brk, 10))));
     bind('doneReset', onDoneReset);
     bind('clearBtn', onClearAll);
     app.querySelectorAll('.mode-btn').forEach(b => {
@@ -4626,10 +4838,16 @@ PAWS.load();
     }
 
     if(phase === 'break'){
+      // when the break has run its length, a bell — and a gentle question
+      if(!data.breakChimed && restElapsed() >= breakLimit()){
+        data.breakChimed = true;
+        playWindBell();
+        saveData();
+      }
       // the dog sits down and says so, for as long as the break lasts
       const bub = $id('cheer');
       if(bub){
-        bub.innerHTML = 'ひとやすみ<span class="bpaw"></span>';
+        bub.innerHTML = (data.breakChimed ? 'そろそろ始める？' : 'ひとやすみ') + '<span class="bpaw"></span>';
         bub.classList.remove('hide');
         placeBubble(bub, st.dogPos);
       }
@@ -4865,8 +5083,26 @@ PAWS.load();
     if(fast) celebrateBurst();
   }
 
+  const BREAK_MINS = [5, 10, 15, 30, 60];
+  function breakMin(){
+    if(BREAK_MINS.indexOf(data.breakMin) >= 0) return data.breakMin;
+    // an older store may still say short or long
+    if(data.breakKind === 'long') return 60;
+    if(data.breakKind === 'short') return 10;
+    return 5;
+  }
+  function breakLimit(){ return breakMin() * 60; }
+
+  async function onBreakKind(min){
+    data.breakMin = min;
+    if(restElapsed() < breakLimit()) data.breakChimed = false;
+    await saveData();
+    render();
+  }
+
   async function onBreak(){
     bankStretch();
+    data.breakChimed = false;
     data.workAccum = workElapsed();
     data.workStart = null;
     data.breakStart = Date.now();
@@ -4879,6 +5115,7 @@ PAWS.load();
 
   async function onRestart(){
     cheerSlot = -1;                 // back to the murmur rhythm
+    data.breakChimed = false;
     data.breakAccum = restElapsed();
     data.breakStart = null;
     data.workStart = Date.now();

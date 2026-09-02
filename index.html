@@ -1832,6 +1832,9 @@
   .cal-walk .walker{ z-index:1; }
   .cal-editor .ed-field .toggle{ flex:0 0 auto; }
 
+  .cal-editor .copy-field{ border-top:1px solid var(--line); padding-top:11px; margin-top:3px; }
+  .cal-editor .copy-field .mini-btn{ flex:0 0 auto; }
+
   /* ---------- Home ---------- */
   #paneHome{ gap:16px; }
 
@@ -5883,12 +5886,16 @@ PAWS.load();
     ).join('');
   }
 
+  // The colour drains away clockwise; once the goal is passed there is
+  // nothing left of the bar at all.
   function ringDash(st, c){
-    const len = st.over > 0 ? c * st.over : c * (1 - st.progress);
-    return len.toFixed(1) + ' ' + c.toFixed(1);
+    return (c * Math.max(0, 1 - st.progress)).toFixed(1) + ' ' + c.toFixed(1);
   }
   function ringOffset(st, c){
-    return st.over > 0 ? '0' : (-c * st.progress).toFixed(1);
+    return (-c * st.progress).toFixed(1);
+  }
+  function ringStroke(st){
+    return st.progress >= 1 ? 'transparent' : st.color;
   }
 
   function dialState(){
@@ -5897,14 +5904,10 @@ PAWS.load();
       const el = armedElapsed();
       const left = goal - el;
       const p = el / goal;
-      // Before the goal the colour drains away; after it a red arc grows
-      // clockwise from twelve — one full lap for an hour over.
-      const over = Math.max(0, -left);
       return {
         main: left >= 0 ? fmtElapsed(left) : '+' + fmtElapsed(-left),
         label: left >= 0 ? 'get moving' : 'over goal',
-        over: over > 0 ? Math.min(over / 3600, 1) : 0,
-        progress: Math.min(Math.max(p, 0), 1),
+        progress: Math.min(Math.max(p,0), 1),
         raw: p,
         color: ringColor(p, typeColor(data.armed.type)),
         live: true
@@ -5951,6 +5954,7 @@ PAWS.load();
         <circle class="ring-track" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>
         <circle class="ring-fill" cx="130" cy="130" r="108" fill="none" stroke-width="8"
                 stroke="${st.color}"
+                stroke="${ringStroke(st)}"
                 stroke-dasharray="${ringDash(st, c)}"
                 stroke-dashoffset="${ringOffset(st, c)}"/>
       </svg>
@@ -6640,7 +6644,7 @@ PAWS.load();
     const plan = $q('.dial-plan');
     const glow = $q('.glow');
     if(fill){
-      fill.setAttribute('stroke', st.color);
+      fill.setAttribute('stroke', ringStroke(st));
       fill.setAttribute('stroke-dasharray', ringDash(st, c));
       fill.setAttribute('stroke-dashoffset', ringOffset(st, c));
     }
@@ -7232,6 +7236,7 @@ PAWS.load();
   let draft = null;
   let note = null;             // a short line under the header
   let scrollToEditor = false;  // after a plan is opened from the grid
+  let copyDate = null;         // the day a copy would land on
 
   /* ---------------- types, shared with the rest ---------------- */
 
@@ -7648,6 +7653,12 @@ PAWS.load();
         <label>メモ</label>
         <input type="text" id="cvNote" maxlength="80" value="${esc(t.note || '')}" placeholder="任意">
       </div>
+      ${editId === 'new' ? '' : `
+      <div class="ed-field copy-field">
+        <label>コピー</label>
+        <input type="date" id="cvCopyDate" value="${esc(copyDate || t.date)}">
+        <button class="mini-btn solid" id="cvCopy">この日にコピー</button>
+      </div>`}
       ${t.allDay ? '' : `<div class="send-row">
         <button class="mini-btn solid" id="cvSend" ${sent ? 'disabled' : ''}>${sent ? 'Alarm に登録済み' : 'Alarm に登録する'}</button>
         <span class="send-note">${PAW_MINI}の Alarm に入り、時間になるとカウントダウンが始まります</span>
@@ -7777,6 +7788,7 @@ PAWS.load();
       if(!e) return;
       editId = e.id;
       draft = Object.assign({}, e);
+      copyDate = null;
       scrollToEditor = true;
       render();
     };
@@ -7832,6 +7844,7 @@ PAWS.load();
     on('cvSave', onSave);
     on('cvDel', onDelete);
     on('cvSend', onSend);
+    on('cvCopy', onCopy);
   }
 
   function readForm(){
@@ -7881,6 +7894,34 @@ PAWS.load();
     cursor = draft.date;
     editId = null; draft = null;
     save();
+    render();
+  }
+
+  // The same plan again, on another day. Repeats start again from there.
+  function onCopy(){
+    if(!draft) return;
+    readForm();
+    const el = $id('cvCopyDate');
+    const to = el && el.value ? el.value : '';
+    if(!to){ note = 'コピー先の日付を選んでください。'; render(); return; }
+    const span = spanOf(draft);
+    const endTo = span ? keyOf(addDays(parseKey(to), span)) : to;
+    const copy = Object.assign({}, draft, {
+      id: uid(),
+      date: to,
+      endDate: endTo,
+      taskId: null,
+      at: Date.now()
+    });
+    events().push(copy);
+    data.events.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    copyDate = to;
+    cursor = to;
+    editId = null;
+    draft = null;
+    save();
+    const d = parseKey(to);
+    note = (d.getMonth() + 1) + '/' + d.getDate() + ' にコピーしました。';
     render();
   }
 

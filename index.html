@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="application-name" content="First Move">
-<title>Ready When You Are</title>
+<title>One Step at a Time</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -1414,16 +1414,34 @@
   }
 
   /* ---------- suite shell ---------- */
+  /* a one-off sits in the repeat row, wider than the day squares */
+  .day-picker button.once{ aspect-ratio:auto; flex:0 0 46px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; }
+  /* the type whose goal the box is showing */
+  .goal-type{ font-family:'Space Mono', ui-monospace, monospace; font-size:10px;
+    font-weight:700; letter-spacing:.08em; opacity:.9; }
   :root{ --line:#EAE1D3; --bg-soft:#F3EDE2; }
   /* fireworks open outside the dial, so keep them from widening the page */
   body{ overflow-x:hidden; }
-  .tabbar{ display:flex; gap:6px; background:var(--bg-card); border:1px solid var(--line);
+  .tabbar{ display:flex; gap:3px; background:var(--bg-card); border:1px solid var(--line);
     border-radius:999px; padding:4px; }
   .tabbtn{ flex:1; border:none; background:none; border-radius:999px; padding:10px 0;
-    font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:14px; font-weight:700;
+    font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:12.5px; font-weight:700;
     color:var(--text-faint); cursor:pointer; display:flex; align-items:center;
-    justify-content:center; gap:7px; transition:background .18s ease, color .18s ease; }
+    justify-content:center; gap:5px; transition:background .18s ease, color .18s ease; }
   .tabbtn svg{ width:17px; height:15px; fill:currentColor; opacity:.75; }
+  .tabbtn.glyph{ flex:1; padding:11px 0; }
+  .tabbtn.glyph svg{ width:19px; height:16px; }
+  .tabbtn.glyph svg.cal-ico{ width:17px; height:17px; }
+  /* Ready sits inside Home now, with a hairline above it */
+  .ready-block{ border-top:1px solid var(--line); padding-top:18px; margin-top:2px;
+    display:flex; flex-direction:column; gap:16px; }
+  .ready-title{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:14px;
+    font-weight:700; color:#A09080; letter-spacing:.02em; text-align:center; }
+  #paneSet #paneShared{ border-top:none; padding-top:0; margin-top:0; }
+  .tabbtn svg.cal-ico{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.4;
+    stroke-linecap:round; stroke-linejoin:round; }
+  .tabbtn svg.cal-ico .dot{ fill:currentColor; stroke:none; }
   .tabbtn.on{ background:linear-gradient(135deg,#D2BB99,var(--beige) 60%,var(--beige-deep));
     color:var(--beige-ink); box-shadow:0 6px 16px -10px var(--beige-deep); }
   .pane{ display:flex; flex-direction:column; gap:24px; }
@@ -1621,6 +1639,268 @@
   .ring-bfly .wing{ animation:flap .16s ease-in-out infinite alternate; transform-origin:50% 50%; }
   @keyframes flyBob{ 0%,100%{ transform:translateY(-1.5px) } 50%{ transform:translateY(2px) } }
   @media (prefers-reduced-motion: reduce){ .ring-bfly svg,.ring-bfly .wing{ animation:none } }
+
+  /* ---------- Schedule (the calendar tab) ---------- */
+  #paneCal{ gap:14px; }
+  .cal-bar{ display:flex; align-items:center; gap:8px; }
+  .cal-bar .cal-title{ flex:1; text-align:center; font-family:'Zen Kaku Gothic New',sans-serif;
+    color:var(--text); font-size:15px; }
+  .cal-bar .cal-title b{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:18px;
+    font-weight:700; color:#7C6247; }
+  .cal-bar .cal-title span{ font-family:'Space Mono',monospace; font-size:12px;
+    color:var(--text-faint); margin-left:5px; }
+  .cal-nav{ flex:0 0 34px; height:34px; border-radius:999px; border:1px solid var(--line);
+    background:var(--bg-card); color:var(--text-muted); font-size:18px; line-height:1;
+    cursor:pointer; }
+  .cal-nav:hover{ background:var(--bg-soft); color:var(--text); }
+  .cal-today{ flex:0 0 auto; height:34px; padding:0 13px; border-radius:999px; border:1px solid var(--line);
+    background:var(--bg-card); color:var(--text-muted); cursor:pointer;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; }
+  .cal-today:hover{ background:var(--bg-soft); color:var(--text); }
+
+  .cal-views{ display:flex; gap:5px; background:var(--bg-card); border:1px solid var(--line);
+    border-radius:999px; padding:4px; }
+  .cal-views button{ flex:1; border:none; background:none; border-radius:999px; padding:7px 0;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; color:var(--text-faint);
+    cursor:pointer; }
+  .cal-views button.on{ background:linear-gradient(135deg,#D2BB99,var(--beige) 60%,var(--beige-deep));
+    color:var(--beige-ink); font-weight:700; }
+
+  .cal-note{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; color:#7C6247;
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:9px 12px; }
+
+  .cal-grid{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+    overflow:hidden; }
+  .cal-wd{ display:grid; grid-template-columns:repeat(7,1fr); background:var(--bg-soft);
+    border-bottom:1px solid var(--line); }
+  .cal-wd span{ text-align:center; padding:7px 0; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:11px; color:var(--text-muted); }
+  .cal-wd .sat{ color:#6B84AE; }
+  .cal-wd .sun{ color:#B0645F; }
+  .cal-cells{ display:grid; grid-template-columns:repeat(7,1fr); }
+  .cal-cell{ min-height:76px; border:0;
+    border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:none; padding:4px 3px 4px; cursor:pointer; display:flex; flex-direction:column;
+    align-items:stretch; gap:2px; text-align:left; overflow:hidden; }
+  .cal-cell:nth-child(7n){ border-right:none; }
+  .cal-cell:nth-last-child(-n+7){ border-bottom:none; }
+  .cal-cell.other{ background:#FCFAF6; }
+  .cal-cell.other .dnum{ color:#CFC5B8; }
+  .cal-cell.sel{ background:var(--bg-soft); }
+  .cal-cell .dnum{ align-self:flex-end; width:21px; height:21px; line-height:21px; text-align:center;
+    border-radius:999px; font-family:'Space Mono',monospace; font-size:11.5px; color:var(--text); }
+  .cal-cell .dnum.sat{ color:#6B84AE; }
+  .cal-cell .dnum.sun{ color:#B0645F; }
+  .cal-cell .dnum.today{ background:#4B4038; color:#FFFCF6; font-weight:700; }
+  .cal-cell .chips{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .cal-cell .chip{ display:block; border-left:3px solid var(--c); background:#F7F3EB;
+    border-radius:4px; padding:1px 3px; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:9px; line-height:1.35; color:var(--text-muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cal-cell .more{ font-family:'Space Mono',monospace; font-size:8.5px; color:var(--text-faint);
+    padding-left:3px; }
+
+  .cal-week{ display:flex; flex-direction:column; gap:8px; }
+  .cal-day{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:10px 12px; }
+  .cal-day.is-today{ border-color:#D8C6A8; box-shadow:0 6px 18px -14px var(--beige-deep); }
+  .cal-day-head{ display:flex; align-items:baseline; gap:8px; background:none; border:none;
+    padding:0 0 6px; cursor:pointer; width:100%; }
+  .cal-day-head .dd{ font-family:'Space Mono',monospace; font-size:14px; color:var(--text); }
+  .cal-day-head .dd.sat{ color:#6B84AE; }
+  .cal-day-head .dd.sun{ color:#B0645F; }
+  .cal-day-head .dw{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; color:var(--text-faint); }
+  .cal-day-head .tnow{ margin-left:auto; font-family:'Space Mono',monospace; font-size:9.5px;
+    letter-spacing:.1em; color:var(--beige-deep); }
+  .cal-day.big{ padding:14px 14px 12px; }
+  .cal-none{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px; color:var(--text-faint); }
+  .cal-day-list{ display:flex; flex-direction:column; gap:6px; }
+  .cal-day-list.plain{ margin-top:2px; }
+
+  .cal-ev{ display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left;
+    background:var(--cb); border:1px solid var(--c);
+    border-radius:0; padding:8px 10px; cursor:pointer; }
+  .cal-ev:hover{ filter:brightness(.985); }
+  .cal-ev .ev-time{ flex:0 0 62px; font-family:'Space Mono',monospace; font-size:10.5px;
+    color:var(--text-muted); padding-top:2px; }
+  .cal-ev .ev-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .cal-ev .ev-title{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; color:var(--text); }
+  .cal-ev .ev-meta{ display:flex; align-items:center; gap:5px; font-family:'Space Mono',monospace;
+    font-size:9.5px; color:var(--text-faint); flex-wrap:wrap; }
+  .cal-ev .ev-meta i{ width:7px; height:7px; border-radius:999px; display:inline-block; }
+  .cal-ev .ev-sent{ color:#5B9E6B; }
+  .cal-ev .ev-note{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; color:var(--text-faint); }
+
+  .cal-editor .rep-picker{ display:flex; gap:5px; flex:1; }
+  .cal-editor .rep-picker button{ flex:1; border:1px solid var(--line); background:var(--bg-soft);
+    border-radius:9px; padding:8px 0; font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px;
+    color:var(--text-faint); cursor:pointer; }
+  .cal-editor .rep-picker button.on{ background:linear-gradient(135deg,#D2BB99,var(--beige) 60%,var(--beige-deep));
+    border-color:transparent; color:var(--beige-ink); font-weight:700; }
+  .cal-editor .send-row{ display:flex; align-items:center; gap:9px; margin-top:2px; flex-wrap:wrap; }
+  .cal-editor .send-row button[disabled]{ opacity:.55; cursor:default; }
+  .cal-editor .send-note{ flex:1; min-width:140px; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:10.5px; color:var(--text-faint); line-height:1.5; }
+
+  /* the month chip: the type's colour on the edge, a wash of it inside */
+  .cal-cell .chip{ cursor:pointer; display:flex; flex-direction:column; gap:0;
+    border:1px solid var(--c); background:var(--cb); border-radius:0;
+    padding:1px 3px 2px; overflow:hidden; }
+  .cal-cell .chip .ct{ font-family:'Space Mono',monospace; font-size:8px;
+    color:var(--text-faint); line-height:1.3; }
+  .cal-cell .chip .ct:empty{ display:none; }
+  .cal-cell .chip .cn{ display:flex; align-items:center; gap:3px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:9.5px; line-height:1.3;
+    color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cal-cell .chip .cn i{ display:none; }
+
+  /* the day, as a timetable */
+  .tt{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+    padding:12px 12px 14px; }
+  .tt-top{ display:flex; align-items:baseline; gap:8px; padding-bottom:9px; }
+  .tt-top .dd{ font-family:'Space Mono',monospace; font-size:15px; color:var(--text); }
+  .tt-top .dd.sat{ color:#6B84AE; }
+  .tt-top .dd.sun{ color:#B0645F; }
+  .tt-top .dw{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; color:var(--text-faint); }
+  .tt-top .tnow{ margin-left:auto; font-family:'Space Mono',monospace; font-size:9.5px;
+    letter-spacing:.1em; color:var(--beige-deep); }
+  .tt-allday{ display:flex; flex-wrap:wrap; gap:5px; padding-bottom:10px;
+    border-bottom:1px solid var(--line); margin-bottom:9px; }
+  .tt-chip{ display:inline-flex; align-items:center; gap:5px; border:1px solid var(--c);
+    background:var(--cb); border-radius:0; padding:4px 8px; cursor:pointer;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px; color:var(--text); }
+  .tt-chip i{ display:none; }
+  .tt-chip .no-t{ font-size:9.5px; color:var(--text-faint); }
+  .tt-grid{ display:flex; gap:7px; }
+  .tt-hours{ flex:0 0 22px; }
+  .tt-hour{ height:var(--rh); }
+  .tt-hour span{ display:block; transform:translateY(-6px); text-align:right;
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--text-faint); }
+  .tt-body{ position:relative; flex:1; min-width:0; border-top:1px solid var(--line); }
+  .tt-slot{ position:absolute; left:0; right:0; height:var(--rh); border:0;
+    border-bottom:1px solid var(--line); background:none; cursor:pointer; padding:0; }
+  .tt-slot:hover{ background:#FBF7F0; }
+  .tt-now{ position:absolute; left:-3px; right:0; height:0; border-top:1.5px solid #C58B7A; }
+  .tt-now::before{ content:''; position:absolute; left:-3px; top:-3.5px; width:7px; height:7px;
+    border-radius:999px; background:#C58B7A; }
+  .tt-ev{ position:absolute; border:1px solid var(--c); background:var(--cb); border-radius:0;
+    padding:3px 7px; text-align:left; cursor:pointer; overflow:hidden;
+    display:flex; flex-direction:column; gap:1px; }
+  .tt-ev:hover{ filter:brightness(.985); }
+  .tt-ev .te-time{ font-family:'Space Mono',monospace; font-size:9px; color:var(--text-faint);
+    line-height:1.3; }
+  .tt-ev .te-title{ display:flex; align-items:center; gap:4px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; color:var(--text);
+    line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tt-ev .te-title i{ display:none; }
+  .tt-ev .te-note{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:10px;
+    color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tt-ev.short{ justify-content:center; padding:2px 7px; }
+  .tt-ev .te-line{ display:flex; align-items:center; gap:5px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px; color:var(--text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tt-ev .te-line i{ display:none; }
+  .tt-ev .te-line b{ font-family:'Space Mono',monospace; font-size:9px; font-weight:400;
+    color:var(--text-faint); }
+
+  /* ---------- Home ---------- */
+  #paneHome{ gap:16px; }
+
+  /* the date stands on its own, no card around it */
+  /* the date sits in the top corner of the sky */
+  .home-date{ position:absolute; left:14px; top:11px; z-index:4;
+    display:flex; align-items:baseline; gap:7px; pointer-events:none; }
+  .home-date .hd-md{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:18px;
+    font-weight:700; color:#7C6247; letter-spacing:.01em; }
+  .home-date .hd-wd{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:11.5px;
+    font-weight:600; color:var(--text-faint); }
+  /* the dog's own patch of ground: no frame, just room to walk */
+  .home-stage{ position:relative; height:150px; margin:-4px 0 -2px; overflow:hidden;
+    border-radius:14px; }
+  /* the sky, and whatever is up in it */
+  .home-stage .sky{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .home-stage.day .sky{ background:linear-gradient(180deg,
+    rgba(150,199,224,.40) 0%, rgba(150,199,224,.16) 52%, rgba(150,199,224,0) 100%); }
+  .home-stage.dusk .sky{ background:linear-gradient(180deg,
+    rgba(224,146,116,.38) 0%, rgba(230,172,140,.15) 54%, rgba(230,172,140,0) 100%); }
+  .home-stage.night .sky{ background:linear-gradient(180deg,
+    rgba(64,84,126,.36) 0%, rgba(64,84,126,.13) 56%, rgba(64,84,126,0) 100%); }
+  .orb{ position:absolute; width:26px; height:26px; border-radius:999px; z-index:0;
+    transform:translateX(-50%); pointer-events:none; }
+  .orb.sun{ background:#F1C566; box-shadow:0 0 22px 9px rgba(241,197,102,.30); }
+  .home-stage.dusk .orb.sun{ background:#E1785C; box-shadow:0 0 24px 10px rgba(225,120,92,.28); }
+  .orb.moon{ width:22px; height:22px; background:#F3DE9C;
+    box-shadow:0 0 20px 8px rgba(243,222,156,.30),
+               inset -6px -1px 0 -1px rgba(64,84,126,.26); }
+  /* the yard the dog walks in */
+  .stage-ground{ position:absolute; left:0; right:0; bottom:7px; height:1px;
+    background:linear-gradient(90deg, transparent, #E3D8C6 18%, #E3D8C6 82%, transparent); }
+  .scene{ position:absolute; bottom:7px; transform:translateX(-50%); pointer-events:none;
+    z-index:1; opacity:.92; }
+  .scene svg{ width:100%; height:auto; display:block; }
+  .scene.house{ z-index:2; }
+  .scene.grass, .scene.flower{ z-index:3; opacity:.85; }
+  .home-stage .walker{ z-index:5; }
+  .home-stage .dog-bubble.sess{ font-size:12px; }
+
+  .home-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
+    padding:14px 16px; }
+
+  .home-card.wx{ display:flex; flex-direction:column; gap:10px; }
+  .wx-line{ display:flex; flex-direction:row; align-items:center; gap:14px; flex-wrap:wrap; }
+  .wx-art{ flex:0 0 54px; width:54px; height:54px; }
+  .wx-art svg{ width:100%; height:100%; display:block; }
+  .w-sun{ fill:#E7BE72; }
+  .w-ray{ stroke:#E7BE72; stroke-width:2.4; stroke-linecap:round; }
+  .w-cloud{ fill:#DCD3C6; }
+  .wx-art.part .w-cloud{ fill:#E3DACD; }
+  .w-drop{ stroke:#93B4C4; stroke-width:2.2; stroke-linecap:round; }
+  .w-flake{ fill:#B9CEDA; }
+  .w-bolt{ fill:#D9A94F; }
+  .wx-body{ flex:1; min-width:110px; }
+  .wx-label{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; color:var(--text); }
+  .wx-temp{ font-family:'Space Mono',monospace; font-size:28px; color:#4B4038; line-height:1.15; }
+  .wx-sub{ display:flex; gap:10px; flex-wrap:wrap; font-family:'Space Mono',monospace;
+    font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .wx-sub .hi{ color:#C08A72; }
+  .wx-sub .lo{ color:#7E9BB0; }
+  .wx-place{ display:flex; gap:6px; align-items:center; margin-left:auto; }
+  .wx-picker{ display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+    border-top:1px solid var(--line); padding-top:10px; }
+  .wx-picker input{ flex:1; min-width:130px; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:13px; color:var(--text); background:var(--bg-soft); border:1px solid var(--line);
+    border-radius:10px; padding:9px 10px; }
+  .wx-msg{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11.5px; color:#A9605E; }
+
+  .home-card.alarm{ display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    cursor:pointer; }
+  .home-card.alarm:hover{ background:var(--bg-soft); }
+  .home-card.alarm .al-when{ font-family:'Space Mono',monospace; font-size:19px; color:#4B4038; }
+  .home-card.alarm .al-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .home-card.alarm .al-title{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:14px;
+    color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-card.alarm .al-meta{ font-family:'Space Mono',monospace; font-size:9.5px;
+    letter-spacing:.06em; color:var(--text-faint); }
+  .home-card.alarm .al-go{ font-family:'Space Mono',monospace; font-size:10px;
+    letter-spacing:.1em; color:var(--beige-deep); }
+
+  .home-plans{ display:flex; flex-direction:column; gap:7px; }
+  .home-plan{ display:flex; align-items:baseline; gap:11px; width:100%; text-align:left;
+    border:1px solid var(--c); background:var(--cb); border-radius:0; padding:10px 12px;
+    cursor:pointer; flex-wrap:wrap; }
+  .home-plan:hover{ filter:brightness(.985); }
+  .home-plan .hp-time{ flex:0 0 auto; font-family:'Space Mono',monospace; font-size:11px;
+    color:var(--text-muted); }
+  .home-plan .hp-title{ flex:1; min-width:0; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:14px; color:var(--text); }
+  .home-plan .hp-note{ flex-basis:100%; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:11px; color:var(--text-faint); }
+
+  .wx-hits{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .wx-hits-t{ flex-basis:100%; font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px;
+    color:var(--text-faint); }
+  .wx-hits .pop-n{ margin-left:6px; font-family:'Space Mono',monospace; font-size:9px;
+    color:var(--text-faint); }
 </style>
 </head>
 <body>
@@ -1628,21 +1908,30 @@
 <div class="app" id="app">
 
   <div class="head-block">
-    <h1>Ready When You Are</h1>
+    <h1>One Step at a Time</h1>
     <div class="paw-mark">
       <svg viewBox="1.5 1 23 16" aria-hidden="true"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>
     </div>
-    <div class="sub">We'll signal you when it's time.<br>From the first move to the finish.</div>
+    <div class="sub">Plan the day, take the first step.</div>
   </div>
 
   <div class="tabbar">
-    <button class="tabbtn on" data-tab="fm"><svg viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg>Ready</button>
-    <button class="tabbtn" data-tab="ss"><svg viewBox="1.5 1 23 16" aria-hidden="true"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>Session</button>
+    <button class="tabbtn glyph" data-tab="cal" title="Schedule" aria-label="Schedule"><svg viewBox="0 0 16 16" aria-hidden="true" class="cal-ico"><rect x="1.7" y="3" width="12.6" height="11.3" rx="2.1"/><path d="M1.7 6.4h12.6"/><path d="M5.1 1.7v2.6"/><path d="M10.9 1.7v2.6"/><circle cx="5.2" cy="9.6" r="0.85" class="dot"/><circle cx="8" cy="9.6" r="0.85" class="dot"/></svg></button>
+    <button class="tabbtn glyph on" data-tab="home" title="Today" aria-label="Today"><svg viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg></button>
+    <button class="tabbtn glyph" data-tab="ss" title="Session" aria-label="Session"><svg viewBox="0 0 16 16" aria-hidden="true" class="cal-ico"><circle cx="8" cy="9.2" r="5.6"/><path d="M8 9.2V6.2"/><path d="M6.2 1.8h3.6"/><path d="M12.6 4.4l1-1"/></svg></button>
+    <button class="tabbtn glyph" data-tab="set" title="Settings" aria-label="Settings"><svg viewBox="0 0 16 16" aria-hidden="true" class="cal-ico"><path d="M6.75 1.6h2.5l.3 1.62 1.05.61 1.55-.56 1.25 2.16-1.25 1.06v1.02l1.25 1.06-1.25 2.16-1.55-.56-1.05.61-.3 1.62h-2.5l-.3-1.62-1.05-.61-1.55.56-1.25-2.16 1.25-1.06V6.49L2.6 5.43l1.25-2.16 1.55.56 1.05-.61z"/><circle cx="8" cy="8" r="2.1"/></svg></button>
   </div>
 
-  <div class="pane" id="paneFm"><div class="loading">Loading…</div></div>
+  <div class="pane" id="paneHome" hidden>
+    <div id="homeTop"><div class="loading">Loading…</div></div>
+    <div class="ready-block">
+      <div class="ready-title">Ready When You Are</div>
+      <div class="pane" id="paneFm"><div class="loading">Loading…</div></div>
+    </div>
+  </div>
+  <div class="pane" id="paneCal" hidden><div class="loading">Loading…</div></div>
   <div class="pane" id="paneSs" hidden><div class="loading">Loading…</div></div>
-  <div id="paneShared"></div>
+  <div class="pane" id="paneSet" hidden><div id="paneShared"></div></div>
 
 </div>
 
@@ -1805,6 +2094,7 @@ window.PAWS = (function(){
     const files = {};
     Object.keys(mods).forEach(id => {
       const m = mods[id];
+      if(!m.gistFile || !m.payload) return;
       const body = Object.assign({ app:m.appId, version:1, metaAt:root.metaAt || 0,
                                    savedAt:new Date().toISOString(),
                                    types:root.types, soundOn:root.soundOn }, m.payload());
@@ -1833,6 +2123,7 @@ window.PAWS = (function(){
       .then(j => {
         const jobs = [];
         Object.keys(mods).forEach(id => {
+          if(!mods[id].gistFile) return;
           const f = j.files && j.files[mods[id].gistFile];
           if(!f) return;                                  // nothing stored for this pane yet
           jobs.push((f.truncated && f.raw_url ? fetch(f.raw_url).then(r => r.text())
@@ -2193,10 +2484,15 @@ window.PAWS = (function(){
   /* ---------------- tabs ---------------- */
 
   let currentTab = 'fm';
+  const PANES = { home:'paneHome', cal:'paneCal', ss:'paneSs', set:'paneSet' };
+  const ALIAS = { fm:'home' };          // Ready lives inside Home
+
   function setTab(id){
+    if(ALIAS[id]) id = ALIAS[id];
+    if(!PANES[id]) id = 'home';
     currentTab = id;
-    ['fm','ss'].forEach(k => {
-      const pane = document.getElementById(k === 'fm' ? 'paneFm' : 'paneSs');
+    Object.keys(PANES).forEach(k => {
+      const pane = document.getElementById(PANES[k]);
       if(pane) pane.hidden = (k !== id);
       const btn = document.querySelector('.tabbtn[data-tab="' + k + '"]');
       if(btn) btn.classList.toggle('on', k === id);
@@ -2209,9 +2505,9 @@ window.PAWS = (function(){
     document.querySelectorAll('.tabbtn').forEach(b =>
       b.addEventListener('click', () => setTab(b.dataset.tab)));
     const q = new URLSearchParams(window.location.search);
-    const wanted = (window.__fmArmedByUrl || q.get('go') || q.get('start') || q.get('task')) ? 'fm'
-                 : (q.get('tab') || readLS('paw_suite_tab') || 'fm');
-    setTab(wanted === 'ss' ? 'ss' : 'fm');
+    const wanted = (window.__fmArmedByUrl || q.get('go') || q.get('start') || q.get('task')) ? 'home'
+                 : (q.get('tab') || readLS('paw_suite_tab') || 'home');
+    setTab(wanted);
     renderShared();
     save(false);          // persist the merged / migrated shape straight away
     if(MINI) return;
@@ -2254,7 +2550,9 @@ PAWS.load();
     goalCelebrated: false,
     goalCelebratedOn: null,
     thresholdSec: 300,      // goal for getting started (5 min)
-    workGoalSec: 10800,     // goal for the work session (3 h)
+    workGoalSec: 10800,     // fallback goal, and the line on the day chart
+    typeGoals: {},          // each type's own goal, in seconds
+    goalDoneOn: {},         // type -> the day its goal was last celebrated
     soundOn: true,
     taskType: 'WORK',
     types: null,
@@ -2406,6 +2704,30 @@ PAWS.load();
     return total;
   }
 
+  // Each type carries its own goal; types without one fall back to the old
+  // single goal.
+  function goalFor(id){
+    const g = (data.typeGoals || {})[id || 'WORK'];
+    return (typeof g === 'number' && g > 0) ? g : (data.workGoalSec || 10800);
+  }
+  // Today's total for one type: finished sessions plus the one in progress.
+  function dayTotalType(id){
+    const from = dayStart5(new Date()).getTime();
+    let total = 0;
+    (data.sessions || []).forEach(s => {
+      if(s.ts < from) return;
+      if(s.segments && typeof s.segments === 'object') total += s.segments[id] || 0;
+      else if((s.type || 'WORK') === id) total += s.work || 0;
+    });
+    if(data.phase === 'working' || data.phase === 'break') total += (typeTotals()[id] || 0);
+    return total;
+  }
+  // How far round the ring the current type has come today.
+  function typeProgress(){
+    const t = data.taskType || 'WORK';
+    return dayTotalType(t) / goalFor(t);
+  }
+
   function readyElapsed(){
     return data.readyStart ? (Date.now() - data.readyStart) / 1000 : 0;
   }
@@ -2497,6 +2819,7 @@ PAWS.load();
       if(Array.isArray(r.types) && r.types.length) data.types = r.types;
       if(typeof r.thresholdSec === 'number') data.thresholdSec = r.thresholdSec;
       if(typeof r.workGoalSec === 'number') data.workGoalSec = r.workGoalSec;
+      if(r.typeGoals && typeof r.typeGoals === 'object') data.typeGoals = r.typeGoals;
       if(typeof r.soundOn === 'boolean') data.soundOn = r.soundOn;
       data.metaAt = r.metaAt;
       changed = true;
@@ -2515,6 +2838,7 @@ PAWS.load();
       types: data.types || null,
       thresholdSec: data.thresholdSec,
       workGoalSec: data.workGoalSec,
+      typeGoals: data.typeGoals || {},
       soundOn: data.soundOn !== false,
       taskType: data.taskType
     };
@@ -2789,7 +3113,7 @@ PAWS.load();
 
   /* ---------------- the dog ---------------- */
 
-  const DOG_SVG = `
+  const DOG_SVG = window.__DOG_SVG = `
   <svg viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g class="pose"><g class="bob">
       <path class="tail dog-body" d="M7 15 C3 13, 2 9, 4.5 7.5 C5.5 9.5, 6.5 12, 8.5 13.5 Z" />
@@ -2933,7 +3257,7 @@ PAWS.load();
     if(!dial || !dog) return;
 
     // start just beside the dog, then drift away
-    const p = ((workElapsed() / data.workGoalSec) % 1 + 1) % 1;
+    const p = ((typeProgress() % 1) + 1) % 1;
     const angle = -Math.PI / 2 + p * Math.PI * 2;
     const r = DIAL_R + FEET_OFFSET;
     const x = DIAL_SIZE / 2 + Math.cos(angle) * r;
@@ -2951,7 +3275,7 @@ PAWS.load();
   }
 
   function flyerAt(){
-    const p = ((workElapsed() / data.workGoalSec) % 1 + 1) % 1;
+    const p = ((typeProgress() % 1) + 1) % 1;
     const angle = -Math.PI / 2 + p * Math.PI * 2;
     const r = DIAL_R + FEET_OFFSET;
     return {
@@ -3052,6 +3376,22 @@ PAWS.load();
     }
     return list;
   }
+  // A visitor in someone else's box — Home's little stage, say.
+  function guest(host, el, life){
+    host.appendChild(el);
+    setTimeout(() => el.remove(), life);
+  }
+
+  // What Home needs to borrow: the year's weather, and the wings.
+  window.__SEASON = {
+    season: () => currentSeason(),
+    drift:  (host, season, delay) => spawnDrift(season, delay || 0, host),
+    streak: host => spawnStreak(host),
+    firework: host => spawnFirework(host),
+    butterflySvg: () => butterflySvg(pickBfColor()),
+    guest: guest
+  };
+
   function addToDials(el, life){
     dials().forEach((d, i) => {
       const n = i === 0 ? el : el.cloneNode(true);
@@ -3062,7 +3402,7 @@ PAWS.load();
 
   // A small firework: a spark climbs, then opens into a wheel of rays.
   const FW_HUES = [50, 190, 330, 0, 275, 25, 150];
-  function spawnFirework(){
+  function spawnFirework(host){
     const hue = FW_HUES[Math.floor(Math.random() * FW_HUES.length)];
     const rays = 14 + Math.floor(Math.random() * 3) * 2;   // 14, 16, 18
     const reach = 14 + Math.random() * 7;
@@ -3088,22 +3428,30 @@ PAWS.load();
             + ' color:hsl(' + hue + ', 92%, ' + light + '%)"></span>';
     }
     el.innerHTML = html;
-    addToDials(el, 2600);
+    if(host){
+      el.style.left = (20 + Math.random() * Math.max(40, (host.clientWidth || 300) - 60)).toFixed(0) + 'px';
+      el.style.top  = (24 + Math.random() * 40).toFixed(0) + 'px';
+      guest(host, el, 2600);
+    }
+    else addToDials(el, 2600);
   }
-  function spawnDrift(season, delay){
+  function spawnDrift(season, delay, host){
+    if(!SEASON_ART[season]) return;          // summer has fireworks instead
+    const W = host ? (host.clientWidth || DIAL_SIZE) : DIAL_SIZE;
     const el = document.createElement('div');
     el.innerHTML = SEASON_ART[season]();
     el.className = 'season drift';
-    el.style.setProperty('--x', (-10 + Math.random() * (DIAL_SIZE + 20)).toFixed(0) + 'px');
+    el.style.setProperty('--x', (-10 + Math.random() * (W + 20)).toFixed(0) + 'px');
     el.style.setProperty('--sway', ((Math.random() - 0.5) * 70).toFixed(0) + 'px');
     el.style.setProperty('--life', (7 + Math.random() * 5).toFixed(1) + 's');
     el.style.setProperty('--peak', season === 'snow' ? '0.95' : '0.85');
     el.style.animationDelay = delay.toFixed(2) + 's';
     el.style.width = (season === 'snow' ? 11 : 12 + Math.random() * 4).toFixed(0) + 'px';
-    addToDials(el, 15000 + delay * 1000);
+    if(host) guest(host, el, 15000 + delay * 1000);
+    else addToDials(el, 15000 + delay * 1000);
   }
 
-  function spawnStreak(){
+  function spawnStreak(host){
     const el = document.createElement('div');
     el.innerHTML = SEASON_ART.stars();
     el.className = 'season streak';
@@ -3113,7 +3461,12 @@ PAWS.load();
     el.style.setProperty('--dy', (120 + Math.random() * 80).toFixed(0) + 'px');
     el.style.setProperty('--ang', (26 + Math.random() * 12).toFixed(0) + 'deg');
     el.style.width = '110px';
-    addToDials(el, 2200);
+    if(host){
+      el.style.setProperty('--x', (Math.random() * Math.max(40, (host.clientWidth || 300) - 120)).toFixed(0) + 'px');
+      el.style.setProperty('--y', (-6 + Math.random() * 40).toFixed(0) + 'px');
+      guest(host, el, 2200);
+    }
+    else addToDials(el, 2200);
   }
 
   function seasonalTick(){
@@ -3123,10 +3476,10 @@ PAWS.load();
     const hour = new Date().getHours();
 
     // Any evening, whatever the season, a star may cross the sky.
-    if((hour >= 18 || hour < 2) && now - lastStar > 420000){
+    if((hour >= 18 || hour < 2) && now - lastStar > 75000 + Math.random() * 60000){
       lastStar = now;
       spawnStreak();
-      if(Math.random() < 0.15) setTimeout(spawnStreak, 800 + Math.random() * 600);
+      if(Math.random() < 0.3) setTimeout(spawnStreak, 800 + Math.random() * 700);
     }
 
     if(now - lastSeasonal < 300000) return;               // five minutes apart
@@ -3153,7 +3506,15 @@ PAWS.load();
     let allFastest = null, bestTs = null;
     logs.forEach(l => { if(allFastest === null || l.elapsed < allFastest){ allFastest = l.elapsed; bestTs = l.ts; } });
     const todaySessions = (data.sessions || []).filter(s => isToday(s.ts));
-    const todayWork = todaySessions.reduce((a,b)=>a + (b.work || 0), 0);
+    const todayWorkAll = todaySessions.reduce((a,b)=>a + (b.work || 0), 0);
+    // The two cards at the top belong to the type on the dial.
+    const curType = data.taskType || 'WORK';
+    const segOf = s => (s.segments && Object.keys(s.segments).length)
+      ? s.segments : { [s.type || 'WORK']: s.work || 0 };
+    const todayWork = dayTotalType(curType);
+    const sessionCount = todaySessions.filter(s => (segOf(s)[curType] || 0) > 0).length
+      + ((data.phase === 'working' || data.phase === 'break')
+         && (typeTotals()[curType] || 0) > 0 ? 1 : 0);
     const byType = {};
     typeList().forEach(t => { byType[t.id] = 0; });
     todaySessions.forEach(s => {
@@ -3164,7 +3525,8 @@ PAWS.load();
     });
     const successCount = logs.filter(l => l.elapsed <= data.thresholdSec).length;
     const successRate = logs.length ? Math.round((successCount / logs.length) * 100) : null;
-    return { todayAvg, allFastest, bestTs, todayWork, successRate, byType, sessionCount: todaySessions.length };
+    return { todayAvg, allFastest, bestTs, todayWork, todayWorkAll, successRate, byType,
+             sessionCount, curType };
   }
 
   // ---- history chart: day / week / month, pageable ----
@@ -3508,27 +3870,38 @@ PAWS.load();
     return x;
   }
 
+  // One paw per day, for the type on the dial: it stamps when that type
+  // met its own goal that day.
   function weekPaws(){
     const currentDay = dayStart5(new Date());
     const monday = weekStart5(new Date());
     const letters = ['M','T','W','T','F','S','S'];
     // Mon → Sun, each with its own muted shade
     const colors  = ['#A8C075','#C9913F','#7FAEBE','#C7929F','#D3BA55','#6B84AE','#AB5F63'];
+    const t = data.taskType || 'WORK';
+    const goal = goalFor(t);
     const out = [];
     for(let i = 0; i < 7; i++){
       const d = new Date(monday); d.setDate(d.getDate() + i);
       const next = new Date(d); next.setDate(next.getDate() + 1);
+      const isToday = d.getTime() === currentDay.getTime();
       let total = 0;
-      (data.sessions || []).forEach(s => {
-        if(s.ts >= d.getTime() && s.ts < next.getTime()) total += s.work || 0;
-      });
+      if(isToday){
+        total = dayTotalType(t);       // includes the session in progress
+      } else {
+        (data.sessions || []).forEach(s => {
+          if(s.ts < d.getTime() || s.ts >= next.getTime()) return;
+          if(s.segments && typeof s.segments === 'object') total += s.segments[t] || 0;
+          else if((s.type || 'WORK') === t) total += s.work || 0;
+        });
+      }
       out.push({
         date: d,
         letter: letters[i],
         color: colors[i],
         total: total,
-        met: total >= data.workGoalSec,
-        today: d.getTime() === currentDay.getTime()
+        met: total > 0 && total >= goal,
+        today: isToday
       });
     }
     return out;
@@ -3542,18 +3915,22 @@ PAWS.load();
     <ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/>`;
 
   let stampedDays = null;   // days already stamped in this view, so it animates once
+  let stampedType = null;   // the type those paws belonged to
 
   function renderWeekPaws(){
     const days = weekPaws();
+    const type = data.taskType || 'WORK';
     const metKeys = days.filter(d => d.met).map(d => d.date.getTime());
-    const firstPass = stampedDays === null;
+    // Switching type shows another set of paws: those are not fresh stamps.
+    const firstPass = stampedDays === null || stampedType !== type;
+    stampedType = type;
     const fresh = firstPass ? [] : metKeys.filter(k => !stampedDays.includes(k));
     stampedDays = metKeys;
     return `<div class="week-paws">
       ${days.map(d => `
         <div class="week-paw ${d.met ? 'on' : ''} ${fresh.includes(d.date.getTime()) ? 'stamp' : ''} ${d.today ? 'today' : ''}"
              style="color:${d.color}"
-             title="${d.letter} ${(d.date.getMonth()+1)}/${d.date.getDate()} · ${d.total > 0 ? fmtElapsed(d.total) : 'no sessions'}">
+             title="${d.letter} ${(d.date.getMonth()+1)}/${d.date.getDate()} · ${typeLabel(type)} ${d.total > 0 ? fmtElapsed(d.total) : '—'}">
           <svg viewBox="0 0 40 34" aria-hidden="true">${PAW_PATHS}</svg>
           <span class="wd">${d.letter}</span>
         </div>
@@ -3586,16 +3963,16 @@ PAWS.load();
     }
     if(phase === 'working' || phase === 'break'){
       const w = workElapsed();
-      // The ring measures the whole day against the goal, not this stretch.
-      const p = dayTotalWork() / data.workGoalSec;
+      // The ring measures today's total for this type against its own goal.
+      const p = typeProgress();
       return {
-        main: fmtElapsed(w),
+        main: fmtElapsed(dayTotalType(data.taskType || 'WORK')),
         label: phase === 'break' ? 'on a break' : 'in session',
         progress: ((p % 1) + 1) % 1,
         raw: p,
         color: typeColor(data.taskType || 'WORK'),
         sub: phase === 'break' ? 'break ' + fmtElapsed(restElapsed())
-                               : 'today ' + fmtElapsed(dayTotalWork()),
+                               : 'session ' + fmtElapsed(w),
         lap: Math.floor(p),
         dogClass: phase === 'break' ? 'sit' : '',
         dogPos: p,
@@ -3603,19 +3980,28 @@ PAWS.load();
       };
     }
     if(phase === 'done'){
-      const dayP = dayTotalWork() / data.workGoalSec;
+      const dayP = typeProgress();
       return {
-        main: fmtElapsed(workElapsed()),
+        main: fmtElapsed(dayTotalType(data.taskType || 'WORK')),
         label: 'finished',
         progress: Math.min(dayP, 1),
         raw: dayP,
         color: typeColor(data.taskType || 'WORK'),
-        sub: restElapsed() > 0 ? 'break ' + fmtElapsed(restElapsed()) : null,
-        lap: 0, dogClass: 'sit', dogPos: workElapsed() / data.workGoalSec, live: false
+        sub: 'session ' + fmtElapsed(workElapsed()),
+        lap: 0, dogClass: 'sit', dogPos: dayP, live: false
       };
     }
-    return { main: '0:00', label: 'standing by', progress: 0, raw: 0,
-             color: ringColor(0), sub: null, lap: 0, dogClass: 'still', dogPos: 0, live: false };
+    // Standing by, the ring still shows how much of today's goal this type has.
+    const idleT = data.taskType || 'WORK';
+    const idleDone = dayTotalType(idleT);
+    const idleP = idleDone / goalFor(idleT);
+    return { main: idleDone > 0 ? fmtElapsed(idleDone) : '0:00',
+             label: 'standing by',
+             progress: Math.min(((idleP % 1) + 1) % 1, 1),
+             raw: idleP,
+             color: idleDone > 0 ? typeColor(idleT) : ringColor(0),
+             sub: idleDone > 0 ? 'today' : null,
+             lap: 0, dogClass: 'still', dogPos: 0, live: false };
   }
 
   function buttonMarkup(){
@@ -3726,9 +4112,9 @@ PAWS.load();
 
       <div class="goal-row">
         <div class="settings">
-          <span class="lbl">${ICON.target}Goal</span>
+          <span class="lbl">${ICON.target}Goal<span class="goal-type" style="color:${typeColor(data.taskType || 'WORK')}">${typeLabel(data.taskType || 'WORK')}</span></span>
           <div style="display:flex; align-items:center; gap:6px;">
-            <input type="number" id="workGoalInput" min="1" max="1440" value="${Math.round(data.workGoalSec/60)}"> min
+            <input type="number" id="workGoalInput" min="1" max="1440" value="${Math.round(goalFor(data.taskType || 'WORK')/60)}"> min
           </div>
         </div>
         <div class="settings">
@@ -3748,16 +4134,16 @@ PAWS.load();
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label lbl">${ICON.clock}Today's total</div>
+          <div class="stat-label lbl">${ICON.clock}Today's total<span class="goal-type" style="color:${typeColor(stats.curType)}">${typeLabel(stats.curType)}</span></div>
           <div class="stat-value cyan">${stats.todayWork > 0 ? fmtElapsed(stats.todayWork) : '—'}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label lbl">${ICON.stack}Sessions today</div>
+          <div class="stat-label lbl">${ICON.stack}Sessions today<span class="goal-type" style="color:${typeColor(stats.curType)}">${typeLabel(stats.curType)}</span></div>
           <div class="stat-value">${stats.sessionCount || '—'}</div>
         </div>
       </div>
 
-      ${stats.todayWork > 0 ? `<div class="type-tally">
+      ${stats.todayWorkAll > 0 ? `<div class="type-tally">
         ${typeList().filter(t => stats.byType[t.id] > 0).map(t => `
           <span><i style="background:${t.color}"></i>${t.label} ${fmtElapsed(stats.byType[t.id])}</span>
         `).join('')}
@@ -4200,9 +4586,11 @@ PAWS.load();
       positionPack(st.dogPos);
 
       // Reaching the session goal
-      if(data.goalCelebratedOn !== dayKey5() && dayTotalWork() >= data.workGoalSec){
-        data.goalCelebratedOn = dayKey5();
-        banner = { text: `🎉 ${Math.round(data.workGoalSec/60)} minutes today — goal reached!`, celebrate: true };
+      const gt = data.taskType || 'WORK';
+      data.goalDoneOn = data.goalDoneOn || {};
+      if(data.goalDoneOn[gt] !== dayKey5() && dayTotalType(gt) >= goalFor(gt)){
+        data.goalDoneOn[gt] = dayKey5();
+        banner = { text: `🎉 ${typeLabel(gt)} ${Math.round(goalFor(gt)/60)} minutes today — goal reached!`, celebrate: true };
         saveData();
         render();
         playBigFanfare();
@@ -4573,6 +4961,7 @@ PAWS.load();
     // Close off the stretch under the old type before switching.
     bankStretch();
     data.taskType = key;
+    cheerSlot = -1;
     await saveData();
     render();
   }
@@ -4590,7 +4979,9 @@ PAWS.load();
     let v = parseInt(e.target.value, 10);
     if(isNaN(v) || v < 1) v = 1;
     if(v > 1440) v = 1440;
-    data.workGoalSec = v * 60;
+    const t = data.taskType || 'WORK';
+    data.typeGoals = data.typeGoals || {};
+    data.typeGoals[t] = v * 60;
     await saveData();
     render();
   }
@@ -5131,10 +5522,22 @@ PAWS.load();
     return Array.isArray(task.days) ? task.days : [0,1,2,3,4,5,6];
   }
   function hasSchedule(task){
-    return !!(task && /^\d{1,2}:\d{2}$/.test(task.time || '') && taskDays(task).length);
+    if(!task || !/^\d{1,2}:\d{2}$/.test(task.time || '')) return false;
+    return task.once ? true : taskDays(task).length > 0;
   }
   function runsOn(task, date){
+    if(task.once) return !task.onceDay || dayKey5(date) === task.onceDay;
     return taskDays(task).indexOf(jsDayToIdx(date.getDay())) >= 0;
+  }
+  // Which day a one-off belongs to: today while its time is still ahead (or
+  // only just behind), otherwise tomorrow.
+  function onceTargetDay(time){
+    const hm = parseHM(time);
+    if(!hm) return dayKey5(new Date());
+    const now = new Date();
+    const at = timeOn(now, hm);
+    if(now.getTime() - at.getTime() > CATCH_UP * 1000) at.setDate(at.getDate() + 1);
+    return dayKey5(at);
   }
   // Next scheduled moment for a task, from `from` onward (exclusive of the past).
   function nextRun(task, from){
@@ -5167,7 +5570,14 @@ PAWS.load();
     });
     return best;
   }
+  // A one-off task belongs to a single day and never comes back.
+  function onceDayLabel(task){
+    if(!task.onceDay) return '1回のみ';
+    const p = String(task.onceDay).split('-');
+    return '1回のみ ' + Number(p[1]) + '/' + Number(p[2]);
+  }
   function daysLabel(task){
+    if(task.once) return onceDayLabel(task);
     const d = taskDays(task).slice().sort((a,b)=>a-b);
     if(!d.length) return 'くり返しなし';
     if(d.length === 7) return '毎日';
@@ -5673,7 +6083,8 @@ PAWS.load();
       <div class="ed-field">
         <label>くり返し</label>
         <div class="day-picker">
-          ${DAY_LETTERS.map((d,i) => `<button data-day="${i}" class="${days.indexOf(i)>=0 ? 'on':''}">${d}</button>`).join('')}
+          <button class="once ${t.once ? 'on' : ''}" data-once="1" title="その日だけ、1回だけ">1回</button>
+          ${DAY_LETTERS.map((d,i) => `<button data-day="${i}" class="${!t.once && days.indexOf(i)>=0 ? 'on':''}">${d}</button>`).join('')}
         </div>
       </div>
       <div class="ed-field">
@@ -5879,7 +6290,7 @@ PAWS.load();
       ${banner ? `<div class="banner ${banner.celebrate ? 'celebrate' : ''}">${esc(banner.text)}</div>` : ''}
 
       <div>
-        <div class="section-title"><span>Tasks</span>
+        <div class="section-title"><span>Alarm</span>
           <span class="tools"><button class="mini-btn solid" id="addTask">+ 追加</button></span>
         </div>
         ${editId !== null ? renderEditor() + '<div style="height:10px"></div>' : ''}
@@ -6053,8 +6464,16 @@ PAWS.load();
       const t = (data.tasks||[]).find(x => x.id === b.dataset.testurl);
       if(t) armTask(t, Date.now(), false);
     }));
+    app.querySelectorAll('[data-once]').forEach(b => b.addEventListener('click', () => {
+      if(!draft) return;
+      draft.once = !draft.once;
+      if(draft.once) draft.days = [];
+      syncDraftFromForm();
+      render();
+    }));
     app.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
       if(!draft) return;
+      draft.once = false;
       const i = parseInt(b.dataset.day, 10);
       const d = taskDays(draft).slice();
       const at = d.indexOf(i);
@@ -6314,13 +6733,59 @@ PAWS.load();
       label: '',
       type: (typeList()[0] || {}).id,
       time: '09:00',
-      days: [0,1,2,3,4],
+      days: [],
+      once: true,
       goalSec: 300,
       on: true,
       session: true
     };
     render();
   }
+
+  // The Schedule tab drops a plan in here, where it becomes an alarm.
+  window.__addReadyTask = function(spec){
+    spec = spec || {};
+    const t = {
+      id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      label: (spec.label || '予定').slice(0, 28),
+      type: spec.type || (typeList()[0] || {}).id,
+      time: spec.time || '',
+      days: Array.isArray(spec.days) ? spec.days.slice() : [],
+      once: !!spec.once,
+      goalSec: spec.goalSec || 300,
+      on: true,
+      session: spec.session !== false
+    };
+    if(t.once && t.time) t.onceDay = spec.onceDay || onceTargetDay(t.time);
+    data.tasks = data.tasks || [];
+    data.tasks.push(t);
+    saveData();
+    render();
+    scheduleWatch();
+    return t.id;
+  };
+  window.__hasReadyTask = function(id){
+    return !!(data.tasks || []).find(t => t.id === id);
+  };
+
+  // Home shows whatever alarm comes next.
+  window.__nextAlarm = function(){
+    const now = new Date();
+    let best = null;
+    (data.tasks || []).forEach(t => {
+      if(t.on === false || isSpent(t)) return;
+      const n = nextRun(t, now);
+      if(!n) return;
+      if(!best || n < best.when) best = { when:n, task:t };
+    });
+    if(!best) return null;
+    return {
+      time: best.task.time,
+      label: best.task.label,
+      type: best.task.type,
+      today: dayKey5(best.when) === dayKey5(now)
+    };
+  };
 
   function onEditTask(id){
     const t = (data.tasks || []).find(x => x.id === id);
@@ -6338,6 +6803,9 @@ PAWS.load();
     if(!draft.label || !draft.label.trim()) draft.label = '名称未設定';
     draft.label = draft.label.trim();
     if(draft.time && !/^\d{1,2}:\d{2}$/.test(draft.time)) draft.time = '';
+    // A one-off is pinned to the single day it will run on.
+    if(draft.once && draft.time) draft.onceDay = onceTargetDay(draft.time);
+    else { draft.once = false; delete draft.onceDay; }
     data.tasks = data.tasks || [];
     if(editId === 'new'){
       data.tasks.push(draft);
@@ -6348,6 +6816,7 @@ PAWS.load();
         // A task only fires once a day. If its schedule changed, today's
         // firing has to count as unused again.
         const rescheduled = prev.time !== draft.time ||
+          !!prev.once !== !!draft.once || prev.onceDay !== draft.onceDay ||
           String(taskDays(prev)) !== String(taskDays(draft));
         data.tasks[i] = Object.assign({}, prev, draft);
         if(rescheduled) data.tasks[i].firedOn = null;
@@ -6587,6 +7056,1232 @@ PAWS.load();
   }
 
   init();
+})();
+
+</script>
+
+<script>
+/* =====================================================================
+   Schedule — the plain calendar that sits before Ready.
+   It keeps its own events; a timed one can be handed over to Ready,
+   where it becomes a task that starts the timer.
+   ===================================================================== */
+(function(){
+  'use strict';
+
+  const app = document.getElementById('paneCal');
+  if(!app) return;
+  if(/[?&]mini=1/.test(location.search)) return;   // the little window is only the timer
+
+  const $id = id => app.querySelector('#' + id);
+  const $qa = sel => app.querySelectorAll(sel);
+
+  const data = PAWS.section('cal', {
+    events: [],        // { id, title, date, allDay, start, end, type, note, repeat, at, taskId }
+    tombs: [],
+    view: 'month'
+  });
+
+  const TOMB_MAX = 800;
+
+  /* ---------------- dates ---------------- */
+
+  const pad2 = n => String(n).padStart(2, '0');
+  const keyOf = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  function parseKey(k){
+    const p = String(k || '').split('-').map(Number);
+    if(p.length !== 3 || isNaN(p[0])) return new Date();
+    return new Date(p[0], p[1] - 1, p[2]);
+  }
+  const todayKey = () => keyOf(new Date());
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  // Monday first, the way the week reads here
+  const idxOf = d => (d.getDay() + 6) % 7;
+  const mondayOf = d => addDays(d, -idxOf(d));
+  const WD = ['月','火','水','木','金','土','日'];
+
+  let cursor = todayKey();     // the day in focus
+  let editId = null;           // event being edited, or 'new'
+  let draft = null;
+  let note = null;             // a short line under the header
+  let scrollToEditor = false;  // after a plan is opened from the grid
+
+  /* ---------------- types, shared with the rest ---------------- */
+
+  const DEFAULT_TYPES = [
+    { id:'WORK',  label:'WORK',  color:'#46AFC2' },
+    { id:'READ',  label:'READ',  color:'#C7929F' },
+    { id:'STUDY', label:'STUDY', color:'#8FB4C4' },
+    { id:'OTHER', label:'OTHER', color:'#C7AC87' }
+  ];
+  const typeList = () => (data.types && data.types.length) ? data.types : DEFAULT_TYPES;
+  const typeOf = id => typeList().find(t => t.id === id) || { id:id, label:id || '—', color:'#B9AFA5' };
+  const typeColor = id => typeOf(id).color;
+  const typeLabel = id => typeOf(id).label;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+  function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  // A wash of the type's colour, for the inside of a box whose edge is that colour.
+  function tint(hex, amt){
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if(!m) return '#F7F3EB';
+    const n = parseInt(m[1], 16);
+    const mix = c => Math.round(c + (255 - c) * (1 - amt));
+    return '#' + [mix((n >> 16) & 255), mix((n >> 8) & 255), mix(n & 255)]
+      .map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+  const toMin = t => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || ''));
+    return m ? Math.min(1439, parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) : null;
+  };
+  const hhmm = m => pad2(Math.floor(m / 60)) + ':' + pad2(m % 60);
+
+  /* ---------------- events ---------------- */
+
+  function events(){ return data.events || (data.events = []); }
+
+  // Does this event land on that day? Repeats grow forward from its own date.
+  function onDay(ev, dayKey){
+    if(!ev.date) return false;
+    if(ev.date === dayKey) return true;
+    if(!ev.repeat || ev.repeat === 'none') return false;
+    if(dayKey < ev.date) return false;
+    const a = parseKey(ev.date), b = parseKey(dayKey);
+    if(ev.repeat === 'week')  return idxOf(a) === idxOf(b);
+    if(ev.repeat === 'month') return a.getDate() === b.getDate();
+    if(ev.repeat === 'year')  return a.getDate() === b.getDate() && a.getMonth() === b.getMonth();
+    return false;
+  }
+  function eventsOn(dayKey){
+    return events().filter(e => onDay(e, dayKey)).sort((x, y) => {
+      if(!!x.allDay !== !!y.allDay) return x.allDay ? -1 : 1;
+      return String(x.start || '').localeCompare(String(y.start || ''));
+    });
+  }
+  function timeText(e){
+    if(e.allDay) return '';
+    if(e.start && e.end) return e.start + '–' + e.end;
+    return e.start || '';
+  }
+  function repeatLabel(e){
+    return e.repeat === 'week' ? '毎週' + WD[idxOf(parseKey(e.date))] + '曜'
+         : e.repeat === 'month' ? '毎月' + parseKey(e.date).getDate() + '日'
+         : e.repeat === 'year' ? '毎年' + (parseKey(e.date).getMonth()+1) + '/' + parseKey(e.date).getDate()
+         : '';
+  }
+
+  function save(){ PAWS.save(); }
+  function addTombs(ids){
+    const t = data.tombs || (data.tombs = []);
+    ids.forEach(id => { if(t.indexOf(id) < 0) t.push(id); });
+    if(t.length > TOMB_MAX) data.tombs = t.slice(-TOMB_MAX);
+  }
+
+  /* ---------------- sync ---------------- */
+
+  function payload(){
+    return {
+      app:'schedule', version:1,
+      metaAt: data.metaAt || 0,
+      savedAt: new Date().toISOString(),
+      events: events(),
+      tombs: data.tombs || []
+    };
+  }
+  function mergeRemote(r){
+    if(!r || r.app !== 'schedule') return false;
+    let changed = false;
+    const tomb = new Set([].concat(data.tombs || [], r.tombs || []));
+    const byId = {};
+    events().forEach(e => { byId[e.id] = e; });
+    (r.events || []).forEach(e => {
+      if(!e || !e.id || tomb.has(e.id)) return;
+      const cur = byId[e.id];
+      if(!cur || (e.at || 0) > (cur.at || 0)){ byId[e.id] = e; changed = true; }
+    });
+    const before = events().length;
+    const list = Object.keys(byId).map(k => byId[k]).filter(e => !tomb.has(e.id));
+    if(list.length !== before) changed = true;
+    data.events = list.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const nt = Array.from(tomb).slice(-TOMB_MAX);
+    if(nt.length !== (data.tombs || []).length){ data.tombs = nt; changed = true; }
+    return changed;
+  }
+
+  /* ---------------- the header ---------------- */
+
+  function headTitle(){
+    const d = parseKey(cursor);
+    if(data.view === 'day')  return `<b>${d.getMonth()+1}月${d.getDate()}日</b> <span>${WD[idxOf(d)]}</span>`;
+    if(data.view === 'week'){
+      const a = mondayOf(d), b = addDays(a, 6);
+      return `<b>${a.getMonth()+1}/${a.getDate()} – ${b.getMonth()+1}/${b.getDate()}</b> <span>${a.getFullYear()}</span>`;
+    }
+    return `<b>${d.getMonth()+1}月</b> <span>${d.getFullYear()}</span>`;
+  }
+
+  function step(dir){
+    const d = parseKey(cursor);
+    if(data.view === 'month') d.setMonth(d.getMonth() + dir);
+    else if(data.view === 'week') d.setDate(d.getDate() + dir * 7);
+    else d.setDate(d.getDate() + dir);
+    cursor = keyOf(d);
+  }
+
+  /* ---------------- the month ---------------- */
+
+  function renderMonth(){
+    const cur = parseKey(cursor);
+    const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
+    const start = mondayOf(first);
+    const tk = todayKey();
+    let cells = '';
+    for(let i = 0; i < 42; i++){
+      const d = addDays(start, i);
+      const k = keyOf(d);
+      const other = d.getMonth() !== cur.getMonth();
+      const list = eventsOn(k);      // every plan of the day is shown
+      cells += `<button class="cal-cell ${other ? 'other' : ''} ${k === cursor ? 'sel' : ''}" data-day="${k}">
+        <span class="dnum ${k === tk ? 'today' : ''} ${idxOf(d) === 5 ? 'sat' : ''} ${idxOf(d) === 6 ? 'sun' : ''}">${d.getDate()}</span>
+        <span class="chips">
+          ${list.map(e => `<span class="chip" data-chip="${esc(e.id)}" style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}"
+            title="${esc((timeText(e) ? timeText(e) + ' ' : '') + e.title)}">
+            <span class="ct">${esc(e.allDay ? '終日' : (e.start || ''))}</span>
+            <span class="cn"><i></i>${esc(e.title)}</span>
+          </span>`).join('')}
+        </span>
+      </button>`;
+      if(i % 7 === 6 && d >= new Date(cur.getFullYear(), cur.getMonth() + 1, 0) && i >= 27) break;
+    }
+    return `<div class="cal-grid">
+      <div class="cal-wd">${WD.map((w, i) => `<span class="${i===5?'sat':''} ${i===6?'sun':''}">${w}</span>`).join('')}</div>
+      <div class="cal-cells">${cells}</div>
+    </div>`;
+  }
+
+  /* ---------------- the week and the day ---------------- */
+
+  function dayCard(k, big){
+    const d = parseKey(k);
+    const list = eventsOn(k);
+    const tk = todayKey();
+    return `<div class="cal-day ${k === tk ? 'is-today' : ''} ${big ? 'big' : ''}">
+      <div class="cal-day-head" data-day="${k}">
+        <span class="dd ${idxOf(d)===5?'sat':''} ${idxOf(d)===6?'sun':''}">${d.getMonth()+1}/${d.getDate()}</span>
+        <span class="dw">${WD[idxOf(d)]}</span>
+        ${k === tk ? '<span class="tnow">today</span>' : ''}
+      </div>
+      ${list.length ? `<div class="cal-day-list">${list.map(e => eventRow(e)).join('')}</div>`
+                    : '<div class="cal-none">予定なし</div>'}
+    </div>`;
+  }
+
+  function eventRow(e){
+    return `<button class="cal-ev" data-edit="${esc(e.id)}"
+      style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}">
+      <span class="ev-time">${e.allDay ? '終日' : esc(timeText(e) || '—')}</span>
+      <span class="ev-body">
+        <span class="ev-title">${esc(e.title)}</span>
+        <span class="ev-meta">
+          <i style="background:${typeColor(e.type)}"></i>${esc(typeLabel(e.type))}
+          ${e.repeat && e.repeat !== 'none' ? '<span>·</span><span>' + esc(repeatLabel(e)) + '</span>' : ''}
+          ${e.taskId ? '<span>·</span><span class="ev-sent">Alarm 登録済み</span>' : ''}
+        </span>
+        ${e.note ? `<span class="ev-note">${esc(e.note)}</span>` : ''}
+      </span>
+    </button>`;
+  }
+
+  // The day as a timetable: hours down the side, plans in their own slot.
+  const ROW_H = 46;
+
+  function renderTimetable(k){
+    const d = parseKey(k);
+    const list = eventsOn(k);
+    const allDay = list.filter(e => e.allDay);
+    const loose  = list.filter(e => !e.allDay && !e.start);
+    const timed  = list.filter(e => !e.allDay && e.start).map(e => {
+      const s = toMin(e.start);
+      const en = e.end ? toMin(e.end) : null;
+      return { e: e, s: s, en: Math.min(1440, Math.max(en == null ? s + 45 : en, s + 30)) };
+    }).sort((a, b) => a.s - b.s || a.en - b.en);
+
+    // the window of hours worth showing
+    let lo = 8 * 60, hi = 19 * 60;
+    timed.forEach(t => { lo = Math.min(lo, t.s); hi = Math.max(hi, t.en); });
+    lo = Math.max(0, Math.floor(lo / 60) * 60 - 60);
+    hi = Math.min(1440, Math.ceil(hi / 60) * 60 + 60);
+
+    // plans that overlap share the width, cluster by cluster
+    let i = 0;
+    while(i < timed.length){
+      let j = i, end = timed[i].en;
+      while(j + 1 < timed.length && timed[j + 1].s < end){ j++; end = Math.max(end, timed[j].en); }
+      const group = timed.slice(i, j + 1);
+      const colEnd = [];
+      group.forEach(t => {
+        let c = 0;
+        while(c < colEnd.length && colEnd[c] > t.s) c++;
+        colEnd[c] = t.en; t.col = c;
+      });
+      group.forEach(t => { t.cols = Math.max(1, colEnd.length); });
+      i = j + 1;
+    }
+
+    const hours = [];
+    for(let m = lo; m < hi; m += 60) hours.push(m);
+    const now = new Date();
+    const liveMin = (k === todayKey()) ? now.getHours() * 60 + now.getMinutes() : null;
+
+    return `<div class="tt">
+      <div class="tt-top">
+        <span class="dd ${idxOf(d)===5?'sat':''} ${idxOf(d)===6?'sun':''}">${d.getMonth()+1}/${d.getDate()}</span>
+        <span class="dw">${WD[idxOf(d)]}</span>
+        ${k === todayKey() ? '<span class="tnow">today</span>' : ''}
+      </div>
+      ${allDay.length || loose.length ? `<div class="tt-allday">
+        ${allDay.concat(loose).map(e => `<button class="tt-chip" data-edit="${esc(e.id)}"
+          style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}">
+          <i></i>${esc(e.title)}${e.allDay ? '' : ' <span class="no-t">時間未定</span>'}
+        </button>`).join('')}
+      </div>` : ''}
+      <div class="tt-grid" style="--rh:${ROW_H}px">
+        <div class="tt-hours">
+          ${hours.map(m => `<div class="tt-hour"><span>${Math.floor(m/60)}</span></div>`).join('')}
+        </div>
+        <div class="tt-body" style="height:${hours.length * ROW_H}px">
+          ${hours.map((m, n) => `<button class="tt-slot" data-slot="${m}" style="top:${n * ROW_H}px"></button>`).join('')}
+          ${liveMin != null && liveMin >= lo && liveMin <= hi
+            ? `<div class="tt-now" style="top:${(liveMin - lo) / 60 * ROW_H}px"></div>` : ''}
+          ${timed.map(t => {
+            const top = (t.s - lo) / 60 * ROW_H;
+            const h = Math.max(26, (t.en - t.s) / 60 * ROW_H - 3);
+            const w = 100 / (t.cols || 1);
+            const time = esc(hhmm(t.s)) + (t.e.end ? '–' + esc(t.e.end) : '');
+            const body = h < 44
+              ? `<span class="te-line"><i></i><b>${time}</b>${esc(t.e.title)}</span>`
+              : `<span class="te-time">${time}</span>
+                 <span class="te-title"><i></i>${esc(t.e.title)}</span>
+                 ${t.e.note && h > 66 ? `<span class="te-note">${esc(t.e.note)}</span>` : ''}`;
+            return `<button class="tt-ev ${h < 44 ? 'short' : ''}" data-edit="${esc(t.e.id)}"
+              style="top:${top.toFixed(1)}px; height:${h.toFixed(1)}px;
+                     left:${(t.col * w).toFixed(2)}%; width:calc(${w.toFixed(2)}% - 4px);
+                     --c:${typeColor(t.e.type)}; --cb:${tint(typeColor(t.e.type), 0.13)}">
+              ${body}
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderWeek(){
+    const a = mondayOf(parseKey(cursor));
+    let out = '';
+    for(let i = 0; i < 7; i++) out += dayCard(keyOf(addDays(a, i)), false);
+    return `<div class="cal-week">${out}</div>`;
+  }
+
+  /* ---------------- the editor ---------------- */
+
+  function blankEvent(){
+    return {
+      id: uid(),
+      title: '',
+      date: cursor,
+      allDay: false,
+      start: '09:00',
+      end: '',
+      type: (typeList()[0] || {}).id,
+      note: '',
+      repeat: 'none'
+    };
+  }
+
+  function renderEditor(){
+    if(editId === null || !draft) return '';
+    const t = draft;
+    const sent = !!(t.taskId && window.__hasReadyTask && window.__hasReadyTask(t.taskId));
+    return `<div class="editor cal-editor">
+      <div class="ed-title">${editId === 'new' ? 'new plan' : 'edit plan'}</div>
+      <div class="ed-field">
+        <label>予定</label>
+        <input type="text" id="cvTitle" maxlength="40" value="${esc(t.title)}" placeholder="例: 可燃ごみ">
+      </div>
+      <div class="ed-field">
+        <label>日付</label>
+        <input type="date" id="cvDate" value="${esc(t.date)}">
+      </div>
+      <div class="ed-field">
+        <label>終日</label>
+        <button class="toggle ${t.allDay ? 'on' : ''}" id="cvAllDay">${t.allDay ? 'ON' : 'OFF'}</button>
+      </div>
+      ${t.allDay ? '' : `
+      <div class="ed-field">
+        <label>時間</label>
+        <input type="time" id="cvStart" value="${esc(t.start || '')}">
+        <span class="unit">→</span>
+        <input type="time" id="cvEnd" value="${esc(t.end || '')}">
+      </div>`}
+      <div class="ed-field">
+        <label>種類</label>
+        <div class="type-picker">
+          ${typeList().map(x => `<button data-ctype="${esc(x.id)}"
+            style="${t.type === x.id ? `background:linear-gradient(135deg,${x.color},${x.color}); border-color:transparent; color:#fff; font-weight:700;` : ''}">${esc(x.label)}</button>`).join('')}
+        </div>
+      </div>
+      <div class="ed-field">
+        <label>くり返し</label>
+        <div class="rep-picker">
+          ${[['none','なし'],['week','毎週'],['month','毎月'],['year','毎年']].map(r =>
+            `<button data-rep="${r[0]}" class="${(t.repeat || 'none') === r[0] ? 'on' : ''}">${r[1]}</button>`).join('')}
+        </div>
+      </div>
+      <div class="ed-field">
+        <label>メモ</label>
+        <input type="text" id="cvNote" maxlength="80" value="${esc(t.note || '')}" placeholder="任意">
+      </div>
+      ${t.allDay ? '' : `<div class="send-row">
+        <button class="mini-btn solid" id="cvSend" ${sent ? 'disabled' : ''}>${sent ? 'Alarm に登録済み' : 'Alarm に登録する'}</button>
+        <span class="send-note">Home の Alarm に入り、その時間になるとタイマーが始まります</span>
+      </div>`}
+      <div class="ed-actions">
+        <button class="ed-save" id="cvSave">SAVE</button>
+        ${editId === 'new' ? '' : '<button class="ed-del" id="cvDel">DELETE</button>'}
+        <button class="ed-cancel" id="cvCancel">CANCEL</button>
+      </div>
+    </div>`;
+  }
+
+  /* ---------------- render ---------------- */
+
+  function render(){
+    const view = data.view || 'month';
+    app.innerHTML = `
+      <div class="cal-bar">
+        <button class="cal-nav" id="calPrev" title="前へ">‹</button>
+        <div class="cal-title">${headTitle()}</div>
+        <button class="cal-nav" id="calNext" title="次へ">›</button>
+        <button class="cal-today" id="calToday">今日</button>
+      </div>
+
+      <div class="cal-views">
+        ${[['month','月'],['week','週'],['day','日']].map(v =>
+          `<button data-view="${v[0]}" class="${view === v[0] ? 'on' : ''}">${v[1]}</button>`).join('')}
+      </div>
+
+      ${note ? `<div class="cal-note">${esc(note)}</div>` : ''}
+
+      ${view === 'month' ? renderMonth() : view === 'week' ? renderWeek() : ''}
+
+      ${view === 'day' ? renderTimetable(cursor) : ''}
+
+      <div>
+        <div class="section-title">
+          <span>${view === 'month' ? (parseKey(cursor).getMonth()+1) + '月' + parseKey(cursor).getDate() + '日' : 'この日'}</span>
+          <span class="tools"><button class="mini-btn solid" id="calAdd">+ 追加</button></span>
+        </div>
+        ${editId !== null ? renderEditor() + '<div style="height:10px"></div>' : ''}
+        ${view === 'day' ? '' : (eventsOn(cursor).length
+            ? `<div class="cal-day-list plain">${eventsOn(cursor).map(e => eventRow(e)).join('')}</div>`
+            : '<div class="empty-state">この日の予定はまだありません。</div>')}
+      </div>
+    `;
+    bind();
+    if(scrollToEditor){
+      scrollToEditor = false;
+      const ed = app.querySelector('.cal-editor');
+      if(ed) setTimeout(() => ed.scrollIntoView({ block:'center', behavior:'smooth' }), 30);
+    }
+  }
+
+  function bind(){
+    const on = (id, fn) => { const el = $id(id); if(el) el.addEventListener('click', fn); };
+    on('calPrev', () => { step(-1); note = null; render(); });
+    on('calNext', () => { step(1);  note = null; render(); });
+    on('calToday', () => { cursor = todayKey(); note = null; render(); });
+    $qa('[data-view]').forEach(b => b.addEventListener('click', () => {
+      data.view = b.dataset.view; PAWS.save(false); render();
+    }));
+    $qa('[data-day]').forEach(b => b.addEventListener('click', () => {
+      cursor = b.dataset.day;
+      if(editId === 'new' && draft) draft.date = cursor;
+      render();
+    }));
+    const openEditor = id => {
+      const e = events().find(x => x.id === id);
+      if(!e) return;
+      editId = e.id;
+      draft = Object.assign({}, e);
+      scrollToEditor = true;
+      render();
+    };
+    $qa('[data-edit]').forEach(b => b.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openEditor(b.dataset.edit);
+    }));
+    // a box inside a day cell: open it without also selecting the day
+    $qa('[data-chip]').forEach(el => el.addEventListener('click', ev => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      const cell = el.closest('[data-day]');
+      if(cell) cursor = cell.dataset.day;
+      openEditor(el.dataset.chip);
+    }));
+    on('calAdd', () => { editId = 'new'; draft = blankEvent(); render(); });
+    $qa('[data-slot]').forEach(b => b.addEventListener('click', () => {
+      editId = 'new';
+      draft = blankEvent();
+      draft.start = hhmm(parseInt(b.dataset.slot, 10));
+      render();
+    }));
+
+    // editor
+    $qa('[data-ctype]').forEach(b => b.addEventListener('click', () => {
+      if(!draft) return; readForm(); draft.type = b.dataset.ctype; render();
+    }));
+    $qa('[data-rep]').forEach(b => b.addEventListener('click', () => {
+      if(!draft) return; readForm(); draft.repeat = b.dataset.rep; render();
+    }));
+    on('cvAllDay', () => { if(!draft) return; readForm(); draft.allDay = !draft.allDay; render(); });
+    on('cvCancel', () => { editId = null; draft = null; render(); });
+    on('cvSave', onSave);
+    on('cvDel', onDelete);
+    on('cvSend', onSend);
+  }
+
+  function readForm(){
+    if(!draft) return;
+    const v = id => { const el = $id(id); return el ? el.value : null; };
+    const t = v('cvTitle'); if(t !== null) draft.title = t;
+    const d = v('cvDate');  if(d) draft.date = d;
+    const s = v('cvStart'); if(s !== null) draft.start = s;
+    const e = v('cvEnd');   if(e !== null) draft.end = e;
+    const n = v('cvNote');  if(n !== null) draft.note = n;
+  }
+
+  function onSave(){
+    if(!draft) return;
+    readForm();
+    if(!draft.title || !draft.title.trim()) draft.title = '予定';
+    draft.title = draft.title.trim();
+    if(!draft.date) draft.date = cursor;
+    if(draft.allDay){ draft.start = ''; draft.end = ''; }
+    draft.at = Date.now();
+    const list = events();
+    const i = list.findIndex(x => x.id === draft.id);
+    if(i >= 0) list[i] = draft; else list.push(draft);
+    list.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    cursor = draft.date;
+    editId = null; draft = null;
+    save();
+    render();
+  }
+
+  function onDelete(){
+    if(!draft) return;
+    addTombs([draft.id]);
+    data.events = events().filter(x => x.id !== draft.id);
+    editId = null; draft = null;
+    save();
+    render();
+  }
+
+  // Hand a timed plan over to Ready, where it becomes a task with an alarm.
+  function onSend(){
+    if(!draft) return;
+    readForm();
+    if(!draft.start){ note = '時間を入れてから登録してください。'; render(); return; }
+    if(typeof window.__addReadyTask !== 'function'){ note = 'Alarm がまだ準備中です。'; render(); return; }
+    const weekly = draft.repeat === 'week';
+    const id = window.__addReadyTask({
+      label: draft.title || '予定',
+      type: draft.type,
+      time: draft.start,
+      days: weekly ? [idxOf(parseKey(draft.date))] : [],
+      once: !weekly,
+      onceDay: weekly ? null : draft.date
+    });
+    draft.taskId = id;
+    draft.at = Date.now();
+    const list = events();
+    const i = list.findIndex(x => x.id === draft.id);
+    if(i >= 0) list[i] = Object.assign({}, draft); else list.push(Object.assign({}, draft));
+    save();
+    note = 'Alarm に登録しました。';
+    render();
+    PAWS.setTab('fm');
+  }
+
+  /* ---------------- start ---------------- */
+
+  // Home reads today's plans through these.
+  window.__planOn = function(dayKey){ return eventsOn(dayKey); };
+  window.__openPlan = function(id){
+    const e = events().find(x => x.id === id);
+    if(!e) return false;
+    cursor = todayKey();
+    editId = e.id;
+    draft = Object.assign({}, e);
+    scrollToEditor = true;
+    render();
+    return true;
+  };
+
+  PAWS.register('cal', {
+    gistFile: 'schedule.json',
+    appId: 'schedule',
+    payload: payload,
+    merge: mergeRemote,
+    rerender: () => render()
+  });
+
+  render();
+})();
+
+</script>
+
+<script>
+/* =====================================================================
+   Home — the first thing you see: the day, the sky, and what is on it.
+   ===================================================================== */
+(function(){
+  'use strict';
+
+  const app = document.getElementById('homeTop');
+  if(!app) return;
+  if(/[?&]mini=1/.test(location.search)) return;
+
+  const $id = id => app.querySelector('#' + id);
+  const $qa = sel => app.querySelectorAll(sel);
+
+  const data = PAWS.section('home', {
+    place: null,      // { name, lat, lon }
+    wx: null,         // { at, code, temp, hi, lo, pop }
+    askedGeo: false
+  });
+
+  let placeOpen = false;
+  let hits = [];               // places that answered to the name typed
+  let busy = false;
+  let msg = null;
+
+  /* ---------------- little helpers ---------------- */
+
+  const pad2 = n => String(n).padStart(2, '0');
+  const keyOf = d => d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+  const WD = ['月','火','水','木','金','土','日'];
+  const WD_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const idxOf = d => (d.getDay() + 6) % 7;
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+  function tint(hex, amt){
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if(!m) return '#F7F3EB';
+    const n = parseInt(m[1], 16);
+    const mix = c => Math.round(c + (255 - c) * (1 - amt));
+    return '#' + [mix((n >> 16) & 255), mix((n >> 8) & 255), mix(n & 255)]
+      .map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+  const DEFAULT_TYPES = [
+    { id:'WORK',  label:'WORK',  color:'#46AFC2' },
+    { id:'READ',  label:'READ',  color:'#C7929F' },
+    { id:'STUDY', label:'STUDY', color:'#8FB4C4' },
+    { id:'OTHER', label:'OTHER', color:'#C7AC87' }
+  ];
+  const typeList = () => (data.types && data.types.length) ? data.types : DEFAULT_TYPES;
+  const typeOf = id => typeList().find(t => t.id === id) || { id:id, label:id || '—', color:'#B9AFA5' };
+
+  /* ---------------- the weather ---------------- */
+
+  // Open-Meteo's codes, gathered into the handful of skies worth naming.
+  function sky(code){
+    if(code === 0) return { key:'clear', label:'快晴' };
+    if(code === 1) return { key:'clear', label:'晴れ' };
+    if(code === 2) return { key:'part',  label:'晴れときどきくもり' };
+    if(code === 3) return { key:'cloud', label:'くもり' };
+    if(code === 45 || code === 48) return { key:'fog', label:'きり' };
+    if(code >= 51 && code <= 57) return { key:'rain', label:'霧雨' };
+    if(code >= 61 && code <= 67) return { key:'rain', label:'雨' };
+    if(code >= 71 && code <= 77) return { key:'snow', label:'雪' };
+    if(code >= 80 && code <= 82) return { key:'rain', label:'にわか雨' };
+    if(code === 85 || code === 86) return { key:'snow', label:'にわか雪' };
+    if(code >= 95) return { key:'storm', label:'雷雨' };
+    return { key:'cloud', label:'—' };
+  }
+
+  const SUN = '<circle cx="24" cy="24" r="9.5" class="w-sun"/>' +
+    [0,45,90,135,180,225,270,315].map(a =>
+      `<line x1="24" y1="6" x2="24" y2="11" class="w-ray" transform="rotate(${a} 24 24)"/>`).join('');
+  const CLOUD = '<path class="w-cloud" d="M14 33h18a6.5 6.5 0 0 0 .6-13 9 9 0 0 0-17.2 2.2A5.6 5.6 0 0 0 14 33Z"/>';
+  const DROPS = [0,1,2].map(i =>
+    `<line x1="${17 + i*7}" y1="36" x2="${15 + i*7}" y2="42" class="w-drop"/>`).join('');
+  const FLAKES = [0,1,2].map(i =>
+    `<circle cx="${17.5 + i*7}" cy="${39 + (i%2?2:0)}" r="1.7" class="w-flake"/>`).join('');
+
+  function skyArt(key){
+    const wrap = inner => `<svg viewBox="0 0 48 48" aria-hidden="true">${inner}</svg>`;
+    if(key === 'clear') return wrap(SUN);
+    if(key === 'part')  return wrap('<g transform="translate(4,-4) scale(0.72)">' + SUN + '</g>' + CLOUD);
+    if(key === 'cloud' || key === 'fog') return wrap(CLOUD);
+    if(key === 'rain')  return wrap(CLOUD + DROPS);
+    if(key === 'snow')  return wrap(CLOUD + FLAKES);
+    if(key === 'storm') return wrap(CLOUD + '<path class="w-bolt" d="M24 35l-5 8h4l-2 6 7-9h-4l3-5z"/>');
+    return wrap(CLOUD);
+  }
+
+  function fresh(){
+    const w = data.wx;
+    return !!(w && w.at && (Date.now() - w.at) < 30 * 60 * 1000 && w.day === keyOf(new Date()));
+  }
+
+  async function loadWeather(force){
+    if(busy) return;
+    if(!force && fresh()) return;
+    const p = data.place;
+    if(!p || typeof p.lat !== 'number'){ return; }
+    busy = true; msg = null; render();
+    try{
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + p.lat + '&longitude=' + p.lon
+        + '&current=temperature_2m,weather_code'
+        + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+        + '&timezone=auto&forecast_days=1';
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('http ' + r.status);
+      const j = await r.json();
+      const d = j.daily || {};
+      data.wx = {
+        at: Date.now(),
+        day: keyOf(new Date()),
+        temp: j.current ? Math.round(j.current.temperature_2m) : null,
+        code: (d.weather_code && d.weather_code[0] != null) ? d.weather_code[0]
+              : (j.current ? j.current.weather_code : 0),
+        hi: (d.temperature_2m_max || [])[0] != null ? Math.round(d.temperature_2m_max[0]) : null,
+        lo: (d.temperature_2m_min || [])[0] != null ? Math.round(d.temperature_2m_min[0]) : null,
+        pop: (d.precipitation_probability_max || [])[0]
+      };
+      PAWS.save(false);
+    }catch(e){
+      msg = '天気を取れませんでした。';
+    }
+    busy = false;
+    render();
+  }
+
+  // Several places share a name — 横浜 is a city in Kanagawa and a town in
+  // Aomori — so the候補 are offered, biggest first.
+  async function findPlace(name){
+    if(!name || !name.trim()) return;
+    busy = true; msg = null; hits = []; render();
+    try{
+      const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=ja&name='
+        + encodeURIComponent(name.trim()));
+      const j = await r.json();
+      const list = (j.results || []).slice()
+        .sort((a, b) => (b.population || 0) - (a.population || 0));
+      if(!list.length) throw new Error('not found');
+      if(list.length === 1){
+        busy = false;
+        pickPlace(list[0]);
+        return;
+      }
+      hits = list.slice(0, 5);
+      busy = false;
+      render();
+      return;
+    }catch(e){
+      msg = 'その地名が見つかりませんでした。';
+    }
+    busy = false;
+    render();
+  }
+
+  function placeName(hit){
+    const area = hit.admin1 && hit.admin1 !== hit.name ? '（' + hit.admin1 + '）' : '';
+    return hit.name + area;
+  }
+
+  async function pickPlace(hit){
+    data.place = { name: placeName(hit), lat: hit.latitude, lon: hit.longitude };
+    data.wx = null;
+    hits = [];
+    placeOpen = false;
+    PAWS.save(false);
+    await loadWeather(true);
+  }
+
+  function useHere(){
+    if(!navigator.geolocation){ msg = 'この端末では現在地を使えません。'; render(); return; }
+    busy = true; msg = null; render();
+    navigator.geolocation.getCurrentPosition(pos => {
+      data.place = { name:'現在地', lat: Math.round(pos.coords.latitude * 1000) / 1000,
+                     lon: Math.round(pos.coords.longitude * 1000) / 1000 };
+      data.wx = null; placeOpen = false; busy = false;
+      PAWS.save(false);
+      loadWeather(true);
+    }, () => {
+      busy = false;
+      msg = '現在地を取れませんでした。地名を入れてください。';
+      placeOpen = true;
+      render();
+    }, { timeout: 8000, maximumAge: 10 * 60 * 1000 });
+  }
+
+  /* ---------------- today's plans and alarms ---------------- */
+
+  function todaysPlans(){
+    const k = keyOf(new Date());
+    const list = (window.__planOn ? window.__planOn(k) : []) || [];
+    return list;
+  }
+  function nextAlarm(){
+    return window.__nextAlarm ? window.__nextAlarm() : null;
+  }
+
+  /* ---------------- render ---------------- */
+
+  function greeting(){
+    const h = new Date().getHours();
+    if(h < 5)  return 'おそくまでおつかれさま';
+    if(h < 11) return 'おはよう';
+    if(h < 17) return 'こんにちは';
+    if(h < 22) return 'こんばんは';
+    return 'こんばんは';
+  }
+
+  function render(){
+    const now = new Date();
+    const w = data.wx;
+    const s = w ? sky(w.code) : null;
+    const plans = todaysPlans();
+    const alarm = nextAlarm();
+
+    app.innerHTML = `
+      <div class="home-stage ${skyNow().cls}" id="hmStage">
+        ${skyHtml()}
+        <div class="home-date">
+          <span class="hd-md">${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}</span>
+          <span class="hd-wd">${WD_EN[idxOf(now)]}</span>
+        </div>
+        ${yardHtml()}
+        <span class="walker" id="hmDog">${window.__DOG_SVG || ''}</span>
+        <div class="dog-bubble sess hide" id="hmBubble"></div>
+      </div>
+
+      <div class="home-card wx ${w ? 'has' : ''}">
+        ${w ? `
+          <div class="wx-line">
+          <div class="wx-art ${s.key}">${skyArt(s.key)}</div>
+          <div class="wx-body">
+            <div class="wx-label">${esc(s.label)}</div>
+            <div class="wx-temp">${w.temp != null ? w.temp + '°' : '—'}</div>
+            <div class="wx-sub">
+              ${w.hi != null ? `<span class="hi">↑${w.hi}°</span>` : ''}
+              ${w.lo != null ? `<span class="lo">↓${w.lo}°</span>` : ''}
+              ${w.pop != null ? `<span class="pop">☂ ${w.pop}%</span>` : ''}
+            </div>
+          </div>
+          <div class="wx-place">
+            <button class="mini-btn" id="hmPlace">${esc((data.place && data.place.name) || '場所')}</button>
+            <button class="mini-btn" id="hmReload" ${busy ? 'disabled' : ''}>${busy ? '…' : '更新'}</button>
+          </div>
+          </div>
+        ` : `
+          <div class="wx-line">
+            <div class="wx-art cloud">${skyArt('part')}</div>
+            <div class="wx-body">
+              <div class="wx-label">Today's weather</div>
+              <div class="wx-sub">場所を決めると、ここに出ます。</div>
+            </div>
+            <div class="wx-place"><button class="mini-btn solid" id="hmPlace">場所を決める</button></div>
+          </div>
+        `}
+        ${placeOpen ? `
+          <div class="wx-picker">
+            <input type="text" id="hmCity" placeholder="市区町村を入れる（例: 横浜）" value="">
+            <button class="mini-btn solid" id="hmFind">さがす</button>
+            <button class="mini-btn" id="hmHere">現在地</button>
+          </div>
+          ${hits.length ? `<div class="wx-hits">
+            <div class="wx-hits-t">どれですか？</div>
+            ${hits.map((h, i) => `<button class="mini-btn" data-hit="${i}">${esc(placeName(h))}${
+              h.population >= 10000 ? `<span class="pop-n">${Math.round(h.population / 10000)}万人</span>` : ''}</button>`).join('')}
+          </div>` : ''}` : ''}
+        ${msg ? `<div class="wx-msg">${esc(msg)}</div>` : ''}
+      </div>
+
+      ${alarm ? `
+      <button class="home-card alarm" id="hmAlarm">
+        <span class="al-when">${esc(alarm.time || '—')}</span>
+        <span class="al-body">
+          <span class="al-title">${esc(alarm.label)}</span>
+          <span class="al-meta">つぎのアラーム${alarm.today ? '' : '（あす）'}</span>
+        </span>
+        <span class="al-go">Ready ↓</span>
+      </button>` : ''}
+
+      <div>
+        <div class="section-title">
+          <span>Today's plans</span>
+          <span class="tools"><button class="mini-btn" id="hmAll">Schedule →</button></span>
+        </div>
+        ${plans.length ? `<div class="home-plans">
+          ${plans.map(e => {
+            const c = typeOf(e.type).color;
+            return `<button class="home-plan" data-plan="${esc(e.id)}"
+              style="--c:${c}; --cb:${tint(c, 0.13)}">
+              <span class="hp-time">${e.allDay ? '終日' : esc(e.start || '—')}${(!e.allDay && e.end) ? '–' + esc(e.end) : ''}</span>
+              <span class="hp-title">${esc(e.title)}</span>
+              ${e.note ? `<span class="hp-note">${esc(e.note)}</span>` : ''}
+            </button>`;
+          }).join('')}
+        </div>` : `<div class="empty-state">今日の予定はありません。<br>ゆっくりいきましょう。</div>`}
+      </div>
+    `;
+
+    const on = (id, fn) => { const el = $id(id); if(el) el.addEventListener('click', fn); };
+    on('hmPlace', () => { placeOpen = !placeOpen; msg = null; hits = []; render();
+      const el = $id('hmCity'); if(el) el.focus(); });
+    on('hmReload', () => loadWeather(true));
+    on('hmFind', () => { const el = $id('hmCity'); findPlace(el ? el.value : ''); });
+    on('hmHere', useHere);
+    $qa('[data-hit]').forEach(b => b.addEventListener('click', () => {
+      const h = hits[parseInt(b.dataset.hit, 10)];
+      if(h) pickPlace(h);
+    }));
+    on('hmAll', () => PAWS.setTab('cal'));
+    on('hmAlarm', () => {
+      const el = document.getElementById('paneFm');
+      if(el) el.scrollIntoView({ block:'start', behavior:'smooth' });
+    });
+    $qa('[data-plan]').forEach(b => b.addEventListener('click', () => {
+      if(window.__openPlan) window.__openPlan(b.dataset.plan);
+      PAWS.setTab('cal');
+    }));
+    const city = $id('hmCity');
+    if(city) city.addEventListener('keydown', ev => { if(ev.key === 'Enter') findPlace(city.value); });
+    startDog();
+  }
+
+  /* ---------------- the dog on the stage ---------------- */
+
+  const GREET = () => {
+    const h = new Date().getHours();
+    if(h < 5)  return 'まだ起きてるの？';
+    if(h < 11) return 'おはよう';
+    if(h < 17) return 'こんにちは';
+    return 'こんばんは';
+  };
+  const MURMURS = [
+    'いい天気だね', 'お散歩いきたい', 'きょうも いっしょに', 'おなかすいた',
+    'おやつほしい', 'ワクワク', 'そばにいるよ', 'ひなたぼっこ', 'ふぁ〜あ',
+    'なでて', 'たのしみだね', 'ゆっくりいこう', 'はじめの一歩',
+    'ちょっと休憩する？', 'えらいね', 'その調子', 'まっててあげる',
+    'いい匂いがする', 'しっぽ ふりふり', 'きょうは何する？', 'あくび でちゃった',
+    'ボールで あそぼ', 'ねむくなってきた', 'ふんふん', 'ここにいるよ',
+    'あわてなくて いいよ', '一歩ずつ ね', 'そろそろ おやつ？'
+  ];
+  const PAW_TAG = '<span class="bpaw"></span>';
+
+  let dogX = 0.5, dogDir = -1, dogTimer = null, dogStop = 0;
+  let bubbleUntil = 0, nextBubble = 0, greeted = false, bubbleText = '';
+  let nextBf = 0, nextSeason = 0, nextStar = 0;
+  let pups = [];                 // { el, gap }
+  let pupsUntil = 0, nextPups = Date.now() + 20000 + Math.random() * 40000;
+  const COATS = ['coat-beige', 'coat-black', 'coat-brown'];
+
+  /* ---------------- the little yard ---------------- */
+
+  // Foliage follows the season, the way the falling petals do.
+  function leafTone(){
+    const sea = (window.__SEASON && window.__SEASON.season()) || 'fireworks';
+    if(sea === 'blossom')  return { a:'#E9C2CE', b:'#DCAFBE', snow:false };
+    if(sea === 'leaves')   return { a:'#D6A65E', b:'#C4863F', snow:false };
+    if(sea === 'snow')     return { a:'#BFC8C0', b:'#AAB5AC', snow:true  };
+    return { a:'#A6C08D', b:'#8FAC79', snow:false };   // summer green
+  }
+
+  function treeSvg(tone, tall){
+    const cap = tone.snow
+      ? '<ellipse cx="20" cy="15" rx="12" ry="6" fill="#F2F4F0" opacity=".85"/>' : '';
+    return `<svg viewBox="0 0 40 ${tall ? 54 : 44}" aria-hidden="true">
+      <rect x="18" y="${tall ? 30 : 24}" width="4" height="${tall ? 24 : 20}" rx="2" fill="#B79A73"/>
+      <circle cx="20" cy="${tall ? 20 : 18}" r="13" fill="${tone.a}"/>
+      <circle cx="11" cy="${tall ? 26 : 23}" r="9" fill="${tone.b}"/>
+      <circle cx="29" cy="${tall ? 26 : 23}" r="9" fill="${tone.b}"/>
+      ${cap}
+    </svg>`;
+  }
+
+  // Firs keep their green all year; only the snow settles on them.
+  function firSvg(tone, tall){
+    const h = tall ? 58 : 46;
+    const k = tall ? 1 : 0.79;
+    const y = v => (v * k).toFixed(1);
+    const cap = tone.snow ? `
+      <path d="M20 ${y(6)} 26 ${y(17)}H14z" fill="#F2F4F0" opacity=".9"/>
+      <path d="M20 ${y(20)} 27 ${y(30)}H13z" fill="#F2F4F0" opacity=".75"/>` : '';
+    return `<svg viewBox="0 0 40 ${h}" aria-hidden="true">
+      <rect x="18.5" y="${y(44)}" width="3.5" height="${y(14)}" rx="1.8" fill="#B79A73"/>
+      <path d="M20 ${y(3)} 32 ${y(24)}H8z" fill="#9BB584"/>
+      <path d="M20 ${y(16)} 35 ${y(37)}H5z" fill="#8AA773"/>
+      <path d="M20 ${y(28)} 37 ${y(48)}H3z" fill="#9BB584"/>
+      ${cap}
+    </svg>`;
+  }
+
+  const HOUSE_SVG = `<svg viewBox="0 0 46 38" aria-hidden="true">
+    <path d="M23 3 44 17H2z" fill="#C2938F"/>
+    <rect x="7" y="16" width="32" height="21" rx="2.5" fill="#E6CDCB"/>
+    <path d="M23 20c4.4 0 7 3.2 7 7.4V37H16v-9.6c0-4.2 2.6-7.4 7-7.4z" fill="#8A6663"/>
+    <circle cx="23" cy="13" r="1.8" fill="#F6E9E7"/>
+  </svg>`;
+
+  const GRASS_SVG = `<svg viewBox="0 0 18 12" aria-hidden="true">
+    <g stroke="#A9BE94" stroke-width="1.7" stroke-linecap="round" fill="none">
+      <path d="M4 12c0-4 1-6 2.5-7.5"/><path d="M9 12c0-5 .4-7.5.4-9"/><path d="M14 12c0-4-1-6-2.5-7.5"/>
+    </g>
+  </svg>`;
+
+  function flowerSvg(c){
+    return `<svg viewBox="0 0 14 18" aria-hidden="true">
+      <path d="M7 18v-7" stroke="#A9BE94" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <g fill="${c}">
+        <circle cx="7" cy="5" r="2.4"/><circle cx="3.6" cy="7.4" r="2.4"/>
+        <circle cx="10.4" cy="7.4" r="2.4"/><circle cx="4.9" cy="10.6" r="2.4"/>
+        <circle cx="9.1" cy="10.6" r="2.4"/>
+      </g>
+      <circle cx="7" cy="8" r="1.7" fill="#F2E3B8"/>
+    </svg>`;
+  }
+
+  // Fixed spots, so the yard looks the same every time you come home.
+  const YARD = [
+    { k:'tree',   x:  6, w:44, tall:true  },
+    { k:'grass',  x: 16, w:16 },
+    { k:'flower', x: 21, w:12, c:'#E8B3C1' },
+    { k:'fir',    x: 27, w:30, tall:false },
+    { k:'house',  x: 39, w:48 },
+    { k:'grass',  x: 50, w:14 },
+    { k:'flower', x: 56, w:11, c:'#EBD08A' },
+    { k:'tree',   x: 65, w:34, tall:false },
+    { k:'grass',  x: 74, w:15 },
+    { k:'flower', x: 80, w:12, c:'#C8AFD8' },
+    { k:'fir',    x: 91, w:38, tall:true  },
+    { k:'grass',  x: 98, w:13 }
+  ];
+
+  function yardHtml(){
+    const tone = leafTone();
+    return '<div class="stage-ground"></div>' + YARD.map(o => {
+      const art = o.k === 'tree'   ? treeSvg(tone, o.tall)
+                : o.k === 'fir'    ? firSvg(tone, o.tall)
+                : o.k === 'house'  ? HOUSE_SVG
+                : o.k === 'flower' ? flowerSvg(o.c)
+                : GRASS_SVG;
+      return `<span class="scene ${o.k}" style="left:${o.x}%; width:${o.w}px">${art}</span>`;
+    }).join('');
+  }
+
+  // The sky over the yard: pale blue by day, warm at dusk, deep at night.
+  function skyNow(){
+    const d = new Date();
+    const t = d.getHours() + d.getMinutes() / 60;
+    if(t >= 5 && t < 17){
+      const k = (t - 5) / 12;                       // the sun's arc, 5:00 → 17:00
+      return { cls:'day', orb:'sun', x: 8 + k * 84, y: 54 - Math.sin(Math.PI * k) * 20 };
+    }
+    if(t >= 17 && t < 19){
+      const k = (t - 17) / 2;
+      return { cls:'dusk', orb:'sun', x: 78 + k * 14, y: 46 + k * 22 };
+    }
+    const k = ((t + 5) % 24) / 24;
+    return { cls:'night', orb:'moon', x: 81, y: 44 };
+  }
+
+  function skyHtml(){
+    const s = skyNow();
+    return `<div class="sky"></div>
+      <span class="orb ${s.orb}" style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px"></span>`;
+  }
+
+  function stage(){ return $id('hmStage'); }
+
+  function paintDog(){
+    const st = stage();
+    const dog = $id('hmDog');
+    if(!st || !dog) return;
+    const W = st.clientWidth || 300;
+    const H = st.clientHeight || 150;
+    const x = 26 + dogX * (W - 52);
+    const y = H - 17;              // its paws land on the ground line
+    dog.className = 'walker' + (dogStop ? ' still' : '');
+    dog.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px)'
+                        + (dogDir < 0 ? ' scaleX(-1)' : '');
+    // the pups walk in the parent's wake
+    pups.forEach(p => {
+      const px = Math.max(8, Math.min(W - 8, x - dogDir * p.gap));
+      p.el.style.transform = 'translate(' + px.toFixed(1) + 'px, ' + (H - 13).toFixed(1) + 'px)'
+                           + (dogDir < 0 ? ' scaleX(-1)' : '');
+    });
+    const bub = $id('hmBubble');
+    if(bub){
+      bub.style.left = x.toFixed(1) + 'px';
+      bub.style.top  = (y - 20).toFixed(1) + 'px';
+      bub.classList.toggle('flip', x > W * 0.6);
+    }
+  }
+
+  function dogTick(){
+    const st = stage();
+    if(!st || app.hidden || (app.offsetParent === null)) return;
+    const now = Date.now();
+
+    if(dogStop){
+      if(now > dogStop) dogStop = 0;
+    } else {
+      dogX += dogDir * 0.018;
+      if(dogX <= 0){ dogX = 0; dogDir = 1; }
+      if(dogX >= 1){ dogX = 1; dogDir = -1; }
+      // every so often it just stands there, tail going
+      if(Math.random() < 0.01) dogStop = now + 3000 + Math.random() * 4000;
+    }
+
+    // now and then the pups come along for a while
+    if(!pups.length && now > nextPups){
+      const n = 1 + Math.floor(Math.random() * 2);
+      for(let i = 0; i < n; i++){
+        const el = document.createElement('div');
+        el.className = 'walker pup ' + (i ? 'p2 ' : '') + COATS[Math.floor(Math.random() * COATS.length)];
+        el.innerHTML = window.__DOG_SVG || '';
+        st.appendChild(el);
+        pups.push({ el: el, gap: 22 + i * 16 });
+      }
+      pupsUntil = now + 30000 + Math.random() * 40000;
+    }
+    if(pups.length && now > pupsUntil){
+      pups.forEach(p => {
+        p.el.style.transition = 'opacity .8s ease';
+        p.el.style.opacity = '0';
+        setTimeout(() => p.el.remove(), 900);
+      });
+      pups = [];
+      nextPups = now + 90000 + Math.random() * 120000;
+    }
+    paintDog();
+
+    // what it has to say
+    const bub = $id('hmBubble');
+    if(bub){
+      if(bubbleUntil && now > bubbleUntil){
+        bub.classList.add('hide');
+        bubbleUntil = 0;
+        nextBubble = now + 9000 + Math.random() * 12000;
+      } else if(!bubbleUntil && now > nextBubble){
+        const text = greeted ? MURMURS[Math.floor(Math.random() * MURMURS.length)] : GREET();
+        greeted = true;
+        bubbleText = text;
+        bub.innerHTML = text + PAW_TAG;
+        bub.classList.remove('hide');
+        bubbleUntil = now + 6500;
+      }
+    }
+
+    if(reduced()) return;
+
+    // a butterfly, from time to time
+    if(now > nextBf){
+      nextBf = now + 22000 + Math.random() * 30000;
+      if(window.__SEASON){
+        const b = document.createElement('div');
+        b.className = 'butterfly';
+        b.innerHTML = window.__SEASON.butterflySvg();
+        const W = st.clientWidth || 300, H = st.clientHeight || 150;
+        b.style.setProperty('--x', (10 + Math.random() * (W - 40)).toFixed(0) + 'px');
+        b.style.setProperty('--y', (H * 0.42 + Math.random() * 26).toFixed(0) + 'px');
+        b.style.setProperty('--dx', ((Math.random() - 0.5) * W * 0.8).toFixed(0) + 'px');
+        b.style.setProperty('--dy', (-30 - Math.random() * 45).toFixed(0) + 'px');
+        window.__SEASON.guest(st, b, 6800);
+      }
+    }
+
+    // the season, in its own time
+    if(now > nextSeason){
+      nextSeason = now + 4 * 60000 + Math.random() * 3 * 60000;
+      const S = window.__SEASON;
+      if(S){
+        const season = S.season();
+        if(season === 'fireworks'){
+          const n = 2 + Math.floor(Math.random() * 2);
+          for(let i = 0; i < n; i++) setTimeout(() => S.firework(st), i * (600 + Math.random() * 700));
+        } else {
+          const n = 3 + Math.floor(Math.random() * 4);
+          for(let i = 0; i < n; i++) S.drift(st, season, i * (0.25 + Math.random() * 0.5));
+        }
+      }
+    }
+
+    // and a shooting star, late on
+    const h = new Date().getHours();
+    if((h >= 18 || h < 2) && now > nextStar){
+      nextStar = now + 20000 + Math.random() * 30000;
+      if(window.__SEASON){
+        window.__SEASON.streak(st);
+        if(Math.random() < 0.3) setTimeout(() => window.__SEASON.streak(st), 700 + Math.random() * 600);
+      }
+    }
+  }
+
+  function reduced(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function startDog(){
+    if(dogTimer) clearInterval(dogTimer);
+    const st = stage(), dog = $id('hmDog');
+    // The stage is built afresh on every render. Place everyone first, with
+    // the movement turned off, so nobody appears to fall in from the corner.
+    if(st && dog){
+      pups = pups.filter(p => p.el);
+      pups.forEach(p => st.appendChild(p.el));
+      const movers = [dog].concat(pups.map(p => p.el));
+      movers.forEach(el => { el.style.transition = 'none'; });
+      paintDog();
+      void dog.offsetWidth;                       // let the placement settle
+      movers.forEach(el => { el.style.transition = ''; });
+      const bub = $id('hmBubble');
+      if(bub && bubbleUntil > Date.now() && bubbleText){
+        bub.innerHTML = bubbleText + PAW_TAG;
+        bub.style.transition = 'none';
+        bub.classList.remove('hide');
+        void bub.offsetWidth;
+        bub.style.transition = '';
+      }
+    }
+    dogTimer = setInterval(dogTick, 250);
+  }
+
+  PAWS.register('home', {
+    gistFile: null,          // nothing here is worth carrying between devices
+    appId: 'home',
+    payload: null,
+    merge: () => false,
+    rerender: () => render()
+  });
+
+  render();
+  if(data.place) loadWeather(false);
+  // the day turns, the greeting with it
+  setInterval(() => { if(app.offsetParent !== null) render(); }, 60 * 1000);
+  setInterval(() => { if(data.place) loadWeather(false); }, 15 * 60 * 1000);
 })();
 
 </script>

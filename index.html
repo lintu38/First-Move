@@ -1431,13 +1431,28 @@
     justify-content:center; gap:5px; transition:background .18s ease, color .18s ease; }
   .tabbtn svg{ width:17px; height:15px; fill:currentColor; opacity:.75; }
   .tabbtn.glyph{ flex:1; padding:11px 0; }
+  /* the title carries its own paw, and takes less room */
+  .head-block{ gap:5px !important; margin-bottom:11px !important; }
+  h1{ font-size:19px !important; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .t-paw{ display:inline-flex; }
+  .t-paw svg{ width:20px; height:17px; fill:#C7AC87; opacity:.9; }
+  .sub{ font-size:12px !important; }
   .tabbtn.glyph svg{ width:19px; height:16px; }
   .tabbtn.glyph svg.cal-ico{ width:17px; height:17px; }
   /* Ready sits inside Home now, with a hairline above it */
-  .ready-block{ border-top:1px solid var(--line); padding-top:18px; margin-top:2px;
+  .ready-block{ padding-top:6px; margin-top:2px;
     display:flex; flex-direction:column; gap:16px; }
+  /* Ready keeps its own outline, from its name down to the alarms */
+  .poops{ position:absolute; inset:0; pointer-events:none; z-index:4; }
+  .poop{ position:absolute; width:11px; height:9px; transform:translate(-50%,-50%);
+    animation:poopFade .4s ease; }
+  .poop svg{ width:100%; height:auto; display:block; }
+  @keyframes poopFade{ 0%{ opacity:0; } 100%{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){ .poop{ animation:none; } }
+  .ready-frame{ display:flex; flex-direction:column; gap:24px;
+    border:1px solid var(--line); border-radius:20px; padding:16px 14px 18px; }
   .ready-title{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:14px;
-    font-weight:700; color:#A09080; letter-spacing:.02em; text-align:center; }
+    font-weight:700; color:#A09080; letter-spacing:.02em; text-align:center; margin-bottom:-8px; }
   #paneSet #paneShared{ border-top:none; padding-top:0; margin-top:0; }
   .tabbtn svg.cal-ico{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.4;
     stroke-linecap:round; stroke-linejoin:round; }
@@ -1645,7 +1660,7 @@
   .cal-bar{ display:flex; align-items:center; gap:8px; }
   .cal-bar .cal-title{ flex:1; text-align:center; font-family:'Zen Kaku Gothic New',sans-serif;
     color:var(--text); font-size:15px; }
-  .cal-bar .cal-title b{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:18px;
+  .cal-bar .cal-title b{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:15px;
     font-weight:700; color:#7C6247; }
   .cal-bar .cal-title span{ font-family:'Space Mono',monospace; font-size:12px;
     color:var(--text-faint); margin-left:5px; }
@@ -1661,10 +1676,10 @@
   .cal-views{ display:flex; gap:5px; background:var(--bg-card); border:1px solid var(--line);
     border-radius:999px; padding:4px; }
   .cal-views button{ flex:1; border:none; background:none; border-radius:999px; padding:7px 0;
-    font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; color:var(--text-faint);
-    cursor:pointer; }
-  .cal-views button.on{ background:linear-gradient(135deg,#D2BB99,var(--beige) 60%,var(--beige-deep));
-    color:var(--beige-ink); font-weight:700; }
+    font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:12.5px; font-weight:600;
+    color:var(--text-faint); cursor:pointer; }
+  .cal-views button.on{ background:radial-gradient(circle at 34% 28%, #F5EEE2, #E3D5BE 58%, #D0BB9A 100%);
+    color:#6E563D; font-weight:700; }
 
   .cal-note{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; color:#7C6247;
     background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:9px 12px; }
@@ -1803,6 +1818,20 @@
   .tt-ev .te-line b{ font-family:'Space Mono',monospace; font-size:9px; font-weight:400;
     color:var(--text-faint); }
 
+  .cal-editor .paw-mini{ width:13px; height:11px; fill:#C7AC87; vertical-align:-1px;
+    margin-right:2px; }
+  .cal-editor .day-picker button{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; }
+
+  .cal-editor .ed-field input[type=date]{ flex:1 1 130px; min-width:120px; }
+  .cal-editor .ed-field .t-in{ flex:0 0 108px; }
+  .cal-editor .ed-field input[type=number]{ flex:0 0 66px; text-align:center;
+    font-family:'Space Mono',monospace; }
+
+  /* a small dog trots along above the views */
+  .cal-walk{ position:relative; height:33px; margin:-8px 0 -14px; overflow:hidden; }
+  .cal-walk .walker{ z-index:1; }
+  .cal-editor .ed-field .toggle{ flex:0 0 auto; }
+
   /* ---------- Home ---------- */
   #paneHome{ gap:16px; }
 
@@ -1848,14 +1877,17 @@
   .scene.house{ z-index:2; }
   .scene.grass, .scene.flower{ z-index:3; opacity:.85; }
   .home-stage .walker{ z-index:5; }
+  /* on this stage a pup walks in from the side; it does not pop into place */
+  .home-stage .pup{ animation:none; }
   .home-stage .dog-bubble.sess{ font-size:12px; }
 
   .home-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
     padding:14px 16px; }
+  .home-card.wx{ padding:9px 14px; }
 
-  .home-card.wx{ display:flex; flex-direction:column; gap:10px; }
-  .wx-line{ display:flex; flex-direction:row; align-items:center; gap:14px; flex-wrap:wrap; }
-  .wx-art{ flex:0 0 54px; width:54px; height:54px; }
+  .home-card.wx{ display:flex; flex-direction:column; gap:8px; }
+  .wx-line{ display:flex; flex-direction:row; align-items:center; gap:11px; flex-wrap:wrap; }
+  .wx-art{ flex:0 0 40px; width:40px; height:40px; }
   .wx-art svg{ width:100%; height:100%; display:block; }
   .w-sun{ fill:#E7BE72; }
   .w-ray{ stroke:#E7BE72; stroke-width:2.4; stroke-linecap:round; }
@@ -1865,8 +1897,8 @@
   .w-flake{ fill:#B9CEDA; }
   .w-bolt{ fill:#D9A94F; }
   .wx-body{ flex:1; min-width:110px; }
-  .wx-label{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; color:var(--text); }
-  .wx-temp{ font-family:'Space Mono',monospace; font-size:28px; color:#4B4038; line-height:1.15; }
+  .wx-label{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:12px; color:var(--text); }
+  .wx-temp{ font-family:'Space Mono',monospace; font-size:22px; color:#4B4038; line-height:1.1; }
   .wx-sub{ display:flex; gap:10px; flex-wrap:wrap; font-family:'Space Mono',monospace;
     font-size:11px; color:var(--text-faint); margin-top:2px; }
   .wx-sub .hi{ color:#C08A72; }
@@ -1908,6 +1940,21 @@
     color:var(--text-faint); }
   .wx-hits .pop-n{ margin-left:6px; font-family:'Space Mono',monospace; font-size:9px;
     color:var(--text-faint); }
+
+  /* the alarms, tucked under today's plans */
+  .alarm-rows{ display:flex; flex-direction:column; gap:6px; margin-top:7px; }
+  .alarm-row{ display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+    background:var(--bg-card); border:1px solid var(--line); border-radius:11px;
+    padding:8px 11px; cursor:pointer; }
+  .alarm-row:hover{ background:var(--bg-soft); }
+  .alarm-row .ar-tag{ flex:0 0 auto; font-family:'Space Mono',monospace; font-size:9px;
+    letter-spacing:.08em; color:var(--text-faint); border:1px solid var(--line);
+    border-radius:999px; padding:2px 7px; }
+  .alarm-row.snoozed .ar-tag{ color:#A9605E; border-color:#E7D2CE; }
+  .alarm-row .ar-title{ flex:1; min-width:0; font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .alarm-row .ar-when{ flex:0 0 auto; font-family:'Space Mono',monospace; font-size:11px;
+    color:var(--text-muted); }
 </style>
 </head>
 <body>
@@ -1915,10 +1962,7 @@
 <div class="app" id="app">
 
   <div class="head-block">
-    <h1>One Step at a Time</h1>
-    <div class="paw-mark">
-      <svg viewBox="1.5 1 23 16" aria-hidden="true"><g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g><g transform="translate(9,0.5) scale(0.42)"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></g></svg>
-    </div>
+    <h1>One<span class="t-paw"><svg viewBox="0 0 40 34" aria-hidden="true"><ellipse cx="20" cy="25" rx="8.6" ry="7"/><ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/><ellipse cx="16.5" cy="8" rx="3.7" ry="5"/><ellipse cx="24.5" cy="8" rx="3.7" ry="5"/><ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg></span>Step at a Time</h1>
     <div class="sub">Plan the day, take the first step.</div>
   </div>
 
@@ -1932,7 +1976,6 @@
   <div class="pane" id="paneHome" hidden>
     <div id="homeTop"><div class="loading">Loading…</div></div>
     <div class="ready-block">
-      <div class="ready-title">Ready When You Are</div>
       <div class="pane" id="paneFm"><div class="loading">Loading…</div></div>
     </div>
   </div>
@@ -5690,7 +5733,7 @@ PAWS.load();
         if(data.phase === 'ready' && data.armed && data.armed.taskId === t.id) return;
         notify('時間になりました', `${t.label} — ${t.time}`);
         armTask(t, last.getTime(), true);
-        PAWS.setTab('fm');          // bring the countdown into view
+        showReady();                // bring the countdown into view
         return;
       }
     }
@@ -5815,16 +5858,53 @@ PAWS.load();
     el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px) rotate(${(a*180/Math.PI+90).toFixed(1)}deg)`;
   }
 
+  const POOP_SVG = '<svg viewBox="0 0 14 12" aria-hidden="true">'
+    + '<ellipse cx="7" cy="9.4" rx="5.4" ry="2.2" fill="#8A6C4F"/>'
+    + '<ellipse cx="7" cy="6.6" rx="3.9" ry="1.9" fill="#96775A"/>'
+    + '<ellipse cx="7" cy="4.2" rx="2.3" ry="1.6" fill="#A2846A"/></svg>';
+  // a small heap behind and below the dog, which stands at twelve facing right
+  const POOP_SPOTS = [[-15,12],[-25,16],[-9,21],[-32,10],[-20,26],[-36,22],[-6,30],[-29,32]];
+
+  // One as soon as the goal is passed, then another every ten minutes.
+  function poopCount(){
+    if(data.phase !== 'ready' || !data.armed) return 0;
+    const over = armedElapsed() - (data.armed.goalSec || 300);
+    if(over <= 0) return 0;
+    return Math.min(POOP_SPOTS.length, 1 + Math.floor(over / 600));
+  }
+  function paintPoops(){
+    const box = $id('fmPoops');
+    if(!box) return;
+    const n = poopCount();
+    if(box.childElementCount === n) return;
+    const cx = DIAL_SIZE/2, cy = DIAL_SIZE/2 - (DIAL_R + FEET);
+    box.innerHTML = POOP_SPOTS.slice(0, n).map(o =>
+      `<span class="poop" style="left:${(cx + o[0]).toFixed(0)}px; top:${(cy + o[1]).toFixed(0)}px">${POOP_SVG}</span>`
+    ).join('');
+  }
+
+  function ringDash(st, c){
+    const len = st.over > 0 ? c * st.over : c * (1 - st.progress);
+    return len.toFixed(1) + ' ' + c.toFixed(1);
+  }
+  function ringOffset(st, c){
+    return st.over > 0 ? '0' : (-c * st.progress).toFixed(1);
+  }
+
   function dialState(){
     if(data.phase === 'ready' && data.armed){
       const goal = data.armed.goalSec || 300;
       const el = armedElapsed();
       const left = goal - el;
       const p = el / goal;
+      // Before the goal the colour drains away; after it a red arc grows
+      // clockwise from twelve — one full lap for an hour over.
+      const over = Math.max(0, -left);
       return {
         main: left >= 0 ? fmtElapsed(left) : '+' + fmtElapsed(-left),
         label: left >= 0 ? 'get moving' : 'over goal',
-        progress: Math.min(Math.max(p,0), 1),
+        over: over > 0 ? Math.min(over / 3600, 1) : 0,
+        progress: Math.min(Math.max(p, 0), 1),
         raw: p,
         color: ringColor(p, typeColor(data.armed.type)),
         live: true
@@ -5871,8 +5951,8 @@ PAWS.load();
         <circle class="ring-track" cx="130" cy="130" r="108" fill="none" stroke-width="8"/>
         <circle class="ring-fill" cx="130" cy="130" r="108" fill="none" stroke-width="8"
                 stroke="${st.color}"
-                stroke-dasharray="${(c*(1-st.progress)).toFixed(1)} ${c.toFixed(1)}"
-                stroke-dashoffset="${(-c*st.progress).toFixed(1)}"/>
+                stroke-dasharray="${ringDash(st, c)}"
+                stroke-dashoffset="${ringOffset(st, c)}"/>
       </svg>
       <div class="dial-center">
         <div class="type-badge" style="color:${typeColor(a.type)}">${typeIcon(a.type)}</div>
@@ -5882,6 +5962,7 @@ PAWS.load();
         <div class="dial-plan">予定 ${fmtClock(a.planned)} · 経過 ${fmtElapsed(armedElapsed())}</div>
       </div>
       <div class="walker still" id="fmWalker">${DOG_SVG}</div>
+      <div class="poops" id="fmPoops"></div>
       <div class="dog-bubble hide">${barkText}${PAW_TAG}</div>
       <div class="ring-bfly" id="fmBfly"><svg viewBox="0 0 20 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g class="wing"><ellipse cx="6" cy="7" rx="4.6" ry="5.4" fill="#F2D24B" opacity="0.92"/><ellipse cx="14" cy="7" rx="4.6" ry="5.4" fill="#F7DF74" opacity="0.92"/><ellipse cx="6.6" cy="12.6" rx="3.2" ry="3.6" fill="#EFC93B" opacity="0.88"/><ellipse cx="13.4" cy="12.6" rx="3.2" ry="3.6" fill="#F5D95E" opacity="0.88"/></g><rect x="9.3" y="5" width="1.4" height="9" rx="0.7" fill="#8A6C4F"/></svg></div>
     </div>`;
@@ -6288,6 +6369,8 @@ PAWS.load();
     const s = stats();
 
     app.innerHTML = `
+      <div class="ready-frame">
+      <div class="ready-title">Ready When You Are</div>
 
       ${data.phase === 'idle' ? renderTypeRow() : ''}
       ${data.phase === 'idle' && data.snoozed ? renderSnoozeNotice() : ''}
@@ -6302,6 +6385,7 @@ PAWS.load();
         </div>
         ${editId !== null ? renderEditor() + '<div style="height:10px"></div>' : ''}
         ${renderTasks()}
+      </div>
       </div>
 
 
@@ -6498,6 +6582,7 @@ PAWS.load();
 
     const w = $id('fmWalker');
     if(w){ placeOnRing(w, 0); w.className = 'walker still'; }
+    paintPoops();
     placeFly($id('fmBfly'), Math.min(dialState().raw, 1));
   }
 
@@ -6556,8 +6641,8 @@ PAWS.load();
     const glow = $q('.glow');
     if(fill){
       fill.setAttribute('stroke', st.color);
-      fill.setAttribute('stroke-dasharray', (c*(1-st.progress)).toFixed(1) + ' ' + c.toFixed(1));
-      fill.setAttribute('stroke-dashoffset', (-c*st.progress).toFixed(1));
+      fill.setAttribute('stroke-dasharray', ringDash(st, c));
+      fill.setAttribute('stroke-dashoffset', ringOffset(st, c));
     }
     if(clock) clock.textContent = st.main;
     if(label) label.textContent = st.label;
@@ -6569,6 +6654,7 @@ PAWS.load();
     if(goBtn){ goBtn.style.background = go.background; goBtn.style.boxShadow = go.shadow; }
     $qa('.halo').forEach(h => { h.style.borderColor = go.halo; });
     placeFly($id('fmBfly'), Math.min(st.raw, 1));
+    paintPoops();
 
     // five seconds of talking, five of quiet, then something new
     const bub = $q('.dog-bubble');
@@ -6703,7 +6789,7 @@ PAWS.load();
     if(!quiet){
       playSnoozeAlert();
       notify('そろそろ、はじめましょう', data.armed.label);
-      PAWS.setTab('fm');
+      showReady();
     }
   }
 
@@ -6791,6 +6877,40 @@ PAWS.load();
       label: best.task.label,
       type: best.task.type,
       today: dayKey5(best.when) === dayKey5(now)
+    };
+  };
+
+  // Ready lives inside Today now, so 'go there' means scroll to it.
+  function showReady(){
+    PAWS.setTab('fm');
+    setTimeout(() => {
+      const el = document.getElementById('paneFm');
+      if(el) el.scrollIntoView({ block:'start', behavior:'smooth' });
+    }, 120);
+  }
+  window.__showReady = showReady;
+
+  // What Today shows under the plans: the next alarm, and any snooze.
+  window.__alarmPeek = function(){
+    const now = new Date();
+    let next = null;
+    (data.tasks || []).forEach(t => {
+      if(t.on === false || isSpent(t)) return;
+      const n = nextRun(t, now);
+      if(!n) return;
+      if(!next || n < next.when) next = { when:n, task:t };
+    });
+    const s = data.snoozed;
+    return {
+      next: next ? {
+        time: next.task.time, label: next.task.label, type: next.task.type,
+        today: dayKey5(next.when) === dayKey5(now)
+      } : null,
+      snoozed: s ? {
+        label: s.label, type: s.type,
+        at: s.at, left: Math.max(0, Math.round((s.at - Date.now()) / 1000))
+      } : null,
+      armed: (data.phase === 'ready' && data.armed) ? { label: data.armed.label } : null
     };
   };
 
@@ -7130,6 +7250,13 @@ PAWS.load();
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   }
+  const PAW_MINI = '<svg class="paw-mini" viewBox="0 0 40 34" aria-hidden="true">'
+    + '<ellipse cx="20" cy="25" rx="8.6" ry="7"/>'
+    + '<ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/>'
+    + '<ellipse cx="16.5" cy="8" rx="3.7" ry="5"/>'
+    + '<ellipse cx="24.5" cy="8" rx="3.7" ry="5"/>'
+    + '<ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg>';
+
   function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   // A wash of the type's colour, for the inside of a box whose edge is that colour.
@@ -7151,16 +7278,49 @@ PAWS.load();
 
   function events(){ return data.events || (data.events = []); }
 
-  // Does this event land on that day? Repeats grow forward from its own date.
+  const DAY_MS = 86400000;
+  const lastOfMonth = d => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daysApart = (a, b) => Math.round((midnight(b) - midnight(a)) / DAY_MS);
+
+  // How many days one run of the plan lasts: start date → finish date.
+  function spanOf(ev){
+    if(!ev.endDate || ev.endDate <= ev.date) return 0;
+    return Math.max(0, Math.min(365, daysApart(parseKey(ev.date), parseKey(ev.endDate))));
+  }
+  const repeatDays = ev =>
+    (Array.isArray(ev.days) && ev.days.length) ? ev.days : [idxOf(parseKey(ev.date))];
+
+  // Does a run of this plan begin on that day?
+  function startsOn(ev, d){
+    const a = parseKey(ev.date);
+    if(midnight(d) < midnight(a)) return false;
+    const rep = ev.repeat || 'none';
+    if(rep === 'none')  return keyOf(d) === ev.date;
+    if(rep === 'week'){
+      if(repeatDays(ev).indexOf(idxOf(d)) < 0) return false;
+      const every = Math.max(1, ev.every || 1);
+      const weeks = Math.round(daysApart(mondayOf(a), mondayOf(d)) / 7);
+      return weeks >= 0 && weeks % every === 0;
+    }
+    if(rep === 'month'){
+      if(ev.monthEnd) return d.getDate() === lastOfMonth(d);
+      const want = Math.min(31, Math.max(1, ev.monthDay || a.getDate()));
+      // a 31st in a short month falls on that month's last day instead
+      return d.getDate() === Math.min(want, lastOfMonth(d));
+    }
+    if(rep === 'year')  return a.getDate() === d.getDate() && a.getMonth() === d.getMonth();
+    return false;
+  }
+
+  // Does this plan cover that day — on its own, or partway through a run?
   function onDay(ev, dayKey){
     if(!ev.date) return false;
-    if(ev.date === dayKey) return true;
-    if(!ev.repeat || ev.repeat === 'none') return false;
-    if(dayKey < ev.date) return false;
-    const a = parseKey(ev.date), b = parseKey(dayKey);
-    if(ev.repeat === 'week')  return idxOf(a) === idxOf(b);
-    if(ev.repeat === 'month') return a.getDate() === b.getDate();
-    if(ev.repeat === 'year')  return a.getDate() === b.getDate() && a.getMonth() === b.getMonth();
+    const span = spanOf(ev);
+    const d = parseKey(dayKey);
+    for(let back = 0; back <= span; back++){
+      if(startsOn(ev, addDays(d, -back))) return true;
+    }
     return false;
   }
   function eventsOn(dayKey){
@@ -7175,10 +7335,21 @@ PAWS.load();
     return e.start || '';
   }
   function repeatLabel(e){
-    return e.repeat === 'week' ? '毎週' + WD[idxOf(parseKey(e.date))] + '曜'
-         : e.repeat === 'month' ? '毎月' + parseKey(e.date).getDate() + '日'
-         : e.repeat === 'year' ? '毎年' + (parseKey(e.date).getMonth()+1) + '/' + parseKey(e.date).getDate()
-         : '';
+    if(e.repeat === 'week'){
+      const every = Math.max(1, e.every || 1);
+      const head = every === 1 ? '毎週' : every + '週ごと ';
+      return head + repeatDays(e).slice().sort((a,b)=>a-b).map(i => WD[i]).join('') + '曜';
+    }
+    if(e.repeat === 'month') return e.monthEnd ? '毎月末日'
+      : '毎月' + (e.monthDay || parseKey(e.date).getDate()) + '日';
+    if(e.repeat === 'year')  return '毎年' + (parseKey(e.date).getMonth()+1) + '/' + parseKey(e.date).getDate();
+    return '';
+  }
+  function spanLabel(e){
+    const n = spanOf(e);
+    if(!n) return '';
+    const b = parseKey(e.endDate);
+    return '〜' + (b.getMonth()+1) + '/' + b.getDate() + '（' + (n + 1) + '日間）';
   }
 
   function save(){ PAWS.save(); }
@@ -7296,6 +7467,7 @@ PAWS.load();
         <span class="ev-meta">
           <i style="background:${typeColor(e.type)}"></i>${esc(typeLabel(e.type))}
           ${e.repeat && e.repeat !== 'none' ? '<span>·</span><span>' + esc(repeatLabel(e)) + '</span>' : ''}
+          ${spanOf(e) ? '<span>·</span><span>' + esc(spanLabel(e)) + '</span>' : ''}
           ${e.taskId ? '<span>·</span><span class="ev-sent">Alarm 登録済み</span>' : ''}
         </span>
         ${e.note ? `<span class="ev-note">${esc(e.note)}</span>` : ''}
@@ -7400,12 +7572,17 @@ PAWS.load();
       id: uid(),
       title: '',
       date: cursor,
+      endDate: cursor,
       allDay: false,
       start: '09:00',
       end: '',
       type: (typeList()[0] || {}).id,
       note: '',
-      repeat: 'none'
+      repeat: 'none',
+      every: 1,
+      days: [],
+      monthEnd: false,
+      monthDay: 0
     };
   }
 
@@ -7420,20 +7597,19 @@ PAWS.load();
         <input type="text" id="cvTitle" maxlength="40" value="${esc(t.title)}" placeholder="例: 可燃ごみ">
       </div>
       <div class="ed-field">
-        <label>日付</label>
-        <input type="date" id="cvDate" value="${esc(t.date)}">
-      </div>
-      <div class="ed-field">
         <label>終日</label>
         <button class="toggle ${t.allDay ? 'on' : ''}" id="cvAllDay">${t.allDay ? 'ON' : 'OFF'}</button>
       </div>
-      ${t.allDay ? '' : `
       <div class="ed-field">
-        <label>時間</label>
-        <input type="time" id="cvStart" value="${esc(t.start || '')}">
-        <span class="unit">→</span>
-        <input type="time" id="cvEnd" value="${esc(t.end || '')}">
-      </div>`}
+        <label>開始</label>
+        <input type="date" id="cvDate" value="${esc(t.date)}">
+        ${t.allDay ? '' : `<input type="time" class="t-in" id="cvStart" value="${esc(t.start || '')}">`}
+      </div>
+      <div class="ed-field">
+        <label>完了</label>
+        <input type="date" id="cvDateEnd" value="${esc(t.endDate || t.date)}">
+        ${t.allDay ? '' : `<input type="time" class="t-in" id="cvEnd" value="${esc(t.end || '')}">`}
+      </div>
       <div class="ed-field">
         <label>種類</label>
         <div class="type-picker">
@@ -7448,13 +7624,33 @@ PAWS.load();
             `<button data-rep="${r[0]}" class="${(t.repeat || 'none') === r[0] ? 'on' : ''}">${r[1]}</button>`).join('')}
         </div>
       </div>
+      ${t.repeat === 'week' ? `
+      <div class="ed-field">
+        <label>何週ごと</label>
+        <input type="number" id="cvEvery" min="1" max="12" value="${Math.max(1, t.every || 1)}">
+        <span class="unit">週ごと</span>
+      </div>
+      <div class="ed-field">
+        <label>曜日</label>
+        <div class="day-picker">
+          ${WD.map((d, i) => `<button data-wd="${i}" class="${repeatDays(t).indexOf(i) >= 0 ? 'on' : ''}">${d}</button>`).join('')}
+        </div>
+      </div>` : ''}
+      ${t.repeat === 'month' ? `
+      <div class="ed-field">
+        <label>毎月</label>
+        <input type="number" id="cvMonthDay" min="1" max="31" ${t.monthEnd ? 'disabled' : ''}
+               value="${t.monthDay || parseKey(t.date).getDate()}">
+        <span class="unit">日</span>
+        <button class="toggle ${t.monthEnd ? 'on' : ''}" data-mday="end">月末</button>
+      </div>` : ''}
       <div class="ed-field">
         <label>メモ</label>
         <input type="text" id="cvNote" maxlength="80" value="${esc(t.note || '')}" placeholder="任意">
       </div>
       ${t.allDay ? '' : `<div class="send-row">
         <button class="mini-btn solid" id="cvSend" ${sent ? 'disabled' : ''}>${sent ? 'Alarm に登録済み' : 'Alarm に登録する'}</button>
-        <span class="send-note">Home の Alarm に入り、その時間になるとタイマーが始まります</span>
+        <span class="send-note">${PAW_MINI}の Alarm に入り、時間になるとカウントダウンが始まります</span>
       </div>`}
       <div class="ed-actions">
         <button class="ed-save" id="cvSave">SAVE</button>
@@ -7476,8 +7672,12 @@ PAWS.load();
         <button class="cal-today" id="calToday">今日</button>
       </div>
 
+      <div class="cal-walk" id="calWalk">
+        <span class="walker" id="calDog">${window.__DOG_SVG || ''}</span>
+      </div>
+
       <div class="cal-views">
-        ${[['month','月'],['week','週'],['day','日']].map(v =>
+        ${[['month','Month'],['week','Week'],['day','Day']].map(v =>
           `<button data-view="${v[0]}" class="${view === v[0] ? 'on' : ''}">${v[1]}</button>`).join('')}
       </div>
 
@@ -7499,11 +7699,53 @@ PAWS.load();
       </div>
     `;
     bind();
+    startCalDog();
     if(scrollToEditor){
       scrollToEditor = false;
       const ed = app.querySelector('.cal-editor');
       if(ed) setTimeout(() => ed.scrollIntoView({ block:'center', behavior:'smooth' }), 30);
     }
+  }
+
+  /* ---------------- the dog above the views ---------------- */
+
+  let cdX = 0.35, cdDir = -1, cdStop = 0, cdTimer = null;
+
+  function paintCalDog(){
+    const st = $id('calWalk'), dog = $id('calDog');
+    if(!st || !dog) return;
+    const W = st.clientWidth || 300;
+    const x = 18 + cdX * (W - 36);
+    dog.className = 'walker' + (cdStop ? ' still' : '');
+    // its paws land on the top edge of the view bar
+    dog.style.transform = 'translate(' + x.toFixed(1) + 'px, 26px) scale(.8)'
+                        + (cdDir < 0 ? ' scaleX(-1)' : '');
+  }
+
+  function calDogTick(){
+    const st = $id('calWalk');
+    if(!st || st.offsetParent === null) return;
+    const now = Date.now();
+    if(cdStop){
+      if(now > cdStop) cdStop = 0;
+    } else {
+      cdX += cdDir * 0.014;
+      if(cdX <= 0){ cdX = 0; cdDir = 1; }
+      if(cdX >= 1){ cdX = 1; cdDir = -1; }
+      if(Math.random() < 0.012) cdStop = now + 3000 + Math.random() * 5000;
+    }
+    paintCalDog();
+  }
+
+  function startCalDog(){
+    const dog = $id('calDog');
+    if(dog){
+      dog.style.transition = 'none';
+      paintCalDog();
+      void dog.offsetWidth;
+      dog.style.transition = '';
+    }
+    if(!cdTimer) cdTimer = setInterval(calDogTick, 250);
   }
 
   function bind(){
@@ -7514,11 +7756,22 @@ PAWS.load();
     $qa('[data-view]').forEach(b => b.addEventListener('click', () => {
       data.view = b.dataset.view; PAWS.save(false); render();
     }));
-    $qa('[data-day]').forEach(b => b.addEventListener('click', () => {
-      cursor = b.dataset.day;
-      if(editId === 'new' && draft) draft.date = cursor;
-      render();
-    }));
+    $qa('[data-day]').forEach(b => {
+      b.addEventListener('click', () => {
+        cursor = b.dataset.day;
+        if(editId === 'new' && draft) draft.date = cursor;
+        render();
+      });
+      // a double click opens a new plan straight away
+      b.addEventListener('dblclick', ev => {
+        ev.preventDefault();
+        cursor = b.dataset.day;
+        editId = 'new';
+        draft = blankEvent();
+        scrollToEditor = true;
+        render();
+      });
+    });
     const openEditor = id => {
       const e = events().find(x => x.id === id);
       if(!e) return;
@@ -7552,7 +7805,27 @@ PAWS.load();
       if(!draft) return; readForm(); draft.type = b.dataset.ctype; render();
     }));
     $qa('[data-rep]').forEach(b => b.addEventListener('click', () => {
-      if(!draft) return; readForm(); draft.repeat = b.dataset.rep; render();
+      if(!draft) return;
+      readForm();
+      draft.repeat = b.dataset.rep;
+      if(draft.repeat === 'week' && !(draft.days || []).length){
+        draft.days = [idxOf(parseKey(draft.date))];
+      }
+      render();
+    }));
+    $qa('[data-mday]').forEach(b => b.addEventListener('click', () => {
+      if(!draft) return; readForm(); draft.monthEnd = !draft.monthEnd; render();
+    }));
+    $qa('[data-wd]').forEach(b => b.addEventListener('click', () => {
+      if(!draft) return;
+      readForm();
+      const i = parseInt(b.dataset.wd, 10);
+      const list = repeatDays(draft).slice();
+      const at = list.indexOf(i);
+      if(at >= 0){ if(list.length > 1) list.splice(at, 1); }
+      else list.push(i);
+      draft.days = list.sort((a, b2) => a - b2);
+      render();
     }));
     on('cvAllDay', () => { if(!draft) return; readForm(); draft.allDay = !draft.allDay; render(); });
     on('cvCancel', () => { editId = null; draft = null; render(); });
@@ -7565,7 +7838,24 @@ PAWS.load();
     if(!draft) return;
     const v = id => { const el = $id(id); return el ? el.value : null; };
     const t = v('cvTitle'); if(t !== null) draft.title = t;
+    const before = draft.date;
     const d = v('cvDate');  if(d) draft.date = d;
+    const de = v('cvDateEnd'); if(de !== null) draft.endDate = de;
+    // a one-day plan keeps its finish date in step with its start
+    if(d && d !== before && (!draft.endDate || draft.endDate === before || draft.endDate < d)){
+      draft.endDate = d;
+    }
+    const md = v('cvMonthDay');
+    if(md !== null){
+      let n = parseInt(md, 10);
+      if(!isNaN(n)) draft.monthDay = Math.min(31, Math.max(1, n));
+    }
+    const ev2 = v('cvEvery');
+    if(ev2 !== null){
+      let n = parseInt(ev2, 10);
+      if(isNaN(n) || n < 1) n = 1;
+      draft.every = Math.min(12, n);
+    }
     const s = v('cvStart'); if(s !== null) draft.start = s;
     const e = v('cvEnd');   if(e !== null) draft.end = e;
     const n = v('cvNote');  if(n !== null) draft.note = n;
@@ -7577,6 +7867,11 @@ PAWS.load();
     if(!draft.title || !draft.title.trim()) draft.title = '予定';
     draft.title = draft.title.trim();
     if(!draft.date) draft.date = cursor;
+    if(!draft.endDate || draft.endDate < draft.date) draft.endDate = draft.date;
+    if(draft.repeat !== 'week'){ draft.every = 1; draft.days = []; }
+    if(draft.repeat !== 'month'){ draft.monthEnd = false; delete draft.monthDay; }
+    else if(!draft.monthEnd && !draft.monthDay) draft.monthDay = parseKey(draft.date).getDate();
+    else if(!(draft.days || []).length) draft.days = [idxOf(parseKey(draft.date))];
     if(draft.allDay){ draft.start = ''; draft.end = ''; }
     draft.at = Date.now();
     const list = events();
@@ -7604,12 +7899,12 @@ PAWS.load();
     readForm();
     if(!draft.start){ note = '時間を入れてから登録してください。'; render(); return; }
     if(typeof window.__addReadyTask !== 'function'){ note = 'Alarm がまだ準備中です。'; render(); return; }
-    const weekly = draft.repeat === 'week';
+    const weekly = draft.repeat === 'week' && Math.max(1, draft.every || 1) === 1;
     const id = window.__addReadyTask({
       label: draft.title || '予定',
       type: draft.type,
       time: draft.start,
-      days: weekly ? [idxOf(parseKey(draft.date))] : [],
+      days: weekly ? repeatDays(draft).slice() : [],
       once: !weekly,
       onceDay: weekly ? null : draft.date
     });
@@ -7621,7 +7916,7 @@ PAWS.load();
     save();
     note = 'Alarm に登録しました。';
     render();
-    PAWS.setTab('fm');
+    if(window.__showReady) window.__showReady(); else PAWS.setTab('fm');
   }
 
   /* ---------------- start ---------------- */
@@ -7850,6 +8145,16 @@ PAWS.load();
     return list;
   }
 
+  function alarmPeek(){
+    try{ return window.__alarmPeek ? window.__alarmPeek() : null; }catch(e){ return null; }
+  }
+  function leftText(sec){
+    if(sec <= 0) return 'まもなく';
+    const m = Math.round(sec / 60);
+    if(m < 60) return 'あと' + m + '分';
+    return 'あと' + Math.floor(m / 60) + '時間' + (m % 60 ? (m % 60) + '分' : '');
+  }
+
   /* ---------------- render ---------------- */
 
   function greeting(){
@@ -7859,6 +8164,30 @@ PAWS.load();
     if(h < 17) return 'こんにちは';
     if(h < 22) return 'こんばんは';
     return 'こんばんは';
+  }
+
+  // The next alarm, and one put off for later, sit under the plans.
+  function alarmRows(){
+    const a = alarmPeek();
+    if(!a) return '';
+    const rows = [];
+    if(a.snoozed){
+      const c = typeOf(a.snoozed.type).color;
+      rows.push(`<button class="alarm-row snoozed" data-goready="1" style="--c:${c}">
+        <span class="ar-tag">Snoozed</span>
+        <span class="ar-title">${esc(a.snoozed.label)}</span>
+        <span class="ar-when">${esc(leftText(a.snoozed.left))}</span>
+      </button>`);
+    }
+    if(a.next){
+      const c = typeOf(a.next.type).color;
+      rows.push(`<button class="alarm-row" data-goready="1" style="--c:${c}">
+        <span class="ar-tag">Next alarm</span>
+        <span class="ar-title">${esc(a.next.label)}</span>
+        <span class="ar-when">${esc(a.next.time || '—')}${a.next.today ? '' : ' (tomorrow)'}</span>
+      </button>`);
+    }
+    return rows.length ? '<div class="alarm-rows">' + rows.join('') + '</div>' : '';
   }
 
   function render(){
@@ -7937,6 +8266,7 @@ PAWS.load();
             </button>`;
           }).join('')}
         </div>` : `<div class="empty-state">今日の予定はありません。<br>ゆっくりいきましょう。</div>`}
+        ${alarmRows()}
       </div>
     `;
 
@@ -7951,6 +8281,9 @@ PAWS.load();
       if(h) pickPlace(h);
     }));
     on('hmAll', () => PAWS.setTab('cal'));
+    $qa('[data-goready]').forEach(b => b.addEventListener('click', () => {
+      if(window.__showReady) window.__showReady();
+    }));
     $qa('[data-plan]').forEach(b => b.addEventListener('click', () => {
       if(window.__openPlan) window.__openPlan(b.dataset.plan);
       PAWS.setTab('cal');
@@ -7998,14 +8331,36 @@ PAWS.load();
     return { a:'#A6C08D', b:'#8FAC79', snow:false };   // summer green
   }
 
+  // Two different round trees: a wide fluffy one, and a tall oval one.
   function treeSvg(tone, tall){
+    return tall ? ovalTree(tone) : cloudTree(tone);
+  }
+
+  function cloudTree(tone){
     const cap = tone.snow
-      ? '<ellipse cx="20" cy="15" rx="12" ry="6" fill="#F2F4F0" opacity=".85"/>' : '';
-    return `<svg viewBox="0 0 40 ${tall ? 54 : 44}" aria-hidden="true">
-      <rect x="18" y="${tall ? 30 : 24}" width="4" height="${tall ? 24 : 20}" rx="2" fill="#B79A73"/>
-      <circle cx="20" cy="${tall ? 20 : 18}" r="13" fill="${tone.a}"/>
-      <circle cx="11" cy="${tall ? 26 : 23}" r="9" fill="${tone.b}"/>
-      <circle cx="29" cy="${tall ? 26 : 23}" r="9" fill="${tone.b}"/>
+      ? '<ellipse cx="22" cy="10.5" rx="10" ry="4.6" fill="#F2F4F0" opacity=".85"/>' : '';
+    return `<svg viewBox="0 0 44 48" aria-hidden="true">
+      <rect x="20.2" y="26" width="3.6" height="22" rx="1.8" fill="#B79A73"/>
+      <circle cx="12" cy="21" r="8" fill="${tone.b}"/>
+      <circle cx="32" cy="21" r="8" fill="${tone.b}"/>
+      <circle cx="22" cy="23" r="9" fill="${tone.a}"/>
+      <circle cx="16" cy="13" r="7.5" fill="${tone.a}"/>
+      <circle cx="28" cy="13" r="7.5" fill="${tone.a}"/>
+      ${cap}
+    </svg>`;
+  }
+
+  function ovalTree(tone){
+    const cap = tone.snow
+      ? '<path d="M20 2.5c7 0 12 6 12.6 12-3-4.6-7.4-7-12.6-7s-9.6 2.4-12.6 7C8 8.5 13 2.5 20 2.5z"'
+        + ' fill="#F2F4F0" opacity=".85"/>' : '';
+    return `<svg viewBox="0 0 40 54" aria-hidden="true">
+      <rect x="18.2" y="30" width="3.6" height="24" rx="1.8" fill="#B79A73"/>
+      <ellipse cx="20" cy="18" rx="13" ry="16" fill="${tone.a}"/>
+      <path d="M20 2c7.2 0 13 7.2 13 16s-5.8 16-13 16c5-3.4 7.6-9 7.6-16S25 5.4 20 2z"
+            fill="${tone.b}" opacity=".85"/>
+      <circle cx="14.5" cy="13" r="2.1" fill="${tone.b}" opacity=".5"/>
+      <circle cx="17" cy="24" r="1.7" fill="${tone.b}" opacity=".45"/>
       ${cap}
     </svg>`;
   }
@@ -8113,11 +8468,11 @@ PAWS.load();
     dog.className = 'walker' + (dogStop ? ' still' : '');
     dog.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px)'
                         + (dogDir < 0 ? ' scaleX(-1)' : '');
-    // the pups walk in the parent's wake
+    // the pups walk in the parent's wake, in from one edge and out the other
     pups.forEach(p => {
-      const px = Math.max(8, Math.min(W - 8, x - dogDir * p.gap));
+      const px = 26 + p.p * (W - 52);
       p.el.style.transform = 'translate(' + px.toFixed(1) + 'px, ' + (H - 13).toFixed(1) + 'px)'
-                           + (dogDir < 0 ? ' scaleX(-1)' : '');
+                           + (p.face < 0 ? ' scaleX(-1)' : '');
     });
     const bub = $id('hmBubble');
     if(bub){
@@ -8142,26 +8497,47 @@ PAWS.load();
       if(Math.random() < 0.01) dogStop = now + 3000 + Math.random() * 4000;
     }
 
-    // now and then the pups come along for a while
+    // now and then the pups trot in from one edge, stay a while, and go
     if(!pups.length && now > nextPups){
       const n = 1 + Math.floor(Math.random() * 2);
+      const from = dogDir < 0 ? 1.18 : -0.18;      // the edge behind the parent
       for(let i = 0; i < n; i++){
         const el = document.createElement('div');
         el.className = 'walker pup ' + (i ? 'p2 ' : '') + COATS[Math.floor(Math.random() * COATS.length)];
         el.innerHTML = window.__DOG_SVG || '';
         st.appendChild(el);
-        pups.push({ el: el, gap: 22 + i * 16 });
+        const pup = { el: el, gap: 0.06 + i * 0.045, p: from + (dogDir < 0 ? i * 0.09 : -i * 0.09),
+                      face: dogDir, out: false };
+        // put it at the edge before it is ever painted
+        el.style.transition = 'none';
+        pups.push(pup);
       }
+      paintDog();
+      pups.forEach(p2 => { void p2.el.offsetWidth; p2.el.style.transition = ''; });
       pupsUntil = now + 30000 + Math.random() * 40000;
     }
-    if(pups.length && now > pupsUntil){
-      pups.forEach(p => {
-        p.el.style.transition = 'opacity .8s ease';
-        p.el.style.opacity = '0';
-        setTimeout(() => p.el.remove(), 900);
+    if(pups.length && now > pupsUntil) pups.forEach(p2 => { p2.out = true; });
+
+    // each one walks towards where it is going
+    pups.forEach(p2 => {
+      const target = p2.out ? (p2.p > 0.5 ? 1.25 : -0.25) : dogX - dogDir * p2.gap;
+      const d = target - p2.p;
+      if(Math.abs(d) > 0.001){
+        p2.face = d < 0 ? -1 : 1;
+        p2.p += Math.sign(d) * Math.min(Math.abs(d), 0.024);
+      } else if(!p2.out){
+        p2.face = dogDir;
+      }
+    });
+    if(pups.length){
+      const stay = pups.filter(p2 => {
+        if(p2.out && (p2.p >= 1.2 || p2.p <= -0.2)){ p2.el.remove(); return false; }
+        return true;
       });
-      pups = [];
-      nextPups = now + 90000 + Math.random() * 120000;
+      if(stay.length !== pups.length){
+        pups = stay;
+        if(!pups.length) nextPups = now + 90000 + Math.random() * 120000;
+      }
     }
     paintDog();
 
@@ -8184,8 +8560,11 @@ PAWS.load();
 
     if(reduced()) return;
 
-    // a butterfly, from time to time
-    if(now > nextBf){
+    // butterflies belong to the daylight, shooting stars to the night
+    const hour = new Date().getHours();
+    const daytime = hour >= 5 && hour < 19;
+
+    if(daytime && now > nextBf){
       nextBf = now + 22000 + Math.random() * 30000;
       if(window.__SEASON){
         const b = document.createElement('div');
@@ -8216,9 +8595,8 @@ PAWS.load();
       }
     }
 
-    // and a shooting star, late on
-    const h = new Date().getHours();
-    if((h >= 18 || h < 2) && now > nextStar){
+    // and a shooting star, once the sky is dark
+    if(!daytime && now > nextStar){
       nextStar = now + 20000 + Math.random() * 30000;
       if(window.__SEASON){
         window.__SEASON.streak(st);

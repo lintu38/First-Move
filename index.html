@@ -1695,8 +1695,9 @@
   .cal-bar{ display:flex; align-items:center; gap:8px; }
   .cal-bar .cal-title{ flex:1; text-align:center; font-family:'Zen Kaku Gothic New',sans-serif;
     color:var(--text); font-size:15px; }
-  .cal-bar .cal-title b{ font-family:'Comfortaa','Zen Kaku Gothic New',cursive; font-size:15px;
-    font-weight:700; color:#7C6247; }
+  /* the month reads in the same hand as the year, so 「月」 stays light */
+  .cal-bar .cal-title b{ font-family:'Space Mono','Zen Kaku Gothic New',monospace; font-size:15px;
+    font-weight:400; color:#7C6247; letter-spacing:.02em; }
   .cal-bar .cal-title span{ font-family:'Space Mono',monospace; font-size:12px;
     color:var(--text-faint); margin-left:5px; }
   .cal-nav{ flex:0 0 34px; height:34px; border-radius:999px; border:1px solid var(--line);

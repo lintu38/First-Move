@@ -7849,9 +7849,6 @@ PAWS.load();
     const list = (window.__planOn ? window.__planOn(k) : []) || [];
     return list;
   }
-  function nextAlarm(){
-    return window.__nextAlarm ? window.__nextAlarm() : null;
-  }
 
   /* ---------------- render ---------------- */
 
@@ -7869,7 +7866,6 @@ PAWS.load();
     const w = data.wx;
     const s = w ? sky(w.code) : null;
     const plans = todaysPlans();
-    const alarm = nextAlarm();
 
     app.innerHTML = `
       <div class="home-stage ${skyNow().cls}" id="hmStage">
@@ -7925,16 +7921,6 @@ PAWS.load();
         ${msg ? `<div class="wx-msg">${esc(msg)}</div>` : ''}
       </div>
 
-      ${alarm ? `
-      <button class="home-card alarm" id="hmAlarm">
-        <span class="al-when">${esc(alarm.time || '—')}</span>
-        <span class="al-body">
-          <span class="al-title">${esc(alarm.label)}</span>
-          <span class="al-meta">つぎのアラーム${alarm.today ? '' : '（あす）'}</span>
-        </span>
-        <span class="al-go">Ready ↓</span>
-      </button>` : ''}
-
       <div>
         <div class="section-title">
           <span>Today's plans</span>
@@ -7965,10 +7951,6 @@ PAWS.load();
       if(h) pickPlace(h);
     }));
     on('hmAll', () => PAWS.setTab('cal'));
-    on('hmAlarm', () => {
-      const el = document.getElementById('paneFm');
-      if(el) el.scrollIntoView({ block:'start', behavior:'smooth' });
-    });
     $qa('[data-plan]').forEach(b => b.addEventListener('click', () => {
       if(window.__openPlan) window.__openPlan(b.dataset.plan);
       PAWS.setTab('cal');

@@ -1818,7 +1818,20 @@
   .home-stage{ position:relative; height:150px; margin:-4px 0 -2px; overflow:hidden;
     border-radius:14px; }
   /* the sky, and whatever is up in it */
-  /* no wash over the yard — only what hangs in the sky */
+  /* the faintest wash of the hour: it fades out at the top and at both ends,
+     so the panel itself never shows an edge */
+  .home-stage .sky{ position:absolute; inset:0; z-index:0; pointer-events:none;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%); }
+  .home-stage.day .sky{ background:linear-gradient(180deg,
+    rgba(150,199,224,0) 0%, rgba(150,199,224,.15) 30%, rgba(150,199,224,.055) 66%,
+    rgba(150,199,224,0) 100%); }
+  .home-stage.dusk .sky{ background:linear-gradient(180deg,
+    rgba(224,146,116,0) 0%, rgba(224,146,116,.16) 30%, rgba(230,172,140,.06) 66%,
+    rgba(230,172,140,0) 100%); }
+  .home-stage.night .sky{ background:linear-gradient(180deg,
+    rgba(64,84,126,0) 0%, rgba(64,84,126,.10) 30%, rgba(64,84,126,.035) 66%,
+    rgba(64,84,126,0) 100%); }
   .orb{ position:absolute; width:26px; height:26px; border-radius:999px; z-index:0;
     transform:translateX(-50%); pointer-events:none; }
   .orb.sun{ background:#F1C566; box-shadow:0 0 26px 11px rgba(241,197,102,.26); }
@@ -8059,18 +8072,16 @@ PAWS.load();
 
   // Fixed spots, so the yard looks the same every time you come home.
   const YARD = [
-    { k:'tree',   x:  6, w:44, tall:true  },
-    { k:'grass',  x: 16, w:16 },
-    { k:'flower', x: 21, w:12, c:'#E8B3C1' },
-    { k:'fir',    x: 27, w:30, tall:false },
-    { k:'house',  x: 39, w:38 },
-    { k:'grass',  x: 50, w:14 },
-    { k:'flower', x: 56, w:11, c:'#EBD08A' },
-    { k:'tree',   x: 65, w:34, tall:false },
-    { k:'grass',  x: 74, w:15 },
-    { k:'flower', x: 80, w:12, c:'#C8AFD8' },
-    { k:'fir',    x: 91, w:38, tall:true  },
-    { k:'grass',  x: 98, w:13 }
+    { k:'tree',   x:  8, w:38, tall:false },
+    { k:'grass',  x: 18, w:16 },
+    { k:'flower', x: 24, w:12, c:'#E8B3C1' },
+    { k:'grass',  x: 34, w:13 },
+    { k:'fir',    x: 42, w:44, tall:true  },
+    { k:'flower', x: 58, w:11, c:'#EBD08A' },
+    { k:'grass',  x: 66, w:15 },
+    { k:'flower', x: 78, w:12, c:'#C8AFD8' },
+    { k:'tree',   x: 88, w:43, tall:true  },
+    { k:'grass',  x: 97, w:13 }
   ];
 
   function yardHtml(){
@@ -8103,7 +8114,8 @@ PAWS.load();
 
   function skyHtml(){
     const s = skyNow();
-    return `<span class="orb ${s.orb}" style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px"></span>`;
+    return `<div class="sky"></div>
+      <span class="orb ${s.orb}" style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px"></span>`;
   }
 
   function stage(){ return $id('hmStage'); }

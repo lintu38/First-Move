@@ -8848,8 +8848,23 @@ PAWS.load();
 
   // The plans of today the dog has been asked to mention, and the ones
   // it should celebrate.
+  // A plan whose time has passed is not worth mentioning any more.
+  const toMin = t => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || ''));
+    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+  };
+  function overAlready(e){
+    if(!e || e.allDay) return false;
+    const now = new Date();
+    // a run that finishes on a later day is still going
+    if(e.endDate && e.endDate > keyOf(now)) return false;
+    const s = toMin(e.start);
+    const en = e.end ? toMin(e.end) : (s == null ? null : s + 60);
+    if(en == null) return false;
+    return (now.getHours() * 60 + now.getMinutes()) > en;
+  }
   function toTell(){
-    return todaysPlans().filter(e => e && e.tell);
+    return todaysPlans().filter(e => e && e.tell && !overAlready(e));
   }
   function toCheer(){
     return todaysPlans().filter(e => e && e.celebrate);

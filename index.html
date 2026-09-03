@@ -1965,8 +1965,28 @@
     rgba(64,84,126,0) 100%); }
   .orb{ position:absolute; width:26px; height:26px; border-radius:999px; z-index:0;
     transform:translateX(-50%); pointer-events:none; }
-  .orb.sun{ background:#F1C566; box-shadow:0 0 26px 11px rgba(241,197,102,.26); }
-  .home-stage.dusk .orb.sun{ background:#E1785C; box-shadow:0 0 24px 10px rgba(225,120,92,.28); }
+  /* the sun burns: a white heart, a warm rim, and a halo of soft rays */
+  .orb.sun{ background:radial-gradient(circle at 50% 44%, #FFFBEC 0%, #FDEBB4 34%, #F6CE72 66%, #EFB94C 100%);
+    box-shadow:0 0 0 5px rgba(246,206,114,.22), 0 0 18px 7px rgba(244,199,96,.40),
+      0 0 42px 18px rgba(244,199,96,.22);
+    animation:sunPulse 6s ease-in-out infinite; }
+  .orb.sun::before{ content:''; position:absolute; inset:-13px; border-radius:999px;
+    background:repeating-conic-gradient(from 0deg,
+      rgba(246,206,114,.42) 0deg 3.5deg, rgba(246,206,114,0) 3.5deg 18deg);
+    -webkit-mask-image:radial-gradient(circle, transparent 44%, #000 60%, transparent 88%);
+    mask-image:radial-gradient(circle, transparent 44%, #000 60%, transparent 88%);
+    animation:sunSpin 80s linear infinite; pointer-events:none; }
+  @keyframes sunPulse{ 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.09); } }
+  @keyframes sunSpin{ to{ transform:rotate(360deg); } }
+  .home-stage.dusk .orb.sun{
+    background:radial-gradient(circle at 50% 44%, #FFE7CF 0%, #F4A67F 38%, #E1785C 72%, #D2664F 100%);
+    box-shadow:0 0 0 5px rgba(225,120,92,.20), 0 0 18px 7px rgba(225,120,92,.38),
+      0 0 40px 17px rgba(225,120,92,.20); }
+  .home-stage.dusk .orb.sun::before{
+    background:repeating-conic-gradient(from 0deg,
+      rgba(233,150,116,.36) 0deg 3.5deg, rgba(233,150,116,0) 3.5deg 18deg); }
+  @media (prefers-reduced-motion: reduce){
+    .orb.sun, .orb.sun::before{ animation:none; } }
   /* the moon carries the phase it is really in */
   .orb.moon{ width:26px; height:26px; background:none; box-shadow:none;
     filter:drop-shadow(0 0 9px rgba(243,222,156,.45)); }
@@ -2507,6 +2527,12 @@ window.PAWS = (function(){
   function saveAuto(){ writeLS(AUTO_KEY, JSON.stringify({ on:autoCfg.on, everyMin:autoCfg.everyMin, at:autoCfg.at })); }
 
   function fsSupported(){ return typeof window.showDirectoryPicker === 'function'; }
+  // Inside a frame (the Tasks panel) the browser refuses to open a folder
+  // picker at all, so the app has to be opened on its own to set this up.
+  const inFrame = (function(){ try{ return window.top !== window.self; }catch(e){ return true; } })();
+  function openStandalone(){
+    window.open(location.href.split(/[?#]/)[0] + '?tab=set', '_blank', 'noopener');
+  }
 
   function idb(){
     return new Promise((res, rej) => {
@@ -2536,9 +2562,11 @@ window.PAWS = (function(){
     }catch(e){ return null; }
   }
 
+  const FRAME_MSG = 'この枠の中ではフォルダを選べません。右の「別ウィンドウで開く」から One Step を単独で開いて設定してください。';
   async function pickExportDir(){
     if(!fsSupported()){
-      autoCfg.msg = 'この端末では使えません。パソコンの Edge か Chrome でどうぞ。';
+      autoCfg.msg = inFrame ? FRAME_MSG
+        : 'この端末では使えません。パソコンの Edge か Chrome でどうぞ。';
       renderShared(); return;
     }
     try{
@@ -2550,7 +2578,14 @@ window.PAWS = (function(){
       saveAuto();
       renderShared();
       autoExport(true);
-    }catch(e){ /* the picker was closed */ }
+    }catch(e){
+      // a closed picker is not a problem; anything else deserves a word
+      const n = (e && e.name) || '';
+      if(n === 'AbortError') return;
+      autoCfg.msg = inFrame ? FRAME_MSG
+        : 'フォルダを選べませんでした（' + (n || 'エラー') + '）。ブラウザで開き直すとうまくいくことがあります。';
+      renderShared();
+    }
   }
 
   async function dirReady(ask){
@@ -2771,8 +2806,11 @@ window.PAWS = (function(){
             <button class="ed-save" id="shPickDir">フォルダを選ぶ</button>
             <button class="ed-cancel" id="shAutoNow">今すぐ書き出す</button>
             <button class="ed-cancel" id="shAutoOff">${autoCfg.on ? 'OFF にする' : 'ON にする'}</button>
+            ${inFrame ? '<button class="ed-cancel" id="shOpenTop">別ウィンドウで開く</button>' : ''}
           </div>
-          <div class="te-note">選んだフォルダに「one-step-2026-09-02.json」のような名前で保存し、同じ日は上書きします。パソコンの Edge / Chrome でのみ使えます（アプリとして開いたときが確実です）。</div>
+          <div class="te-note">選んだフォルダに「one-step-2026-09-02.json」のような名前で保存し、同じ日は上書きします。パソコンの Edge / Chrome でのみ使えます。${
+            inFrame ? 'いまは Tasks の枠の中なので、「別ウィンドウで開く」で単独のウィンドウにしてから設定してください。'
+                    : ''}</div>
         </div>
       </div>
 
@@ -2803,6 +2841,7 @@ window.PAWS = (function(){
       dn.addEventListener('blur', put);
     }
     on('shPickDir', pickExportDir);
+    on('shOpenTop', openStandalone);
     on('shAutoNow', async () => { if(await dirReady(true)) autoExport(true); else pickExportDir(); });
     on('shAutoOff', () => { autoCfg.on = !autoCfg.on; autoCfg.msg = null; saveAuto(); renderShared();
       if(autoCfg.on) autoExport(true); });
@@ -5101,7 +5140,7 @@ PAWS.load();
 
     if(phase === 'break'){
       // when the break has run its length, a bell — and a gentle question
-      if(!data.breakChimed && restElapsed() >= breakLimit()){
+      if(!data.breakChimed && thisBreak() >= breakLimit()){
         data.breakChimed = true;
         playWindBell();
         saveData();
@@ -5347,7 +5386,7 @@ PAWS.load();
 
   // A minute of lying down, then a nap, then up for the last minute.
   function breakPose(){
-    const r = restElapsed(), lim = breakLimit();
+    const r = thisBreak(), lim = breakLimit();
     if(r >= Math.max(0, lim - 60)) return 'sit';
     if(r < 60) return 'lie';
     return 'sleep';
@@ -5363,9 +5402,16 @@ PAWS.load();
   }
   function breakLimit(){ return breakMin() * 60; }
 
+  // How long THIS break has run. The pose and what the dog says start
+  // again from zero at every break, however much rest came before it.
+  function thisBreak(){
+    if(data.phase !== 'break' || !data.breakStart) return 0;
+    return (Date.now() - data.breakStart) / 1000;
+  }
+
   async function onBreakKind(min){
     data.breakMin = min;
-    if(restElapsed() < breakLimit()) data.breakChimed = false;
+    if(thisBreak() < breakLimit()) data.breakChimed = false;
     await saveData();
     render();
   }

@@ -4730,7 +4730,6 @@ PAWS.load();
     +   '</div></div>'
     +   '<div class="m-btns">'
     +     '<button id="mA">BREAK</button><button id="mB">FINISH</button>'
-    +     '<button id="mPin" title="いちばん手前に浮かべる">' + ICON.window + '</button>'
     +   '</div>'
     + '</div>';
 
@@ -4766,9 +4765,6 @@ PAWS.load();
       if(pipWin && !pipWin.closed) pipWin.close();
       if(MINI_MODE) window.close();
     });
-    const pin = g('mPin');
-    if(withPin) pin.addEventListener('click', openPip);
-    else pin.remove();
     return root;
   }
 
@@ -4910,22 +4906,11 @@ PAWS.load();
     const stl = document.createElement('style');
     stl.textContent = MINI_CSS + `
       #app{ display:none !important; }
-      .pin-note{ display:none; padding:30px 20px; text-align:center; color:#8C8073;
-        font-family:'Zen Kaku Gothic New', sans-serif; font-size:12px; line-height:1.8; }
-      body.pinned #miniHost{ display:none; }
-      body.pinned .pin-note{ display:block; }
-      .m-btns #mPin{ flex:0 0 34px; display:flex; align-items:center; justify-content:center; }
-      .m-btns #mPin svg{ width:14px; height:14px; fill:none; stroke:currentColor;
-        stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
     `;
     document.head.appendChild(stl);
     const host = document.createElement('div');
     document.body.appendChild(host);
     pageMini = miniRoot = buildMini(host, true);
-    const note = document.createElement('div');
-    note.className = 'pin-note';
-    note.innerHTML = '小窓をいちばん手前に表示中です。<br>その小窓を閉じると、ここに戻ります。';
-    document.body.appendChild(note);
     document.title = 'Timer';
     // Prefer the session of the window that opened us: the panel inside Tasks
     // keeps its own storage, so our own copy would show something else.
@@ -4945,21 +4930,47 @@ PAWS.load();
     }
   }
 
+  // The little window remembers the size and the spot you left it in.
+  const MINI_WIN_KEY = 'paw_mini_win';
+  let miniWatch = null;
+  function readMiniWin(){
+    try{ return JSON.parse(localStorage.getItem(MINI_WIN_KEY)) || null; }catch(e){ return null; }
+  }
+  function saveMiniWin(o){
+    try{ localStorage.setItem(MINI_WIN_KEY, JSON.stringify(o)); }catch(e){}
+  }
+  function watchMiniWin(w){
+    if(miniWatch) clearInterval(miniWatch);
+    miniWatch = setInterval(() => {
+      try{
+        if(!w || w.closed){ clearInterval(miniWatch); miniWatch = null; return; }
+        if(w.outerWidth > 80 && w.outerHeight > 80){
+          saveMiniWin({ w: w.outerWidth, h: w.outerHeight, x: w.screenX, y: w.screenY });
+        }
+      }catch(e){ clearInterval(miniWatch); miniWatch = null; }
+    }, 2000);
+  }
+
   function openMini(){
     if(data.phase !== 'working' && data.phase !== 'break'){
       alert('計測を始めてから開いてください。');
       return;
     }
-    if(window.top !== window.self || MINI_MODE){
-      // Inside the Tasks panel. A framed page cannot float a window, so give
-      // it a page of its own that can.
-      const url = location.href.split(/[?#]/)[0] + '?mini=1';
-      const w = window.open(url, 'pawMini', 'width=206,height=278,menubar=no,toolbar=no,location=no,status=no');
-      if(w) w.focus();
-      else alert('小窓がブロックされました。ポップアップを許可してから、もう一度どうぞ。');
-      return;
+    const g = readMiniWin() || {};
+    const w = Math.max(180, Math.min(1200, g.w || 206));
+    const h = Math.max(200, Math.min(1200, g.h || 278));
+    let feat = 'width=' + w + ',height=' + h + ',menubar=no,toolbar=no,location=no,status=no';
+    if(typeof g.x === 'number' && typeof g.y === 'number'){
+      feat += ',left=' + Math.max(0, Math.round(g.x)) + ',top=' + Math.max(0, Math.round(g.y));
     }
-    openPip();
+    const url = location.href.split(/[?#]/)[0] + '?mini=1';
+    const win = window.open(url, 'pawMini', feat);
+    if(win){
+      win.focus();
+      watchMiniWin(win);
+    } else {
+      alert('小窓がブロックされました。ポップアップを許可してから、もう一度どうぞ。');
+    }
   }
 
   /* ---------------- tick ---------------- */

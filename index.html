@@ -1932,6 +1932,7 @@
   .cal-cell .chip.join-l{ border-left:none; margin-left:-4px; padding-left:5px; }
   .cal-cell .chip.join-r{ border-right:none; margin-right:-4px; padding-right:5px; }
   .cal-cell .chip.join-l .ct:empty{ display:none; }
+  .cal-cell .chip.ghost{ visibility:hidden; border-color:transparent; background:none; }
 
   /* ---------- Home ---------- */
   #paneHome{ gap:16px; }
@@ -7954,36 +7955,92 @@ PAWS.load();
 
   /* ---------------- the month ---------------- */
 
+  // One chip: a plan as it looks inside a day cell.
+  function chipHtml(e, d, k){
+    const run = isRun(e);
+    const joinL = run && onDay(e, keyOf(addDays(d, -1)));
+    const joinR = run && onDay(e, keyOf(addDays(d, 1)));
+    const head = !joinL || idxOf(d) === 0;          // the name shows again each week
+    const cls = 'chip' + (joinL ? ' join-l' : '') + (joinR ? ' join-r' : '');
+    return `<span class="${cls}" data-chip="${esc(e.id)}"
+      style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}"
+      title="${esc(dayTimeText(e, k) + ' ' + e.title)}">
+      <span class="ct">${joinL ? '&nbsp;' : esc(e.allDay ? '終日' : (e.start || '')) || '&nbsp;'}</span>
+      <span class="cn"><i></i>${head ? esc(e.title) : '&nbsp;'}</span>
+    </span>`;
+  }
+  // An empty slot, so a plan that runs on keeps the same line all week.
+  const CHIP_GAP = '<span class="chip ghost"><span class="ct">&nbsp;</span>'
+    + '<span class="cn">&nbsp;</span></span>';
+
+  // A week of cells, with every run of days given a line of its own.
+  function weekCells(days, cur, tk){
+    const keys = days.map(keyOf);
+    const lists = keys.map(k => eventsOn(k));
+    const lanes = [];
+    const ensure = l => { while(lanes.length <= l) lanes.push(new Array(7).fill(null)); };
+    const free = (l, from, to) => {
+      ensure(l);
+      for(let i = from; i <= to; i++) if(lanes[l][i]) return false;
+      return true;
+    };
+    // the runs take their line first, the longest ones before the rest
+    const runs = [];
+    const seen = new Set();
+    keys.forEach((k, i) => lists[i].forEach(e => {
+      if(!isRun(e)) return;
+      const tag = e.id + '|' + runStartKey(e, k);
+      if(seen.has(tag)) return;
+      seen.add(tag);
+      let from = i, to = i;
+      while(from > 0 && lists[from - 1].some(x => x.id === e.id)) from--;
+      while(to < 6 && lists[to + 1].some(x => x.id === e.id)) to++;
+      runs.push({ e: e, from: from, to: to });
+    }));
+    runs.sort((a, b) => (b.to - b.from) - (a.to - a.from) || a.from - b.from);
+    runs.forEach(r => {
+      let l = 0;
+      while(!free(l, r.from, r.to)) l++;
+      for(let i = r.from; i <= r.to; i++) lanes[l][i] = r.e;
+    });
+    // then everything that lasts a single day
+    keys.forEach((k, i) => lists[i].forEach(e => {
+      if(isRun(e)) return;
+      let l = 0;
+      ensure(l);
+      while(lanes[l][i]){ l++; ensure(l); }
+      lanes[l][i] = e;
+    }));
+
+    return days.map((d, i) => {
+      const k = keys[i];
+      const other = d.getMonth() !== cur.getMonth();
+      let last = -1;
+      lanes.forEach((row, l) => { if(row[i]) last = l; });
+      let chips = '';
+      for(let l = 0; l <= last; l++){
+        const e = lanes[l][i];
+        chips += e ? chipHtml(e, d, k) : CHIP_GAP;
+      }
+      return `<button class="cal-cell ${other ? 'other' : ''} ${k === cursor ? 'sel' : ''}" data-day="${k}">
+        <span class="dnum ${k === tk ? 'today' : ''} ${idxOf(d) === 5 ? 'sat' : ''} ${idxOf(d) === 6 ? 'sun' : ''}">${d.getDate()}</span>
+        <span class="chips">${chips}</span>
+      </button>`;
+    }).join('');
+  }
+
   function renderMonth(){
     const cur = parseKey(cursor);
     const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
     const start = mondayOf(first);
+    const monthEnd = new Date(cur.getFullYear(), cur.getMonth() + 1, 0);
     const tk = todayKey();
     let cells = '';
-    for(let i = 0; i < 42; i++){
-      const d = addDays(start, i);
-      const k = keyOf(d);
-      const other = d.getMonth() !== cur.getMonth();
-      const list = eventsOn(k);      // every plan of the day is shown
-      cells += `<button class="cal-cell ${other ? 'other' : ''} ${k === cursor ? 'sel' : ''}" data-day="${k}">
-        <span class="dnum ${k === tk ? 'today' : ''} ${idxOf(d) === 5 ? 'sat' : ''} ${idxOf(d) === 6 ? 'sun' : ''}">${d.getDate()}</span>
-        <span class="chips">
-          ${list.map(e => {
-            const run = isRun(e);
-            const joinL = run && onDay(e, keyOf(addDays(d, -1)));
-            const joinR = run && onDay(e, keyOf(addDays(d, 1)));
-            const head = !joinL || idxOf(d) === 0;
-            const cls = 'chip' + (joinL ? ' join-l' : '') + (joinR ? ' join-r' : '');
-            return `<span class="${cls}" data-chip="${esc(e.id)}"
-              style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}"
-              title="${esc(dayTimeText(e, k) + ' ' + e.title)}">
-              <span class="ct">${joinL ? '&nbsp;' : esc(e.allDay ? '終日' : (e.start || '')) || '&nbsp;'}</span>
-              <span class="cn"><i></i>${head ? esc(e.title) : '&nbsp;'}</span>
-            </span>`;
-          }).join('')}
-        </span>
-      </button>`;
-      if(i % 7 === 6 && d >= new Date(cur.getFullYear(), cur.getMonth() + 1, 0) && i >= 27) break;
+    for(let w = 0; w < 6; w++){
+      const days = [];
+      for(let i = 0; i < 7; i++) days.push(addDays(start, w * 7 + i));
+      cells += weekCells(days, cur, tk);
+      if(days[6] >= monthEnd && w >= 3) break;
     }
     return `<div class="cal-grid">
       <div class="cal-wd">${WD.map((w, i) => `<span class="${i===5?'sat':''} ${i===6?'sun':''}">${w}</span>`).join('')}</div>
@@ -8146,7 +8203,7 @@ PAWS.load();
       days: [],
       cont: true,
       celebrate: false,
-      tell: false,
+      tell: true,
       monthEnd: false,
       monthDay: 0
     };
@@ -8219,14 +8276,14 @@ PAWS.load();
           : '期間中、毎日おなじ時間に'}</span>
       </div>` : ''}
       <div class="ed-field">
-        <label>お祝い</label>
-        <button class="toggle ${t.celebrate ? 'on' : ''}" id="cvCheer">${t.celebrate ? 'ON' : 'OFF'}</button>
-        <span class="unit">誕生日など</span>
-      </div>
-      <div class="ed-field">
         <label>${esc(PAWS.dogName())}に伝える</label>
         <button class="toggle ${t.tell ? 'on' : ''}" id="cvTell">${t.tell ? 'ON' : 'OFF'}</button>
         <span class="unit">ときどき話します</span>
+      </div>
+      <div class="ed-field">
+        <label>お祝い</label>
+        <button class="toggle ${t.celebrate ? 'on' : ''}" id="cvCheer">${t.celebrate ? 'ON' : 'OFF'}</button>
+        <span class="unit">誕生日など</span>
       </div>
       <div class="ed-field">
         <label>メモ</label>

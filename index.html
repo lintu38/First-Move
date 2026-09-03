@@ -1451,6 +1451,32 @@
   .sync-fields .rep-picker button.on{ background:var(--bg-card-hover); border-color:#E0D3BF;
     color:var(--text); font-weight:700; }
 
+  /* choosing a colour: a palette that stays open until you pick */
+  .te-swatch{ flex:0 0 30px; width:30px; height:30px; border-radius:9px; cursor:pointer;
+    border:1px solid rgba(0,0,0,.08); box-shadow:inset 0 -2px 6px rgba(0,0,0,.08); padding:0; }
+  .color-grid{ display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:9px 10px; margin-top:7px; }
+  .color-grid button{ width:26px; height:26px; border-radius:8px; cursor:pointer; padding:0;
+    border:1px solid rgba(0,0,0,.07); }
+  .color-grid button.on{ outline:2px solid #7C6247; outline-offset:2px; }
+  .te-custom{ display:inline-flex; align-items:center; gap:6px; margin-left:2px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:11px; color:var(--text-faint); }
+  .te-custom input[type=color]{ width:30px; height:26px; padding:0; border:1px solid var(--line);
+    border-radius:7px; background:none; }
+  /* which tabs show this type as a button */
+  .te-vis{ display:flex; align-items:center; gap:6px; margin:7px 0 2px 34px; flex-wrap:wrap; }
+  .te-vis span{ font-family:'Zen Kaku Gothic New',sans-serif; font-size:10.5px; color:var(--text-faint); }
+  .te-vis button{ display:inline-flex; align-items:center; gap:5px;
+    border:1px solid var(--line); background:var(--bg-card); border-radius:999px;
+    padding:4px 11px; cursor:pointer; font-family:'Space Mono',monospace; font-size:10px;
+    letter-spacing:.06em; color:var(--text-faint); }
+  .te-vis .vis-paw{ width:14px; height:12px; fill:currentColor; }
+  .te-vis .vis-timer{ width:12px; height:12px; fill:none; stroke:currentColor;
+    stroke-width:1.4; stroke-linecap:round; }
+  .te-vis button.on{ background:var(--bg-card-hover); border-color:#E0D3BF; color:var(--text);
+    font-weight:700; }
+
   /* a sitting dog, wherever it sits: back end down, chest up, hind legs folded */
   .walker.sit .pose{ transform-box:view-box; transform-origin:24px 26px;
     transform:rotate(-20deg); }
@@ -1902,6 +1928,11 @@
   .cal-ev .ev-cheer{ color:#C08A72; }
   .cal-ev .ev-tell{ color:#7C9A78; }
 
+  /* a plan that runs over several days joins up across the cells */
+  .cal-cell .chip.join-l{ border-left:none; margin-left:-4px; padding-left:5px; }
+  .cal-cell .chip.join-r{ border-right:none; margin-right:-4px; padding-right:5px; }
+  .cal-cell .chip.join-l .ct:empty{ display:none; }
+
   /* ---------- Home ---------- */
   #paneHome{ gap:16px; }
 
@@ -2287,6 +2318,20 @@ window.PAWS = (function(){
   let syncMsg  = null;
   let syncBusy = false;
   let syncOpen = false;
+  let colorPickerFor = null;
+  const PAW_ONE = '<svg class="vis-paw" viewBox="0 0 40 34" aria-hidden="true">'
+    + '<ellipse cx="20" cy="25" rx="8.6" ry="7"/>'
+    + '<ellipse cx="9.5" cy="14.5" rx="4" ry="5.2" transform="rotate(-18 9.5 14.5)"/>'
+    + '<ellipse cx="16.5" cy="8" rx="3.7" ry="5"/>'
+    + '<ellipse cx="24.5" cy="8" rx="3.7" ry="5"/>'
+    + '<ellipse cx="31" cy="14.5" rx="4" ry="5.2" transform="rotate(18 31 14.5)"/></svg>';
+  const TIMER_ICO = '<svg class="vis-timer" viewBox="0 0 16 16" aria-hidden="true">'
+    + '<circle cx="8" cy="9.2" r="5.6"/><path d="M8 9.2V6.2"/>'
+    + '<path d="M6.2 1.8h3.6"/><path d="M12.6 4.4l1-1"/></svg>';
+  // a palette that matches the rest of the app
+  const SWATCHES = ['#46AFC2','#4C9AA8','#6FA8DC','#8FB4C4','#7FB3AC','#7C9A78','#9BB584',
+                    '#A8C075','#D3BA55','#E7BE72','#D2A25C','#C9913F','#C08A72','#C7929F',
+                    '#C4514A','#AB5F63','#9A8FC0','#8A6C4F','#B9AFA5','#7C6247'];
   let pushTimer = null;
 
   function loadSync(){
@@ -2628,14 +2673,27 @@ window.PAWS = (function(){
             <div class="te-item" data-shrow="${esc(t.id)}">
               <div class="te-row">
                 <button class="te-grip" data-shgrip="${esc(t.id)}" title="ドラッグで並べ替え">${GRIP}</button>
-                <input type="color" value="${esc(t.color)}" data-shcolor="${esc(t.id)}">
+                <button class="te-swatch" data-shcolorbtn="${esc(t.id)}"
+                        style="background:${esc(t.color)}" title="色を選ぶ"></button>
                 <button class="te-icon" data-shiconbtn="${esc(t.id)}" style="color:${esc(t.color)}" title="アイコンを選ぶ">${typeIcon(t)}</button>
                 <input type="text" value="${esc(t.label)}" maxlength="12" data-shlabel="${esc(t.id)}">
                 <button class="te-del" data-shdel="${esc(t.id)}" ${list.length <= 1 ? 'disabled' : ''} title="削除">×</button>
               </div>
+              ${colorPickerFor === t.id ? `<div class="color-grid">
+                ${SWATCHES.map(c => `<button data-shsetcolor="${esc(t.id)}" data-c="${c}"
+                    class="${t.color.toLowerCase() === c.toLowerCase() ? 'on' : ''}"
+                    style="background:${c}"></button>`).join('')}
+                <label class="te-custom">自由に
+                  <input type="color" value="${esc(t.color)}" data-shcolor="${esc(t.id)}"></label>
+              </div>` : ''}
               ${iconPickerFor === t.id ? `<div class="icon-grid">
                 ${keys.map(k => `<button data-shseticon="${esc(t.id)}" data-key="${k}" class="${t.icon === k ? 'on' : ''}">${TYPE_ICONS_REF[k]}</button>`).join('')}
               </div>` : ''}
+              <div class="te-vis">
+                <span>ボタンを出す</span>
+                <button data-shvis="${esc(t.id)}" data-k="fm" class="${t.showFm === false ? '' : 'on'}">${PAW_ONE}Get Set</button>
+                <button data-shvis="${esc(t.id)}" data-k="ss" class="${t.showSs === false ? '' : 'on'}">${TIMER_ICO}Session</button>
+              </div>
             </div>
           `).join('')}
           <button class="te-add" id="shTypeAdd">+ 種類を追加</button>
@@ -2760,13 +2818,29 @@ window.PAWS = (function(){
       const el = sharedEl.querySelector('#' + id);
       if(el) el.addEventListener('change', () => { readFields(); saveSync(); renderShared(); });
     });
+    sharedEl.querySelectorAll('[data-shcolorbtn]').forEach(b =>
+      b.addEventListener('click', () => {
+        colorPickerFor = colorPickerFor === b.dataset.shcolorbtn ? null : b.dataset.shcolorbtn;
+        iconPickerFor = null;
+        renderShared();
+      }));
+    sharedEl.querySelectorAll('[data-shsetcolor]').forEach(b =>
+      b.addEventListener('click', () => { colorPickerFor = null; editType(b.dataset.shsetcolor, { color:b.dataset.c }); }));
     sharedEl.querySelectorAll('[data-shcolor]').forEach(i =>
-      i.addEventListener('change', () => editType(i.dataset.shcolor, { color:i.value })));
+      i.addEventListener('change', () => { colorPickerFor = null; editType(i.dataset.shcolor, { color:i.value }); }));
+    sharedEl.querySelectorAll('[data-shvis]').forEach(b =>
+      b.addEventListener('click', () => {
+        const t2 = root.types.find(x => x.id === b.dataset.shvis);
+        if(!t2) return;
+        const key = b.dataset.k === 'fm' ? 'showFm' : 'showSs';
+        editType(b.dataset.shvis, { [key]: t2[key] === false });
+      }));
     sharedEl.querySelectorAll('[data-shlabel]').forEach(i =>
       i.addEventListener('change', () => editType(i.dataset.shlabel, { label:i.value })));
     sharedEl.querySelectorAll('[data-shiconbtn]').forEach(b =>
       b.addEventListener('click', () => {
         iconPickerFor = iconPickerFor === b.dataset.shiconbtn ? null : b.dataset.shiconbtn;
+        colorPickerFor = null;
         renderShared();
       }));
     sharedEl.querySelectorAll('[data-shseticon]').forEach(b =>
@@ -2795,6 +2869,8 @@ window.PAWS = (function(){
     if(patch.label !== undefined){ const v = String(patch.label).trim(); t.label = v || t.id; }
     if(patch.color !== undefined) t.color = patch.color;
     if(patch.icon !== undefined){ t.icon = patch.icon; iconPickerFor = null; }
+    if(patch.showFm !== undefined) t.showFm = patch.showFm;
+    if(patch.showSs !== undefined) t.showSs = patch.showSs;
     save(); refreshAll();
   }
   function addType(){
@@ -2985,6 +3061,11 @@ PAWS.load();
 
   // Icons a task type can wear. Shown in the dial while that type is running.
   const TYPE_ICONS = {
+    cake:     '<svg viewBox="0 0 16 16"><path d="M3 9.4c1 .8 1.7.8 2.5 0s1.5-.8 2.5 0 1.7.8 2.5 0 1.5-.8 2.5 0"/><path d="M2.6 9.4v3.2h10.8V9.4"/><path d="M2.6 9.4c0-1.2 1-2 2.4-2h6c1.4 0 2.4.8 2.4 2"/><path d="M8 7.4V5.2M6.2 7.4V5.8M9.8 7.4V5.8"/><circle cx="8" cy="3.9" r=".8"/></svg>',
+    person:   '<svg viewBox="0 0 16 16"><circle cx="8" cy="5.2" r="2.6"/><path d="M3 13.4c0-2.6 2.2-4.2 5-4.2s5 1.6 5 4.2"/></svg>',
+    hospital: '<svg viewBox="0 0 16 16"><rect x="2.6" y="4.2" width="10.8" height="9.2" rx="1.4"/><path d="M8 6.4v4.6M5.7 8.7h4.6"/><path d="M5.4 4.2V2.6h5.2v1.6"/></svg>',
+    school:   '<svg viewBox="0 0 16 16"><path d="M2.4 6.6 8 3l5.6 3.6"/><path d="M3.8 7.6v5.8h8.4V7.6"/><path d="M6.6 13.4v-3.2h2.8v3.2"/><path d="M8 3V1.6"/></svg>',
+    paw:      '<svg viewBox="0 0 16 16"><ellipse cx="8" cy="11.2" rx="3.4" ry="2.8" fill="currentColor" stroke="none"/><ellipse cx="3.9" cy="7" rx="1.6" ry="2.1" fill="currentColor" stroke="none" transform="rotate(-18 3.9 7)"/><ellipse cx="6.6" cy="4.4" rx="1.5" ry="2" fill="currentColor" stroke="none"/><ellipse cx="9.8" cy="4.4" rx="1.5" ry="2" fill="currentColor" stroke="none"/><ellipse cx="12.4" cy="7" rx="1.6" ry="2.1" fill="currentColor" stroke="none" transform="rotate(18 12.4 7)"/></svg>',
     briefcase:'<svg viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="8.4" rx="1.6"/><path d="M6 5V3.8A1.2 1.2 0 0 1 7.2 2.6h1.6A1.2 1.2 0 0 1 10 3.8V5"/><path d="M2 8.6h12"/></svg>',
     book:     '<svg viewBox="0 0 16 16"><path d="M2.4 3.2h4a2 2 0 0 1 1.6 1v8a2 2 0 0 0-1.6-.8h-4z"/><path d="M13.6 3.2h-4A2 2 0 0 0 8 4.2v8a2 2 0 0 1 1.6-.8h4z"/></svg>',
     cap:      '<svg viewBox="0 0 16 16"><path d="M8 3 15 6.2 8 9.4 1 6.2z"/><path d="M4 7.6v3.2C4 12 6 13 8 13s4-1 4-2.2V7.6"/></svg>',
@@ -4499,7 +4580,7 @@ PAWS.load();
 
     app.innerHTML = `
       <div class="type-row">
-        ${typeList().map(t => `
+        ${typeList().filter(t => t.showSs !== false || t.id === data.taskType).map(t => `
           <button class="type-btn ${data.taskType === t.id ? 'on' : ''}"
                   data-type="${t.id}"
                   ${data.phase === 'done' ? 'disabled' : ''}
@@ -5585,6 +5666,11 @@ PAWS.load();
   };
 
   const TYPE_ICONS = {
+    cake:     '<svg viewBox="0 0 16 16"><path d="M3 9.4c1 .8 1.7.8 2.5 0s1.5-.8 2.5 0 1.7.8 2.5 0 1.5-.8 2.5 0"/><path d="M2.6 9.4v3.2h10.8V9.4"/><path d="M2.6 9.4c0-1.2 1-2 2.4-2h6c1.4 0 2.4.8 2.4 2"/><path d="M8 7.4V5.2M6.2 7.4V5.8M9.8 7.4V5.8"/><circle cx="8" cy="3.9" r=".8"/></svg>',
+    person:   '<svg viewBox="0 0 16 16"><circle cx="8" cy="5.2" r="2.6"/><path d="M3 13.4c0-2.6 2.2-4.2 5-4.2s5 1.6 5 4.2"/></svg>',
+    hospital: '<svg viewBox="0 0 16 16"><rect x="2.6" y="4.2" width="10.8" height="9.2" rx="1.4"/><path d="M8 6.4v4.6M5.7 8.7h4.6"/><path d="M5.4 4.2V2.6h5.2v1.6"/></svg>',
+    school:   '<svg viewBox="0 0 16 16"><path d="M2.4 6.6 8 3l5.6 3.6"/><path d="M3.8 7.6v5.8h8.4V7.6"/><path d="M6.6 13.4v-3.2h2.8v3.2"/><path d="M8 3V1.6"/></svg>',
+    paw:      '<svg viewBox="0 0 16 16"><ellipse cx="8" cy="11.2" rx="3.4" ry="2.8" fill="currentColor" stroke="none"/><ellipse cx="3.9" cy="7" rx="1.6" ry="2.1" fill="currentColor" stroke="none" transform="rotate(-18 3.9 7)"/><ellipse cx="6.6" cy="4.4" rx="1.5" ry="2" fill="currentColor" stroke="none"/><ellipse cx="9.8" cy="4.4" rx="1.5" ry="2" fill="currentColor" stroke="none"/><ellipse cx="12.4" cy="7" rx="1.6" ry="2.1" fill="currentColor" stroke="none" transform="rotate(18 12.4 7)"/></svg>',
     briefcase:'<svg viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="8.4" rx="1.6"/><path d="M6 5V3.8A1.2 1.2 0 0 1 7.2 2.6h1.6A1.2 1.2 0 0 1 10 3.8V5"/><path d="M2 8.6h12"/></svg>',
     book:     '<svg viewBox="0 0 16 16"><path d="M2.4 3.2h4a2 2 0 0 1 1.6 1v8a2 2 0 0 0-1.6-.8h-4z"/><path d="M13.6 3.2h-4A2 2 0 0 0 8 4.2v8a2 2 0 0 1 1.6-.8h4z"/></svg>',
     cap:      '<svg viewBox="0 0 16 16"><path d="M8 3 15 6.2 8 9.4 1 6.2z"/><path d="M4 7.6v3.2C4 12 6 13 8 13s4-1 4-2.2V7.6"/></svg>',
@@ -6411,8 +6497,9 @@ PAWS.load();
   }
   function renderTypeRow(){
     const cur = currentType();
+    const shown = typeList().filter(t => t.showFm !== false || t.id === cur);
     return `<div class="type-row">
-      ${typeList().map(t => typeBtn(t, 'data-fmtype', t.id === cur)).join('')}
+      ${(shown.length ? shown : typeList()).map(t => typeBtn(t, 'data-fmtype', t.id === cur)).join('')}
     </div>`;
   }
 
@@ -7764,6 +7851,31 @@ PAWS.load();
     if(e.start && e.end) return e.start + '–' + e.end;
     return e.start || '';
   }
+
+  // A plan of several days either runs straight through, or repeats the
+  // same hours on each of them.
+  const isRun = e => spanOf(e) > 0 && e.cont !== false;
+  function runStartKey(e, dayKey){
+    const d = parseKey(dayKey), span = spanOf(e);
+    for(let back = 0; back <= span; back++){
+      const st = addDays(d, -back);
+      if(startsOn(e, st)) return keyOf(st);
+    }
+    return null;
+  }
+  function runEndKey(e, dayKey){
+    const st = runStartKey(e, dayKey);
+    return st ? keyOf(addDays(parseKey(st), spanOf(e))) : null;
+  }
+  // What the clock says for this plan, on this day.
+  function dayTimeText(e, dayKey){
+    if(e.allDay) return '終日';
+    if(!isRun(e)) return timeText(e) || '—';
+    const st = runStartKey(e, dayKey), en = runEndKey(e, dayKey);
+    if(dayKey === st) return (e.start || '') + '〜';
+    if(dayKey === en) return '〜' + (e.end || '');
+    return 'つづき';
+  }
   function repeatLabel(e){
     if(e.repeat === 'week'){
       const every = Math.max(1, e.every || 1);
@@ -7856,11 +7968,19 @@ PAWS.load();
       cells += `<button class="cal-cell ${other ? 'other' : ''} ${k === cursor ? 'sel' : ''}" data-day="${k}">
         <span class="dnum ${k === tk ? 'today' : ''} ${idxOf(d) === 5 ? 'sat' : ''} ${idxOf(d) === 6 ? 'sun' : ''}">${d.getDate()}</span>
         <span class="chips">
-          ${list.map(e => `<span class="chip" data-chip="${esc(e.id)}" style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}"
-            title="${esc((timeText(e) ? timeText(e) + ' ' : '') + e.title)}">
-            <span class="ct">${esc(e.allDay ? '終日' : (e.start || ''))}</span>
-            <span class="cn"><i></i>${esc(e.title)}</span>
-          </span>`).join('')}
+          ${list.map(e => {
+            const run = isRun(e);
+            const joinL = run && onDay(e, keyOf(addDays(d, -1)));
+            const joinR = run && onDay(e, keyOf(addDays(d, 1)));
+            const head = !joinL || idxOf(d) === 0;
+            const cls = 'chip' + (joinL ? ' join-l' : '') + (joinR ? ' join-r' : '');
+            return `<span class="${cls}" data-chip="${esc(e.id)}"
+              style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}"
+              title="${esc(dayTimeText(e, k) + ' ' + e.title)}">
+              <span class="ct">${joinL ? '&nbsp;' : esc(e.allDay ? '終日' : (e.start || '')) || '&nbsp;'}</span>
+              <span class="cn"><i></i>${head ? esc(e.title) : '&nbsp;'}</span>
+            </span>`;
+          }).join('')}
         </span>
       </button>`;
       if(i % 7 === 6 && d >= new Date(cur.getFullYear(), cur.getMonth() + 1, 0) && i >= 27) break;
@@ -7883,21 +8003,22 @@ PAWS.load();
         <span class="dw">${WD[idxOf(d)]}</span>
         ${k === tk ? '<span class="tnow">today</span>' : ''}
       </div>
-      ${list.length ? `<div class="cal-day-list">${list.map(e => eventRow(e)).join('')}</div>`
+      ${list.length ? `<div class="cal-day-list">${list.map(e => eventRow(e, k)).join('')}</div>`
                     : '<div class="cal-none">予定なし</div>'}
     </div>`;
   }
 
-  function eventRow(e){
+  function eventRow(e, dayKey){
     return `<button class="cal-ev" data-edit="${esc(e.id)}"
       style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}">
-      <span class="ev-time">${e.allDay ? '終日' : esc(timeText(e) || '—')}</span>
+      <span class="ev-time">${esc(dayTimeText(e, dayKey || cursor))}</span>
       <span class="ev-body">
         <span class="ev-title">${esc(e.title)}</span>
         <span class="ev-meta">
           <i style="background:${typeColor(e.type)}"></i>${esc(typeLabel(e.type))}
           ${e.repeat && e.repeat !== 'none' ? '<span>·</span><span>' + esc(repeatLabel(e)) + '</span>' : ''}
           ${spanOf(e) ? '<span>·</span><span>' + esc(spanLabel(e)) + '</span>' : ''}
+          ${spanOf(e) ? '<span>·</span><span>' + (e.cont === false ? '毎日' : '連続') + '</span>' : ''}
           ${e.celebrate ? '<span>·</span><span class="ev-cheer">お祝い</span>' : ''}
           ${e.tell ? '<span>·</span><span class="ev-tell">' + esc(PAWS.dogName()) + 'が伝える</span>' : ''}
           ${e.taskId ? '<span>·</span><span class="ev-sent">Alarm 登録済み</span>' : ''}
@@ -7913,13 +8034,22 @@ PAWS.load();
   function renderTimetable(k){
     const d = parseKey(k);
     const list = eventsOn(k);
-    const allDay = list.filter(e => e.allDay);
-    const loose  = list.filter(e => !e.allDay && !e.start);
-    const timed  = list.filter(e => !e.allDay && e.start).map(e => {
-      const s = toMin(e.start);
-      const en = e.end ? toMin(e.end) : null;
-      return { e: e, s: s, en: Math.min(1440, Math.max(en == null ? s + 45 : en, s + 30)) };
-    }).sort((a, b) => a.s - b.s || a.en - b.en);
+    const allDay = list.filter(e => e.allDay
+      || (isRun(e) && k !== runStartKey(e, k) && k !== runEndKey(e, k)));
+    const loose  = list.filter(e => !e.allDay && !e.start && !isRun(e));
+    const timed = [];
+    list.filter(e => !e.allDay && e.start).forEach(e => {
+      let s2 = toMin(e.start);
+      let en = e.end ? toMin(e.end) : null;
+      if(isRun(e)){
+        const st = runStartKey(e, k), fin = runEndKey(e, k);
+        if(k !== st && k !== fin) return;            // a whole middle day sits in the strip
+        if(k === st && k !== fin) en = 1440;         // it runs on past midnight
+        if(k === fin && k !== st){ s2 = 0; en = toMin(e.end) || 0; }
+      }
+      timed.push({ e: e, s: s2, en: Math.min(1440, Math.max(en == null ? s2 + 45 : en, s2 + 30)) });
+    });
+    timed.sort((a, b) => a.s - b.s || a.en - b.en);
 
     // the window of hours worth showing
     let lo = 8 * 60, hi = 19 * 60;
@@ -7957,7 +8087,8 @@ PAWS.load();
       ${allDay.length || loose.length ? `<div class="tt-allday">
         ${allDay.concat(loose).map(e => `<button class="tt-chip" data-edit="${esc(e.id)}"
           style="--c:${typeColor(e.type)}; --cb:${tint(typeColor(e.type), 0.13)}">
-          <i></i>${esc(e.title)}${e.allDay ? '' : ' <span class="no-t">時間未定</span>'}
+          <i></i>${esc(e.title)}${e.allDay ? '' : ' <span class="no-t">'
+            + (isRun(e) ? 'つづき' : '時間未定') + '</span>'}
         </button>`).join('')}
       </div>` : ''}
       <div class="tt-grid" style="--rh:${ROW_H}px">
@@ -8013,6 +8144,7 @@ PAWS.load();
       repeat: 'none',
       every: 1,
       days: [],
+      cont: true,
       celebrate: false,
       tell: false,
       monthEnd: false,
@@ -8077,6 +8209,14 @@ PAWS.load();
                value="${t.monthDay || parseKey(t.date).getDate()}">
         <span class="unit">日</span>
         <button class="toggle ${t.monthEnd ? 'on' : ''}" data-mday="end">月末</button>
+      </div>` : ''}
+      ${(t.endDate && t.endDate > t.date) ? `
+      <div class="ed-field">
+        <label>数日の予定</label>
+        <button class="toggle ${t.cont !== false ? 'on' : ''}" id="cvCont">${t.cont !== false ? '連続' : '毎日'}</button>
+        <span class="unit">${t.cont !== false
+          ? '開始の時間から完了の時間まで、ずっと'
+          : '期間中、毎日おなじ時間に'}</span>
       </div>` : ''}
       <div class="ed-field">
         <label>お祝い</label>
@@ -8144,7 +8284,7 @@ PAWS.load();
         </div>
         ${editId !== null ? renderEditor() + '<div style="height:10px"></div>' : ''}
         ${view === 'day' ? '' : (eventsOn(cursor).length
-            ? `<div class="cal-day-list plain">${eventsOn(cursor).map(e => eventRow(e)).join('')}</div>`
+            ? `<div class="cal-day-list plain">${eventsOn(cursor).map(e => eventRow(e, cursor)).join('')}</div>`
             : '<div class="empty-state">この日の予定はまだありません。</div>')}
       </div>
     `;
@@ -8279,6 +8419,7 @@ PAWS.load();
       render();
     }));
     on('cvAllDay', () => { if(!draft) return; readForm(); draft.allDay = !draft.allDay; render(); });
+    on('cvCont',  () => { if(!draft) return; readForm(); draft.cont = draft.cont === false; render(); });
     on('cvCheer', () => { if(!draft) return; readForm(); draft.celebrate = !draft.celebrate; render(); });
     on('cvTell',  () => { if(!draft) return; readForm(); draft.tell = !draft.tell; render(); });
     on('cvCancel', () => { editId = null; draft = null; render(); });

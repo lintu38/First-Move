@@ -1451,6 +1451,12 @@
   .sync-fields .rep-picker button.on{ background:var(--bg-card-hover); border-color:#E0D3BF;
     color:var(--text); font-weight:700; }
 
+  /* a sitting dog, wherever it sits: back end down, chest up, hind legs folded */
+  .walker.sit .pose{ transform-box:view-box; transform-origin:24px 26px;
+    transform:rotate(-20deg); }
+  .walker.sit rect[x="8.5"], .walker.sit rect[x="11.5"]{
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.2); }
+
   /* BREAK wears its hover shade from the start; FINISH wears Get Set's */
   #paneSs .pill.quiet{ background:var(--bg-card-hover); color:var(--text); }
   #paneSs .pill.quiet:hover{ background:#F0E8DA; color:#2A231C; }

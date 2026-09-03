@@ -1871,6 +1871,9 @@
   .cal-editor .copy-field{ border-top:1px solid var(--line); padding-top:11px; margin-top:3px; }
   .cal-editor .copy-field .mini-btn{ flex:0 0 auto; }
 
+  .cal-ev .ev-cheer{ color:#C08A72; }
+  .cal-ev .ev-tell{ color:#7C9A78; }
+
   /* ---------- Home ---------- */
   #paneHome{ gap:16px; }
 
@@ -1904,9 +1907,10 @@
     transform:translateX(-50%); pointer-events:none; }
   .orb.sun{ background:#F1C566; box-shadow:0 0 26px 11px rgba(241,197,102,.26); }
   .home-stage.dusk .orb.sun{ background:#E1785C; box-shadow:0 0 24px 10px rgba(225,120,92,.28); }
-  .orb.moon{ width:22px; height:22px; background:#F3DE9C;
-    box-shadow:0 0 20px 8px rgba(243,222,156,.30),
-               inset -6px -1px 0 -1px rgba(64,84,126,.26); }
+  /* the moon carries the phase it is really in */
+  .orb.moon{ width:26px; height:26px; background:none; box-shadow:none;
+    filter:drop-shadow(0 0 9px rgba(243,222,156,.45)); }
+  .orb.moon svg{ width:100%; height:100%; display:block; }
   /* the yard the dog walks in */
   .stage-ground{ position:absolute; left:0; right:0; bottom:7px; height:1px;
     background:linear-gradient(90deg, transparent, #E3D8C6 18%, #E3D8C6 82%, transparent); }
@@ -1919,6 +1923,41 @@
   /* on this stage a pup walks in from the side; it does not pop into place */
   .home-stage .pup{ animation:none; }
   .home-stage .dog-bubble.sess{ font-size:12px; }
+
+  /* resting: sitting, lying down, dozing off */
+  /* sitting: the back end goes down, the chest stays up.
+     The tilt itself is set from script, since the dog may be mirrored. */
+  /* the hind legs fold away under the body */
+  .home-stage .walker.sit rect[x="8.5"], .home-stage .walker.sit rect[x="11.5"]{
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.2); }
+  .home-stage .walker.sit .leg-a, .home-stage .walker.sit .leg-b{ animation:none; }
+  .home-stage .walker.sit .bob{ animation:none; }
+  .home-stage .walker.lie .bob, .home-stage .walker.lie .leg-a, .home-stage .walker.lie .leg-b,
+  .home-stage .walker.sleep .bob, .home-stage .walker.sleep .leg-a, .home-stage .walker.sleep .leg-b{
+    animation:none; }
+  .home-stage .walker.lie .pose, .home-stage .walker.sleep .pose{ transform:translateY(6.5px); }
+  .home-stage .walker.lie .leg-a, .home-stage .walker.lie .leg-b,
+  .home-stage .walker.sleep .leg-a, .home-stage .walker.sleep .leg-b{
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+  .home-stage .walker.lie .tail{ animation-duration:1.2s; }
+  .home-stage .walker.sleep .tail{ animation:none; }
+  /* eyes shut while asleep */
+  .home-stage .walker.sleep circle.dog-nose:last-of-type{
+    transform-box:fill-box; transform-origin:50% 50%; transform:scaleY(.22); }
+
+  .zzz{ position:absolute; z-index:6; display:flex; align-items:flex-end; gap:2px;
+    pointer-events:none; font-family:'Comfortaa','Zen Kaku Gothic New',cursive;
+    color:#A99274; transition:opacity .45s ease; }
+  .zzz.hide{ opacity:0; }
+  .zzz i{ font-style:normal; animation:zzzUp 2.6s ease-in-out infinite; }
+  .zzz i:nth-child(1){ font-size:9px; }
+  .zzz i:nth-child(2){ font-size:11px; animation-delay:.55s; }
+  .zzz i:nth-child(3){ font-size:13px; animation-delay:1.1s; }
+  @keyframes zzzUp{
+    0%{ opacity:0; transform:translate(0,4px); }
+    30%{ opacity:.9; }
+    100%{ opacity:0; transform:translate(5px,-11px); } }
+  @media (prefers-reduced-motion: reduce){ .zzz i{ animation:none; opacity:.75; } }
 
   .home-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
     padding:14px 16px; }
@@ -2078,6 +2117,7 @@ window.PAWS = (function(){
     if(!Array.isArray(r.types) || !r.types.length) r.types = DEFAULT_TYPES.map(t => Object.assign({}, t));
     if(typeof r.soundOn !== 'boolean') r.soundOn = true;
     if(typeof r.handoff !== 'boolean') r.handoff = true;
+    if(typeof r.dogName !== 'string') r.dogName = '';
     root = r;
     return root;
   }
@@ -2107,6 +2147,34 @@ window.PAWS = (function(){
   }
 
   function register(id, api){ mods[id] = api; }
+
+  /* ---------------- the dog itself ---------------- */
+
+  const DEFAULT_DOG_NAME = 'ポチ';
+  function dogName(){
+    const n = root && typeof root.dogName === 'string' ? root.dogName.trim() : '';
+    return n || DEFAULT_DOG_NAME;
+  }
+  function setDogName(v){
+    root.dogName = String(v || '').slice(0, 12).trim();
+    save();
+    refreshAll();
+  }
+
+  // Around Christmas every dog in the app puts a little hat on.
+  const SANTA_HAT = '<g class="santa">'
+    + '<path d="M21.2 8.4c1-4.4 4.4-7 7.4-5.4 2.2 1.2 2.6 3.5 1.8 5.6z" fill="#C4514A"/>'
+    + '<ellipse cx="25.6" cy="8.7" rx="5.2" ry="1.5" fill="#F7F1E7"/>'
+    + '<circle cx="30.6" cy="3.6" r="1.8" fill="#F7F1E7"/>'
+    + '</g>';
+  function xmasNow(){
+    const d = new Date();
+    return d.getMonth() + 1 === 12 && d.getDate() >= 20 && d.getDate() <= 25;
+  }
+  function dogArt(svg){
+    const s = String(svg == null ? '' : svg);
+    return xmasNow() ? s.replace('</g></g>', SANTA_HAT + '</g></g>') : s;
+  }
 
   // Another window of the same app — the little floating timer, or a second
   // tab — wrote to the store. Adopt it in place, so each pane keeps the very
@@ -2553,6 +2621,16 @@ window.PAWS = (function(){
       </div>
 
       <div>
+        <div class="section-title"><span>Dog</span></div>
+        <div class="sync-fields">
+          <div class="ed-field"><label>名前</label>
+            <input type="text" id="shDogName" maxlength="12" value="${esc(dogName())}"
+                   placeholder="${esc(DEFAULT_DOG_NAME)}"></div>
+          <div class="te-note">Today の犬の名前です。予定を「${esc(dogName())}に伝える」にすると、この子が話してくれます。</div>
+        </div>
+      </div>
+
+      <div>
         <div class="section-title"><span>Auto Export</span></div>
         <div class="sync-status">
           <b>${autoCfg.on ? '自動書き出し ON' : 'OFF'}</b>${autoCfg.at ? ' · 最終 ' + fmtWhen(autoCfg.at) : ' · まだ書き出していません'}
@@ -2594,6 +2672,12 @@ window.PAWS = (function(){
     on('shSyncPull', () => { readFields(); syncPull(false); });
     on('shHelp', () => { helpOpen = !helpOpen; renderShared(); });
     on('shExport', exportAll);
+    const dn = sharedEl.querySelector('#shDogName');
+    if(dn){
+      const put = () => { if(dn.value.trim() !== dogName()) setDogName(dn.value); };
+      dn.addEventListener('change', put);
+      dn.addEventListener('blur', put);
+    }
     on('shPickDir', pickExportDir);
     on('shAutoNow', async () => { if(await dirReady(true)) autoExport(true); else pickExportDir(); });
     on('shAutoOff', () => { autoCfg.on = !autoCfg.on; autoCfg.msg = null; saveAuto(); renderShared();
@@ -2763,6 +2847,7 @@ window.PAWS = (function(){
 
   return {
     load, section, save, register, audio, renderShared, refreshAll,
+    dogName, setDogName, dogArt, xmas: xmasNow,
     initShell, setTab, root: () => root,
     setIcons(icons){ Object.assign(TYPE_ICONS_REF, icons); },
     handoff: () => true
@@ -3372,7 +3457,7 @@ PAWS.load();
 
   /* ---------------- the dog ---------------- */
 
-  const DOG_SVG = window.__DOG_SVG = `
+  const DOG_SVG = window.__DOG_SVG = PAWS.dogArt(`
   <svg viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g class="pose"><g class="bob">
       <path class="tail dog-body" d="M7 15 C3 13, 2 9, 4.5 7.5 C5.5 9.5, 6.5 12, 8.5 13.5 Z" />
@@ -3387,7 +3472,7 @@ PAWS.load();
       <circle class="dog-nose" cx="31.6" cy="13.4" r="1.15"/>
       <circle class="dog-nose" cx="27" cy="11.4" r="0.95"/>
     </g></g>
-  </svg>`;
+  </svg>`);
 
   const DIAL_SIZE = 260;
   const DIAL_R = 108;
@@ -5425,7 +5510,7 @@ PAWS.load();
     <g opacity="0.55" transform="translate(0.5,4.5) scale(0.36)">${PAW_PATHS}</g>
     <g transform="translate(9,0.5) scale(0.42)">${PAW_PATHS}</g>`;
 
-  const DOG_SVG = `
+  const DOG_SVG = PAWS.dogArt(`
   <svg viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g class="pose"><g class="bob">
       <path class="tail dog-body" d="M7 15 C3 13, 2 9, 4.5 7.5 C5.5 9.5, 6.5 12, 8.5 13.5 Z" />
@@ -5440,7 +5525,7 @@ PAWS.load();
       <circle class="dog-nose" cx="31.6" cy="13.4" r="1.15"/>
       <circle class="dog-nose" cx="27" cy="11.4" r="0.95"/>
     </g></g>
-  </svg>`;
+  </svg>`);
 
   /* ---------------- small helpers ---------------- */
 
@@ -7711,6 +7796,8 @@ PAWS.load();
           <i style="background:${typeColor(e.type)}"></i>${esc(typeLabel(e.type))}
           ${e.repeat && e.repeat !== 'none' ? '<span>·</span><span>' + esc(repeatLabel(e)) + '</span>' : ''}
           ${spanOf(e) ? '<span>·</span><span>' + esc(spanLabel(e)) + '</span>' : ''}
+          ${e.celebrate ? '<span>·</span><span class="ev-cheer">お祝い</span>' : ''}
+          ${e.tell ? '<span>·</span><span class="ev-tell">' + esc(PAWS.dogName()) + 'が伝える</span>' : ''}
           ${e.taskId ? '<span>·</span><span class="ev-sent">Alarm 登録済み</span>' : ''}
         </span>
         ${e.note ? `<span class="ev-note">${esc(e.note)}</span>` : ''}
@@ -7824,6 +7911,8 @@ PAWS.load();
       repeat: 'none',
       every: 1,
       days: [],
+      celebrate: false,
+      tell: false,
       monthEnd: false,
       monthDay: 0
     };
@@ -7887,6 +7976,16 @@ PAWS.load();
         <span class="unit">日</span>
         <button class="toggle ${t.monthEnd ? 'on' : ''}" data-mday="end">月末</button>
       </div>` : ''}
+      <div class="ed-field">
+        <label>お祝い</label>
+        <button class="toggle ${t.celebrate ? 'on' : ''}" id="cvCheer">${t.celebrate ? 'ON' : 'OFF'}</button>
+        <span class="unit">誕生日など</span>
+      </div>
+      <div class="ed-field">
+        <label>${esc(PAWS.dogName())}に伝える</label>
+        <button class="toggle ${t.tell ? 'on' : ''}" id="cvTell">${t.tell ? 'ON' : 'OFF'}</button>
+        <span class="unit">ときどき話します</span>
+      </div>
       <div class="ed-field">
         <label>メモ</label>
         <input type="text" id="cvNote" maxlength="80" value="${esc(t.note || '')}" placeholder="任意">
@@ -8078,6 +8177,8 @@ PAWS.load();
       render();
     }));
     on('cvAllDay', () => { if(!draft) return; readForm(); draft.allDay = !draft.allDay; render(); });
+    on('cvCheer', () => { if(!draft) return; readForm(); draft.celebrate = !draft.celebrate; render(); });
+    on('cvTell',  () => { if(!draft) return; readForm(); draft.tell = !draft.tell; render(); });
     on('cvCancel', () => { editId = null; draft = null; render(); });
     on('cvSave', onSave);
     on('cvDel', onDelete);
@@ -8243,6 +8344,7 @@ PAWS.load();
   const data = PAWS.section('home', {
     place: null,      // { name, lat, lon }
     wx: null,         // { at, code, temp, hi, lo, pop }
+    cheeredOn: null,  // the day a celebration was already cheered
     askedGeo: false
   });
 
@@ -8424,6 +8526,43 @@ PAWS.load();
     return list;
   }
 
+  // A short bright run of notes, for a birthday or anything else marked
+  // as worth celebrating.
+  function playCheer(){
+    if(data.soundOn === false) return;
+    const ctx = PAWS.audio && PAWS.audio();
+    if(!ctx) return;
+    const t0 = ctx.currentTime + 0.05;
+    [[523.25, 0], [659.25, 0.13], [783.99, 0.26], [1046.5, 0.4], [1318.5, 0.56]]
+      .forEach(([f, dt]) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + dt);
+        g.gain.exponentialRampToValueAtTime(0.05, t0 + dt + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 1.5);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t0 + dt); osc.stop(t0 + dt + 1.6);
+      });
+  }
+
+  // The plans of today the dog has been asked to mention, and the ones
+  // it should celebrate.
+  function toTell(){
+    return todaysPlans().filter(e => e && e.tell);
+  }
+  function toCheer(){
+    return todaysPlans().filter(e => e && e.celebrate);
+  }
+  function planLine(e){
+    if(!e) return null;
+    const title = e.title || '予定';
+    const birthday = /誕生日|たんじょうび|バースデー|birthday/i.test(title);
+    const t = e.allDay ? '' : (e.start || '');
+    if(birthday) return t ? t + 'から ' + title + ' だよ' : '今日は' + title + 'だよ';
+    return t ? t + 'から ' + title + ' だよ' : '今日は ' + title + ' があるよ';
+  }
+
   function alarmPeek(){
     try{ return window.__alarmPeek ? window.__alarmPeek() : null; }catch(e){ return null; }
   }
@@ -8484,6 +8623,7 @@ PAWS.load();
         </div>
         ${yardHtml()}
         <span class="walker" id="hmDog">${window.__DOG_SVG || ''}</span>
+        <span class="zzz hide" id="hmZzz"><i>z</i><i>z</i><i>z</i></span>
         <div class="dog-bubble sess hide" id="hmBubble"></div>
       </div>
 
@@ -8574,25 +8714,65 @@ PAWS.load();
 
   /* ---------------- the dog on the stage ---------------- */
 
+  // Japan's public holidays, near enough for a dog to know about.
+  function nthMonday(y, m, n){
+    const first = new Date(y, m - 1, 1);
+    const shift = (8 - first.getDay()) % 7;          // days until the first Monday
+    return 1 + shift + (n - 1) * 7;
+  }
+  function equinoxDay(y, spring){
+    const base = spring ? 20.8431 : 23.2488;
+    return Math.floor(base + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+  }
+  function holidayName(d){
+    const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+    if(m === 1  && day === 1) return '元日';
+    if(m === 1  && day === nthMonday(y, 1, 2)) return '成人の日';
+    if(m === 2  && day === 11) return '建国記念の日';
+    if(m === 2  && day === 23) return '天皇誕生日';
+    if(m === 3  && day === equinoxDay(y, true)) return '春分の日';
+    if(m === 4  && day === 29) return '昭和の日';
+    if(m === 5  && day === 3) return '憲法記念日';
+    if(m === 5  && day === 4) return 'みどりの日';
+    if(m === 5  && day === 5) return 'こどもの日';
+    if(m === 7  && day === nthMonday(y, 7, 3)) return '海の日';
+    if(m === 8  && day === 11) return '山の日';
+    if(m === 9  && day === nthMonday(y, 9, 3)) return '敬老の日';
+    if(m === 9  && day === equinoxDay(y, false)) return '秋分の日';
+    if(m === 10 && day === nthMonday(y, 10, 2)) return 'スポーツの日';
+    if(m === 11 && day === 3) return '文化の日';
+    if(m === 11 && day === 23) return '勤労感謝の日';
+    return null;
+  }
+  // A line for the day itself, when the calendar has something to say.
+  function dayLine(d){
+    const m = d.getMonth() + 1, day = d.getDate();
+    if(m === 1 && day <= 3){
+      return Math.random() < 0.5 ? 'あけましておめでとう' : 'ことしもよろしく';
+    }
+    if(m === 12 && (day === 24 || day === 25)) return 'メリークリスマス';
+    if(m === 12 && day === 31) return 'よいお年を';
+    const h = holidayName(d);
+    return h ? '今日は' + h + 'だよ' : null;
+  }
+
   const GREET = () => {
-    const h = new Date().getHours();
-    if(h < 5)  return 'まだ起きてるの？';
+    const d = new Date(), h = d.getHours();
+    const special = dayLine(d);
+    // on such a day it mostly says that, but still says hello sometimes
+    if(special && Math.random() < 0.65) return special;
+    if(h < 5)  return 'おやすみ';
     if(h < 11) return 'おはよう';
     if(h < 17) return 'こんにちは';
-    return 'こんばんは';
+    if(h < 23) return 'こんばんは';
+    return 'おやすみ';
   };
-  const MURMURS = [
-    'いい天気だね', 'お散歩いきたい', 'きょうも いっしょに', 'おなかすいた',
-    'おやつほしい', 'ワクワク', 'そばにいるよ', 'ひなたぼっこ', 'ふぁ〜あ',
-    'なでて', 'たのしみだね', 'ゆっくりいこう', 'はじめの一歩',
-    'ちょっと休憩する？', 'えらいね', 'その調子', 'まっててあげる',
-    'いい匂いがする', 'しっぽ ふりふり', 'きょうは何する？', 'あくび でちゃった',
-    'ボールで あそぼ', 'ねむくなってきた', 'ふんふん', 'ここにいるよ',
-    'あわてなくて いいよ', '一歩ずつ ね', 'そろそろ おやつ？'
-  ];
+
   const PAW_TAG = '<span class="bpaw"></span>';
 
-  let dogX = 0.5, dogDir = -1, dogTimer = null, dogStop = 0;
+  let dogX = 0.5, dogDir = -1, dogTimer = null;
+  // walk · still · sit · lie · sleep
+  let pose = 'walk', poseUntil = 0, nextPose = Date.now() + 15000 + Math.random() * 25000;
   let bubbleUntil = 0, nextBubble = 0, greeted = false, bubbleText = '';
   let nextBf = 0, nextSeason = 0, nextStar = 0;
   let pups = [];                 // { el, gap }
@@ -8661,12 +8841,19 @@ PAWS.load();
     </svg>`;
   }
 
-  const HOUSE_SVG = `<svg viewBox="0 0 46 38" aria-hidden="true">
-    <path d="M23 3 44 17H2z" fill="#C2938F"/>
-    <rect x="7" y="16" width="32" height="21" rx="2.5" fill="#E6CDCB"/>
-    <path d="M23 20c4.4 0 7 3.2 7 7.4V37H16v-9.6c0-4.2 2.6-7.4 7-7.4z" fill="#8A6663"/>
-    <circle cx="23" cy="13" r="1.8" fill="#F6E9E7"/>
-  </svg>`;
+  function houseSvg(tone){
+    const snow = tone.snow
+      ? '<path d="M20 1.6 38.4 15H33.2L20 5.6 6.8 15H1.6z" fill="#F2F4F0" opacity=".92"/>' : '';
+    return `<svg viewBox="0 0 40 34" aria-hidden="true">
+      <path d="M20 2 38 15H2z" fill="#B08A5E"/>
+      <path d="M20 5.4 33.2 15H6.8z" fill="#C69E6E"/>
+      <rect x="6" y="14" width="28" height="19" rx="2" fill="#D8BC93"/>
+      <path d="M6 20.5h28M6 26.5h28" stroke="#C4A377" stroke-width="0.9"/>
+      <path d="M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z" fill="#6E5642"/>
+      <circle cx="20" cy="11.2" r="1.5" fill="#F0E2C9"/>
+      ${snow}
+    </svg>`;
+  }
 
   const GRASS_SVG = `<svg viewBox="0 0 18 12" aria-hidden="true">
     <g stroke="#A9BE94" stroke-width="1.7" stroke-linecap="round" fill="none">
@@ -8686,6 +8873,43 @@ PAWS.load();
     </svg>`;
   }
 
+  // A pair of these stand out at New Year.
+  const KADOMATSU_SVG = `<svg viewBox="0 0 20 34" aria-hidden="true">
+    <rect x="5.1" y="12" width="2.6" height="14" rx="1.3" fill="#8AA773"/>
+    <rect x="8.9" y="7" width="3" height="19" rx="1.5" fill="#9BB584"/>
+    <rect x="13.1" y="14" width="2.6" height="12" rx="1.3" fill="#8AA773"/>
+    <ellipse cx="6.4" cy="12.2" rx="1.3" ry="0.6" fill="#D8E2CD"/>
+    <ellipse cx="10.4" cy="7.2" rx="1.5" ry="0.7" fill="#E2EAD9"/>
+    <ellipse cx="14.4" cy="14.2" rx="1.3" ry="0.6" fill="#D8E2CD"/>
+    <rect x="4" y="22" width="12" height="12" rx="1.4" fill="#B08A5E"/>
+    <path d="M4 25.5h12M4 30h12" stroke="#93714B" stroke-width="0.9"/>
+    <path d="M4.2 23.4h11.6" stroke="#C4514A" stroke-width="1.8"/>
+    <circle cx="7.2" cy="20" r="2.1" fill="#C4514A"/>
+    <circle cx="12.6" cy="20.8" r="1.7" fill="#E8C86A"/>
+  </svg>`;
+
+  const SNOWMAN_SVG = `<svg viewBox="0 0 26 34" aria-hidden="true">
+    <ellipse cx="13" cy="26" rx="9" ry="8" fill="#F4F6F3"/>
+    <circle cx="13" cy="13.5" r="6.4" fill="#F8FAF7"/>
+    <path d="M4.5 15.5 1 12M21.5 15.5 25 12" stroke="#B79A73" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M13 13.6 17 15l-4 1.2z" fill="#D98B4A"/>
+    <circle cx="10.8" cy="12.2" r="1" fill="#5C4632"/>
+    <circle cx="15.2" cy="12.2" r="1" fill="#5C4632"/>
+    <path d="M6.6 19.4c4 2 8.8 2 12.8 0" stroke="#C4514A" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <circle cx="13" cy="24" r="1.1" fill="#DDE3DC"/>
+    <circle cx="13" cy="28.4" r="1.1" fill="#DDE3DC"/>
+  </svg>`;
+
+  const SUNFLOWER_SVG = `<svg viewBox="0 0 20 30" aria-hidden="true">
+    <path d="M10 30V13" stroke="#8AA773" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M10 21c-3.4-.6-5-2.4-5.4-4.6 2.6-.4 4.6.8 5.4 2.6z" fill="#9BB584"/>
+    <g fill="#EFC24E">
+      ${[0,45,90,135,180,225,270,315].map(a =>
+        `<ellipse cx="10" cy="4.6" rx="2.1" ry="4.2" transform="rotate(${a} 10 10)"/>`).join('')}
+    </g>
+    <circle cx="10" cy="10" r="3.6" fill="#8A6642"/>
+  </svg>`;
+
   // Fixed spots, so the yard looks the same every time you come home.
   const YARD = [
     { k:'tree',   x:  8, w:38, tall:false },
@@ -8693,22 +8917,46 @@ PAWS.load();
     { k:'flower', x: 24, w:12, c:'#E8B3C1' },
     { k:'grass',  x: 34, w:13 },
     { k:'fir',    x: 42, w:44, tall:true  },
-    { k:'flower', x: 58, w:11, c:'#EBD08A' },
-    { k:'grass',  x: 66, w:15 },
-    { k:'flower', x: 78, w:12, c:'#C8AFD8' },
-    { k:'tree',   x: 88, w:43, tall:true  },
-    { k:'grass',  x: 97, w:13 }
+    { k:'flower', x: 56, w:11, c:'#EBD08A' },
+    { k:'grass',  x: 64, w:15 },
+    { k:'house',  x: 76, w:34 },
+    { k:'flower', x: 87, w:11, c:'#C8AFD8' },
+    { k:'tree',   x: 94, w:33, tall:true  },
+    { k:'grass',  x: 99, w:12 }
   ];
+
+  // What the calendar adds to the yard: sunflowers, a snowman, kadomatsu.
+  function extras(){
+    const d = new Date(), m = d.getMonth() + 1, day = d.getDate();
+    const out = [];
+    if(m === 12 || m === 1 || m === 2) out.push({ k:'snowman', x:31, w:26 });
+    if(m === 1 && day <= 7){
+      out.push({ k:'kadomatsu', x:70, w:19 });
+      out.push({ k:'kadomatsu', x:83, w:19 });
+    }
+    return out;
+  }
+  function summerNow(){
+    const m = new Date().getMonth() + 1;
+    return m >= 6 && m <= 8;
+  }
 
   function yardHtml(){
     const tone = leafTone();
-    return '<div class="stage-ground"></div>' + YARD.map(o => {
-      const art = o.k === 'tree'   ? treeSvg(tone, o.tall)
-                : o.k === 'fir'    ? firSvg(tone, o.tall)
-                : o.k === 'house'  ? HOUSE_SVG
-                : o.k === 'flower' ? flowerSvg(o.c)
+    const summer = summerNow();
+    return '<div class="stage-ground"></div>' + YARD.concat(extras()).map(o => {
+      // in summer the little flowers stand up as sunflowers
+      const kind = (summer && o.k === 'flower') ? 'sunflower' : o.k;
+      const art = kind === 'tree'      ? treeSvg(tone, o.tall)
+                : kind === 'fir'       ? firSvg(tone, o.tall)
+                : kind === 'house'     ? houseSvg(tone)
+                : kind === 'snowman'   ? SNOWMAN_SVG
+                : kind === 'kadomatsu' ? KADOMATSU_SVG
+                : kind === 'sunflower' ? SUNFLOWER_SVG
+                : kind === 'flower'    ? flowerSvg(o.c)
                 : GRASS_SVG;
-      return `<span class="scene ${o.k}" style="left:${o.x}%; width:${o.w}px">${art}</span>`;
+      const w = (kind === 'sunflower') ? o.w + 5 : o.w;
+      return `<span class="scene ${kind}" style="left:${o.x}%; width:${w}px">${art}</span>`;
     }).join('');
   }
 
@@ -8728,10 +8976,47 @@ PAWS.load();
     return { cls:'night', orb:'moon', x: 81, y: 44 };
   }
 
+  // Where the moon is in its month: 0 new, .5 full.
+  function moonPhase(){
+    const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);       // a known new moon
+    const SYNODIC = 29.530588853 * 86400000;
+    let p = ((Date.now() - NEW_MOON) % SYNODIC) / SYNODIC;
+    if(p < 0) p += 1;
+    return p;
+  }
+  function moonName(p){
+    if(p < 0.03 || p > 0.97) return '新月';
+    if(p < 0.22) return '三日月';
+    if(p < 0.28) return '上弦の月';
+    if(p < 0.47) return '十三夜';
+    if(p < 0.53) return '満月';
+    if(p < 0.72) return '寝待月';
+    if(p < 0.78) return '下弦の月';
+    return '有明月';
+  }
+  function moonSvg(){
+    const p = moonPhase();
+    const R = 11, C = 13;
+    const a = 2 * Math.PI * p;
+    const rx = Math.abs(Math.cos(a)) * R;
+    const waxing = p < 0.5;
+    const gibbous = Math.cos(a) < 0;
+    const so = waxing ? 1 : 0;
+    const si = gibbous ? so : 1 - so;
+    const d = `M${C},${C - R} A${R},${R} 0 0 ${so} ${C},${C + R} `
+            + `A${rx.toFixed(2)},${R} 0 0 ${si} ${C},${C - R} Z`;
+    return `<svg viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11" fill="#F3DE9C" opacity=".15"/>
+      <path d="${d}" fill="#F3DE9C"/>
+    </svg>`;
+  }
+
   function skyHtml(){
     const s = skyNow();
+    const art = s.orb === 'moon' ? moonSvg() : '';
+    const title = s.orb === 'moon' ? ' title="' + moonName(moonPhase()) + '"' : '';
     return `<div class="sky"></div>
-      <span class="orb ${s.orb}" style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px"></span>`;
+      <span class="orb ${s.orb}"${title} style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px">${art}</span>`;
   }
 
   function stage(){ return $id('hmStage'); }
@@ -8744,7 +9029,20 @@ PAWS.load();
     const H = st.clientHeight || 150;
     const x = 26 + dogX * (W - 52);
     const y = H - 17;              // its paws land on the ground line
-    dog.className = 'walker' + (dogStop ? ' still' : '');
+    dog.className = 'walker' + (pose === 'walk' ? '' : ' ' + pose);
+    // the sit tilts the body back; mirrored, the tilt has to go the other way
+    const poseEl = dog.querySelector('.pose');
+    if(poseEl){
+      if(pose === 'sit'){
+        poseEl.style.transformBox = 'view-box';
+        poseEl.style.transformOrigin = '24px 26px';
+        poseEl.style.transform = 'rotate(-20deg)';
+      } else if(poseEl.style.transform){
+        poseEl.style.transform = '';
+        poseEl.style.transformOrigin = '';
+        poseEl.style.transformBox = '';
+      }
+    }
     dog.style.transform = 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px)'
                         + (dogDir < 0 ? ' scaleX(-1)' : '');
     // the pups walk in the parent's wake, in from one edge and out the other
@@ -8752,12 +9050,19 @@ PAWS.load();
       const px = 26 + p.p * (W - 52);
       p.el.style.transform = 'translate(' + px.toFixed(1) + 'px, ' + (H - 13).toFixed(1) + 'px)'
                            + (p.face < 0 ? ' scaleX(-1)' : '');
+      p.el.classList.toggle('still', !!p.pause);
     });
     const bub = $id('hmBubble');
     if(bub){
       bub.style.left = x.toFixed(1) + 'px';
       bub.style.top  = (y - 20).toFixed(1) + 'px';
       bub.classList.toggle('flip', x > W * 0.6);
+    }
+    const z = $id('hmZzz');
+    if(z){
+      z.classList.toggle('hide', pose !== 'sleep');
+      z.style.left = (x + (dogDir < 0 ? -20 : 8)).toFixed(1) + 'px';
+      z.style.top  = (y - 22).toFixed(1) + 'px';
     }
   }
 
@@ -8766,14 +9071,28 @@ PAWS.load();
     if(!st || app.hidden || (app.offsetParent === null)) return;
     const now = Date.now();
 
-    if(dogStop){
-      if(now > dogStop) dogStop = 0;
+    // walking most of the time, with a sit, a lie-down or a nap in between
+    if(pose !== 'walk'){
+      if(now > poseUntil){
+        pose = 'walk';
+        nextPose = now + 20000 + Math.random() * 35000;
+      }
     } else {
       dogX += dogDir * 0.018;
       if(dogX <= 0){ dogX = 0; dogDir = 1; }
       if(dogX >= 1){ dogX = 1; dogDir = -1; }
-      // every so often it just stands there, tail going
-      if(Math.random() < 0.01) dogStop = now + 3000 + Math.random() * 4000;
+      if(now > nextPose){
+        const h = new Date().getHours();
+        const sleepy = h >= 21 || h < 6;
+        const r = Math.random();
+        pose = sleepy ? (r < 0.45 ? 'sleep' : r < 0.75 ? 'lie' : 'sit')
+                      : (r < 0.40 ? 'sit' : r < 0.65 ? 'lie'
+                        : r < 0.78 ? 'sleep' : 'still');
+        poseUntil = now + (pose === 'sleep' ? 60000 + Math.random() * 90000
+                         : pose === 'lie'   ? 35000 + Math.random() * 55000
+                         : pose === 'sit'   ? 20000 + Math.random() * 30000
+                         : 6000 + Math.random() * 9000);
+      }
     }
 
     // now and then the pups trot in from one edge, stay a while, and go
@@ -8786,7 +9105,10 @@ PAWS.load();
         el.innerHTML = window.__DOG_SVG || '';
         st.appendChild(el);
         const pup = { el: el, gap: 0.06 + i * 0.045, p: from + (dogDir < 0 ? i * 0.09 : -i * 0.09),
-                      face: dogDir, out: false };
+                      face: dogDir, out: false,
+                      // half of them follow the parent, half go their own way
+                      free: Math.random() < 0.5, dir: dogDir, pause: 0,
+                      next: Date.now() + 8000 + Math.random() * 15000 };
         // put it at the edge before it is ever painted
         el.style.transition = 'none';
         pups.push(pup);
@@ -8799,13 +9121,39 @@ PAWS.load();
 
     // each one walks towards where it is going
     pups.forEach(p2 => {
-      const target = p2.out ? (p2.p > 0.5 ? 1.25 : -0.25) : dogX - dogDir * p2.gap;
-      const d = target - p2.p;
-      if(Math.abs(d) > 0.001){
+      if(p2.out){
+        const target = p2.p > 0.5 ? 1.25 : -0.25;
+        const d = target - p2.p;
         p2.face = d < 0 ? -1 : 1;
         p2.p += Math.sign(d) * Math.min(Math.abs(d), 0.024);
-      } else if(!p2.out){
+        return;
+      }
+      // now and then a pup takes off on its own, or comes back to the parent
+      if(now > p2.next){
+        p2.free = Math.random() < 0.55;
+        p2.next = now + 10000 + Math.random() * 20000;
+      }
+      if(p2.free){
+        if(p2.pause){
+          if(now > p2.pause) p2.pause = 0;
+        } else {
+          p2.p += p2.dir * 0.013;
+          if(p2.p <= 0.03){ p2.p = 0.03; p2.dir = 1; }
+          if(p2.p >= 0.97){ p2.p = 0.97; p2.dir = -1; }
+          p2.face = p2.dir;
+          if(Math.random() < 0.02) p2.pause = now + 2500 + Math.random() * 5000;
+        }
+        return;
+      }
+      const target = dogX - dogDir * p2.gap;
+      const d = target - p2.p;
+      if(Math.abs(d) > 0.004){
+        p2.face = d < 0 ? -1 : 1;
+        p2.p += Math.sign(d) * Math.min(Math.abs(d), 0.024);
+        p2.dir = p2.face;
+      } else {
         p2.face = dogDir;
+        p2.dir = dogDir;
       }
     });
     if(pups.length){
@@ -8826,14 +9174,29 @@ PAWS.load();
       if(bubbleUntil && now > bubbleUntil){
         bub.classList.add('hide');
         bubbleUntil = 0;
-        nextBubble = now + 9000 + Math.random() * 12000;
-      } else if(!bubbleUntil && now > nextBubble){
-        const text = greeted ? MURMURS[Math.floor(Math.random() * MURMURS.length)] : GREET();
+        nextBubble = now + 180000 + Math.random() * 180000;   // three to six minutes
+      } else if(!bubbleUntil && now > nextBubble && pose !== 'sleep'){
         greeted = true;
-        bubbleText = text;
-        bub.innerHTML = text + PAW_TAG;
+        const tell = toTell();
+        // now and then it passes on one of today's plans
+        bubbleText = (tell.length && Math.random() < 0.45)
+          ? planLine(tell[Math.floor(Math.random() * tell.length)])
+          : GREET();
+        bub.innerHTML = bubbleText + PAW_TAG;
         bub.classList.remove('hide');
         bubbleUntil = now + 6500;
+      }
+
+      // a day marked for celebration gets its own greeting, once
+      const party = toCheer();
+      if(party.length && data.cheeredOn !== keyOf(new Date()) && pose !== 'sleep'){
+        data.cheeredOn = keyOf(new Date());
+        PAWS.save(false);
+        bubbleText = Math.random() < 0.5 ? 'お誕生日おめでとう！' : 'Happy Birthday！';
+        bub.innerHTML = bubbleText + PAW_TAG;
+        bub.classList.remove('hide');
+        bubbleUntil = now + 9000;
+        playCheer();
       }
     }
 

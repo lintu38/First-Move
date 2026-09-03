@@ -1493,7 +1493,7 @@
   .walker.sleep .bob, .walker.sleep .leg-a, .walker.sleep .leg-b{ animation:none; }
   .walker.sleep .pose{ transform-box:view-box; transform:translateY(6.5px); }
   .walker.sleep .leg-a, .walker.sleep .leg-b{
-    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.34); }
   .walker.sleep .tail{ animation:none; }
   .walker.sleep circle.dog-nose:last-of-type{
     transform-box:fill-box; transform-origin:50% 50%; transform:scaleY(.22); }
@@ -1502,7 +1502,7 @@
   .walker.lie .bob, .walker.lie .leg-a, .walker.lie .leg-b{ animation:none; }
   .walker.lie .pose{ transform-box:view-box; transform:translateY(6.5px); }
   .walker.lie .leg-a, .walker.lie .leg-b{
-    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.34); }
   .walker.lie .tail{ animation-duration:1.2s; }
 
   /* BREAK wears its hover shade from the start; FINISH wears Get Set's */
@@ -2018,7 +2018,7 @@
   .home-stage .walker.lie .pose, .home-stage .walker.sleep .pose{ transform:translateY(6.5px); }
   .home-stage .walker.lie .leg-a, .home-stage .walker.lie .leg-b,
   .home-stage .walker.sleep .leg-a, .home-stage .walker.sleep .leg-b{
-    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.34); }
   .home-stage .walker.lie .tail{ animation-duration:1.2s; }
   .home-stage .walker.sleep .tail{ animation:none; }
   /* eyes shut while asleep */
@@ -3438,19 +3438,55 @@ PAWS.load();
     playNote(ctx, 1318.5, t + 0.16, 1.4, 0.02);     // a little shimmer
   }
   // A bright little rise to close the session out.
-  // A wind bell: two little glass strikes that hang in the air.
+  // A little air around the bell, so it rings in a room and not in a wire.
+  let bellRoom = null;
+  function bellAir(ctx){
+    if(bellRoom) return bellRoom;
+    const len = Math.floor(ctx.sampleRate * 2.4);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for(let c = 0; c < 2; c++){
+      const d = buf.getChannelData(c);
+      for(let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8);
+    }
+    const cv = ctx.createConvolver(); cv.buffer = buf;
+    const wet = ctx.createGain(); wet.gain.value = 0.55;
+    cv.connect(wet); wet.connect(ctx.destination);
+    bellRoom = cv;
+    return cv;
+  }
+
+  // One strike of glass: partials that are not whole multiples of the
+  // note, a sharp attack, and a long tail — the shape of a 風鈴.
+  function bellStrike(ctx, at, base, level){
+    const parts = [[1, 1], [2.76, 0.5], [5.4, 0.3], [8.93, 0.16], [13.34, 0.08]];
+    const out = ctx.createGain();
+    out.gain.value = level;
+    out.connect(ctx.destination);
+    try{ out.connect(bellAir(ctx)); }catch(e){}
+    parts.forEach(([mult, amp], i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = base * mult * (1 + (Math.random() - 0.5) * 0.004);
+      const dur = 3.4 / (1 + i * 0.8);       // the bright partials go first
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, amp), at + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      osc.connect(g); g.connect(out);
+      osc.start(at);
+      osc.stop(at + dur + 0.05);
+    });
+  }
+
+  // Three turns of the breeze, the last one only just there.
   function playWindBell(){
     if(data.soundOn === false) return;
     const ctx = ensureAudio(); if(!ctx) return;
-    const t = ctx.currentTime + 0.04;
-    const strike = (at, f) => {
-      playNote(ctx, f, at, 3.4, 0.05);
-      playNote(ctx, f * 1.5, at + 0.01, 2.6, 0.02);
-      playNote(ctx, f * 2.02, at + 0.02, 1.8, 0.012);
-    };
-    strike(t, 2093.0);          // C7
-    strike(t + 0.42, 2637.0);   // E7
-    strike(t + 1.15, 2093.0);
+    const t = ctx.currentTime + 0.05;
+    bellStrike(ctx, t,        1568.0, 0.16);   // G6
+    bellStrike(ctx, t + 0.31, 2093.0, 0.13);   // C7
+    bellStrike(ctx, t + 0.82, 1760.0, 0.10);   // A6
+    bellStrike(ctx, t + 1.75, 2093.0, 0.055);
   }
 
   function playClose(){
@@ -4670,10 +4706,10 @@ PAWS.load();
             <input type="number" id="workGoalInput" min="1" max="1440" value="${Math.round(goalFor(data.taskType || 'WORK')/60)}"> min
           </div>
         </div>
-        <div class="settings">
+        ${CAN_MINI ? `<div class="settings">
           <span class="lbl">${ICON.window}Mini Window</span>
           <button class="toggle" id="miniBtn">Open</button>
-        </div>
+        </div>` : ''}
         <div class="settings">
           <span class="lbl">${ICON.sound}Sound</span>
           <button class="toggle ${data.soundOn === false ? '' : 'on'}" id="soundToggle">${data.soundOn === false ? 'OFF' : 'ON'}</button>
@@ -5071,7 +5107,16 @@ PAWS.load();
     }, 2000);
   }
 
+  // A phone has nowhere to put a second window, and no way back from one.
+  const CAN_MINI = (function(){
+    try{
+      if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return false;
+      return matchMedia('(hover: hover) and (pointer: fine)').matches;
+    }catch(e){ return true; }
+  })();
+
   function openMini(){
+    if(!CAN_MINI){ alert('小窓はパソコン用の機能です。'); return; }
     if(data.phase !== 'working' && data.phase !== 'break'){
       alert('計測を始めてから開いてください。');
       return;
@@ -5144,6 +5189,15 @@ PAWS.load();
         playWindBell();
         saveData();
       }
+      const walker = $id('walker');
+      if(walker){
+        const want = breakPose();
+        if(!walker.classList.contains(want)){
+          walker.classList.remove('sit', 'lie', 'sleep');
+          if(want) walker.classList.add(want);
+        }
+      }
+      placeZzz(st.dogPos);
       // the dog sits down and says so, for as long as the break lasts
       const bub = $id('cheer');
       if(bub){

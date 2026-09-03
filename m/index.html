@@ -2741,7 +2741,9 @@ window.PAWS = (function(){
       <div class="card">
         <div class="section-title"><span>この端末だけの記録</span></div>
         <div class="te-note">スマホ版です。ほかの端末とは同期しません。記録はこのブラウザの中にだけ保存されます。<br>
-          機種変更やブラウザのデータ消去で消えてしまうので、ときどき下の EXPORT でファイルに保管しておくと安心です。</div>
+          ときどき下の EXPORT でファイルに保管しておくと安心です。</div>
+        <div class="te-note" id="mStore">保存の状態を調べています…</div>
+        <div class="ed-actions"><button class="ed-cancel" id="mStoreFix">保存を守る</button></div>
       </div>
 
       <div class="help ${helpOpen ? 'open' : ''}">
@@ -9729,6 +9731,48 @@ PAWS.load();
 PAWS.initShell();
 </script>
 
+<script>
+  // Android clears a site's storage when space runs short — unless the site
+  // has asked to be kept. Ask quietly, and say plainly where things stand.
+  (function(){
+    const store = navigator.storage;
+    function paint(){
+      const box = document.getElementById('mStore');
+      if(!box) return;
+      const btn = document.getElementById('mStoreFix');
+      if(!store || !store.persisted){
+        if(box.textContent !== 'この端末では保存の状態を確認できません。')
+          box.textContent = 'この端末では保存の状態を確認できません。';
+        if(btn) btn.style.display = 'none';
+        return;
+      }
+      Promise.all([store.persisted(), store.estimate ? store.estimate().catch(() => null) : null])
+        .then(([kept, q]) => {
+          const size = (q && q.usage != null)
+            ? '（いま ' + Math.max(1, Math.round(q.usage / 1024)) + ' KB 使用）' : '';
+          const text = kept
+            ? '保存は守られています。空き容量が少なくなっても、記録が消されることはありません。' + size
+            : 'まだ守られていません。「保存を守る」を押すか、ホーム画面に追加して使うと守られます。' + size;
+          if(box.textContent !== text) box.textContent = text;
+          if(btn) btn.style.display = kept ? 'none' : '';
+        }).catch(() => {});
+    }
+    document.addEventListener('click', e => {
+      if(e.target && e.target.id === 'mStoreFix'){
+        (store && store.persist ? store.persist() : Promise.resolve()).catch(() => {}).then(paint);
+      }
+    });
+    addEventListener('load', () => {
+      const pane = document.getElementById('paneShared');
+      if(pane) new MutationObserver(paint).observe(pane, { childList:true });
+      paint();
+      // ask once, without bothering anyone: Chrome decides by itself
+      if(store && store.persist && store.persisted){
+        store.persisted().then(k => { if(!k) return store.persist(); }).catch(() => {});
+      }
+    });
+  })();
+</script>
 <script>
   // Installed on a phone, the app should still open with no signal.
   if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){

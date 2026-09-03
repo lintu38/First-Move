@@ -1455,7 +1455,29 @@
   .walker.sit .pose{ transform-box:view-box; transform-origin:24px 26px;
     transform:rotate(-20deg); }
   .walker.sit rect[x="8.5"], .walker.sit rect[x="11.5"]{
-    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.2); }
+    transform-box:fill-box; transform-origin:50% 0;
+    transform:translateY(2px) rotate(-72deg); }
+  /* the tucked-in leg needs its own shade, or it disappears into the body */
+  .walker.sit rect[x="11.5"]{ fill:#A6845C; }
+  .walker.sit.coat-beige rect[x="11.5"]{ fill:#A98B5F; }
+  .walker.sit.coat-black rect[x="11.5"]{ fill:#332C25; }
+  .walker.sit.coat-brown rect[x="11.5"]{ fill:#6E5339; }
+
+  /* asleep: the same shape as lying, with the eye shut and the tail still */
+  .walker.sleep .bob, .walker.sleep .leg-a, .walker.sleep .leg-b{ animation:none; }
+  .walker.sleep .pose{ transform-box:view-box; transform:translateY(6.5px); }
+  .walker.sleep .leg-a, .walker.sleep .leg-b{
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+  .walker.sleep .tail{ animation:none; }
+  .walker.sleep circle.dog-nose:last-of-type{
+    transform-box:fill-box; transform-origin:50% 50%; transform:scaleY(.22); }
+
+  /* lying down, wherever it happens */
+  .walker.lie .bob, .walker.lie .leg-a, .walker.lie .leg-b{ animation:none; }
+  .walker.lie .pose{ transform-box:view-box; transform:translateY(6.5px); }
+  .walker.lie .leg-a, .walker.lie .leg-b{
+    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.16); }
+  .walker.lie .tail{ animation-duration:1.2s; }
 
   /* BREAK wears its hover shade from the start; FINISH wears Get Set's */
   #paneSs .pill.quiet{ background:var(--bg-card-hover); color:var(--text); }
@@ -1935,7 +1957,8 @@
      The tilt itself is set from script, since the dog may be mirrored. */
   /* the hind legs fold away under the body */
   .home-stage .walker.sit rect[x="8.5"], .home-stage .walker.sit rect[x="11.5"]{
-    transform-box:fill-box; transform-origin:50% 0; transform:scaleY(.2); }
+    transform-box:fill-box; transform-origin:50% 0;
+    transform:translateY(2px) rotate(-72deg); }
   .home-stage .walker.sit .leg-a, .home-stage .walker.sit .leg-b{ animation:none; }
   .home-stage .walker.sit .bob{ animation:none; }
   .home-stage .walker.lie .bob, .home-stage .walker.lie .leg-a, .home-stage .walker.lie .leg-b,
@@ -2043,6 +2066,42 @@
 
   .home-card.wx .mini-btn{ padding:5px 10px; font-size:10px; }
   .wx-line{ gap:10px; }
+
+  /* what the weather is doing outside, over the yard */
+  .wx-scene{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+  .wx-cloud{ position:absolute; animation-name:cloudDrift; animation-timing-function:linear;
+    animation-iteration-count:infinite; }
+  .wx-cloud svg{ width:100%; height:auto; display:block; }
+  @keyframes cloudDrift{ from{ transform:translateX(-30px); } to{ transform:translateX(460px); } }
+
+  .wx-rain, .wx-snow{ position:absolute; inset:0; }
+  .wx-rain i{ position:absolute; top:-14px; width:1.6px; height:11px; border-radius:1px;
+    background:linear-gradient(#A6C0CE, rgba(166,192,206,0));
+    animation-name:rainFall; animation-timing-function:linear; animation-iteration-count:infinite; }
+  @keyframes rainFall{
+    0%{ transform:translateY(0); opacity:0; }
+    12%{ opacity:.55; }
+    100%{ transform:translateY(155px); opacity:0; } }
+  .wx-snow i{ position:absolute; top:-10px; width:4px; height:4px; border-radius:999px;
+    background:#F2F6F8; opacity:.85;
+    animation-name:snowFall; animation-timing-function:linear; animation-iteration-count:infinite; }
+  @keyframes snowFall{
+    0%{ transform:translate(0,0); opacity:0; }
+    12%{ opacity:.85; }
+    100%{ transform:translate(14px,150px); opacity:0; } }
+
+  .wx-fog{ position:absolute; left:0; right:0; top:38%; height:44%;
+    background:linear-gradient(180deg, rgba(226,224,216,0), rgba(226,224,216,.55) 45%, rgba(226,224,216,0));
+    animation:fogDrift 26s ease-in-out infinite alternate; }
+  @keyframes fogDrift{ from{ transform:translateX(-8px); } to{ transform:translateX(8px); } }
+
+  .wx-flash{ position:absolute; inset:0; background:#FFF8E6; opacity:0;
+    animation:flash 14s linear infinite; }
+  @keyframes flash{
+    0%,92%{ opacity:0; } 93%{ opacity:.5; } 94%{ opacity:.05; } 95%{ opacity:.35; } 97%,100%{ opacity:0; } }
+
+  .orb.dim{ opacity:.45; }
+  @media (prefers-reduced-motion: reduce){ .wx-scene{ display:none; } }
 </style>
 </head>
 <body>
@@ -3565,6 +3624,7 @@ PAWS.load();
   // Place the dog and everyone following it.
   function positionPack(p){
     positionWalker(p);
+    placeZzz(p);
     placePoint($id('bfOrbit'), p);
     const trail = PUP_TRAIL / 360;
     $qa('[data-pup]').forEach(el => {
@@ -3649,6 +3709,21 @@ PAWS.load();
   }
 
   // Same spot as the dog, but without the ring rotation.
+  // the little z's float just above the sleeping dog
+  function placeZzz(p){
+    const el = $id('ssZzz');
+    if(!el) return;
+    const sleeping = data.phase === 'break' && breakPose() === 'sleep';
+    el.classList.toggle('hide', !sleeping);
+    if(!sleeping) return;
+    const t = ((p % 1) + 1) % 1;
+    const a = -Math.PI/2 + t * Math.PI * 2;
+    const x = DIAL_SIZE/2 + Math.cos(a) * (DIAL_R + FEET_OFFSET);
+    const y = DIAL_SIZE/2 + Math.sin(a) * (DIAL_R + FEET_OFFSET);
+    el.style.left = (x + 6).toFixed(1) + 'px';
+    el.style.top  = (y - 20).toFixed(1) + 'px';
+  }
+
   function placeBubble(el, p){
     const t = ((p % 1) + 1) % 1;
     const ang = -Math.PI/2 + t * Math.PI * 2;
@@ -4324,7 +4399,8 @@ PAWS.load();
         sub: phase === 'break' ? 'break ' + fmtElapsed(restElapsed())
                                : 'session ' + fmtElapsed(w),
         lap: Math.floor(p),
-        dogClass: phase === 'break' ? 'sit' : '',
+        // it flops down, dozes off, and sits up for the last minute
+        dogClass: phase === 'break' ? breakPose() : '',
         dogPos: p,
         live: phase === 'working'
       };
@@ -4454,6 +4530,7 @@ PAWS.load();
           ${st.sub ? `<div class="sub-clock">${st.sub}</div>` : ''}
         </div>
         <div class="walker ${st.dogClass}" id="walker">${DOG_SVG}</div>
+        <span class="zzz ${st.dogClass === 'sleep' ? '' : 'hide'}" id="ssZzz"><i>z</i><i>z</i><i>z</i></span>
         ${(data.phase === 'working' || data.phase === 'break')
             ? `<div class="dog-bubble sess ${data.phase === 'break' ? '' : 'hide'}" id="cheer">${data.phase === 'break' ? (data.breakChimed ? 'そろそろ始める？' : 'ひとやすみ') : (cheerText || '')}<span class="bpaw"></span></div>`
             : ''}
@@ -5173,6 +5250,14 @@ PAWS.load();
     await saveData();
     render();
     if(fast) celebrateBurst();
+  }
+
+  // A minute of lying down, then a nap, then up for the last minute.
+  function breakPose(){
+    const r = restElapsed(), lim = breakLimit();
+    if(r >= Math.max(0, lim - 60)) return 'sit';
+    if(r < 60) return 'lie';
+    return 'sleep';
   }
 
   const BREAK_MINS = [5, 10, 15, 30, 60];
@@ -8560,6 +8645,33 @@ PAWS.load();
   function toCheer(){
     return todaysPlans().filter(e => e && e.celebrate);
   }
+  // What the dog makes of the weather outside.
+  function wxLine(){
+    const w = data.wx;
+    if(!w || typeof w.code !== 'number') return null;
+    const k = sky(w.code).key;
+    const pool = [];
+    if(k === 'rain' || k === 'storm'){
+      pool.push('雨がふってきた', '雨やどり', '雨の音がするね', 'かさ わすれずにね');
+      if(k === 'storm') pool.push('かみなり こわい');
+    } else if(k === 'snow'){
+      pool.push('雪だよ！', 'つめたーい', '足あとつけたい');
+    } else if(k === 'clear'){
+      pool.push('いいお天気だね', 'おさんぽ日和', 'ひなたぼっこ日和');
+    } else if(k === 'part'){
+      pool.push('おだやかな空だね', 'ちょうどいい天気');
+    } else if(k === 'cloud'){
+      pool.push('くもってきたね', 'すずしいね');
+    } else if(k === 'fog'){
+      pool.push('きりが でてるよ', 'まっしろだね');
+    }
+    if(typeof w.temp === 'number'){
+      if(w.temp >= 30) pool.push('きょうは あついね', 'お水 のみたい');
+      if(w.temp <= 5)  pool.push('さむいね', 'ぬくぬくしたい');
+    }
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+
   function planLine(e){
     if(!e) return null;
     const title = e.title || '予定';
@@ -8623,6 +8735,7 @@ PAWS.load();
     app.innerHTML = `
       <div class="home-stage ${skyNow().cls}" id="hmStage">
         ${skyHtml()}
+        ${wxHtml()}
         <div class="home-date">
           <span class="hd-md">${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}</span>
           <span class="hd-wd">${WD_EN[idxOf(now)]}</span>
@@ -9017,12 +9130,70 @@ PAWS.load();
     </svg>`;
   }
 
+  // The weather that is actually outside, drawn over the yard.
+  function wxScene(){
+    const w = data.wx;
+    if(!w || typeof w.code !== 'number') return null;
+    const k = sky(w.code).key;                 // clear / part / cloud / fog / rain / snow / storm
+    if(k === 'clear') return null;
+    return k;
+  }
+
+  const CLOUD_ART = c => `<svg viewBox="0 0 60 26" aria-hidden="true">
+    <path d="M12 25h34a9 9 0 0 0 .8-18 12.5 12.5 0 0 0-23.8 3A7.8 7.8 0 0 0 12 25Z" fill="${c}"/>
+  </svg>`;
+
+  function wxHtml(){
+    const kind = wxScene();
+    if(!kind || reduced()) return '';
+    const cloudy = kind !== 'fog';
+    const tone = (kind === 'rain' || kind === 'storm') ? '#CBCFD2'
+               : kind === 'snow' ? '#E2E7EA' : '#DDD9D0';
+    // a few clouds, drifting at their own pace
+    const clouds = !cloudy ? '' : [
+      { x:-25, y:10, w:74, s:78, o:.5 },
+      { x:20,  y:26, w:56, s:104, o:.42 },
+      { x:62,  y:6,  w:88, s:132, o:.34 }
+    ].map(c => `<span class="wx-cloud" style="left:${c.x}%; top:${c.y}px; width:${c.w}px;
+        opacity:${c.o}; animation-duration:${c.s}s">${CLOUD_ART(tone)}</span>`).join('');
+
+    let fall = '';
+    if(kind === 'rain' || kind === 'storm'){
+      fall = '<span class="wx-rain">' + Array.from({ length: 16 }, (_, i) =>
+        `<i style="left:${(4 + i * 6 + Math.random() * 4).toFixed(1)}%;
+            animation-duration:${(0.7 + Math.random() * 0.5).toFixed(2)}s;
+            animation-delay:${(Math.random() * 1.2).toFixed(2)}s"></i>`).join('') + '</span>';
+    } else if(kind === 'snow'){
+      fall = '<span class="wx-snow">' + Array.from({ length: 12 }, (_, i) =>
+        `<i style="left:${(5 + i * 8 + Math.random() * 5).toFixed(1)}%;
+            animation-duration:${(6 + Math.random() * 4).toFixed(1)}s;
+            animation-delay:${(Math.random() * 5).toFixed(1)}s"></i>`).join('') + '</span>';
+    }
+    const haze = (kind === 'fog') ? '<span class="wx-fog"></span>' : '';
+    const flash = (kind === 'storm') ? '<span class="wx-flash"></span>' : '';
+    return `<div class="wx-scene ${kind}">${clouds}${haze}${fall}${flash}</div>`;
+  }
+
   function skyHtml(){
     const s = skyNow();
+    const kind = wxScene();
+    const dim = (kind === 'cloud' || kind === 'rain' || kind === 'snow' || kind === 'storm')
+      ? ' dim' : '';
     const art = s.orb === 'moon' ? moonSvg() : '';
     const title = s.orb === 'moon' ? ' title="' + moonName(moonPhase()) + '"' : '';
     return `<div class="sky"></div>
-      <span class="orb ${s.orb}"${title} style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px">${art}</span>`;
+      <span class="orb ${s.orb}${dim}"${title} style="left:${s.x.toFixed(1)}%; top:${s.y.toFixed(0)}px">${art}</span>`;
+  }
+
+  // The kennel's spot, as a place the dog can walk to.
+  const HOUSE_AT = 76;                     // per cent across the stage
+  function shelterX(W){
+    const px = (HOUSE_AT / 100) * W - 14;      // just at the doorway, not over it
+    return Math.max(0, Math.min(1, (px - 26) / Math.max(1, W - 52)));
+  }
+  function raining(){
+    const k = wxScene();
+    return k === 'rain' || k === 'storm';
   }
 
   function stage(){ return $id('hmStage'); }
@@ -9077,13 +9248,34 @@ PAWS.load();
     if(!st || app.hidden || (app.offsetParent === null)) return;
     const now = Date.now();
 
+    // when it rains, everyone heads for the kennel and waits it out
+    const wet = raining();
+    if(wet){
+      const target = shelterX(st.clientWidth || 300);
+      const d = target - dogX;
+      if(Math.abs(d) > 0.015){
+        dogDir = d < 0 ? -1 : 1;
+        dogX += Math.sign(d) * 0.018;
+        pose = 'walk';
+        poseUntil = 0;
+      } else {
+        dogX = target;
+        dogDir = -1;                       // sitting in the doorway, looking out
+        if(pose === 'walk' || pose === 'still' || now > poseUntil){
+          pose = Math.random() < 0.6 ? 'sit' : 'lie';
+          poseUntil = now + 20000 + Math.random() * 30000;
+        }
+      }
+      nextPose = now + 20000;
+    }
+
     // walking most of the time, with a sit, a lie-down or a nap in between
-    if(pose !== 'walk'){
+    if(!wet && pose !== 'walk'){
       if(now > poseUntil){
         pose = 'walk';
         nextPose = now + 20000 + Math.random() * 35000;
       }
-    } else {
+    } else if(!wet){
       dogX += dogDir * 0.018;
       if(dogX <= 0){ dogX = 0; dogDir = 1; }
       if(dogX >= 1){ dogX = 1; dogDir = -1; }
@@ -9132,6 +9324,19 @@ PAWS.load();
         const d = target - p2.p;
         p2.face = d < 0 ? -1 : 1;
         p2.p += Math.sign(d) * Math.min(Math.abs(d), 0.024);
+        return;
+      }
+      if(wet){
+        const t = shelterX(st.clientWidth || 300) + (p2.gap * 1.3);
+        const d = t - p2.p;
+        if(Math.abs(d) > 0.008){
+          p2.face = d < 0 ? -1 : 1;
+          p2.p += Math.sign(d) * Math.min(Math.abs(d), 0.022);
+          p2.pause = 0;
+        } else {
+          p2.face = -1;
+          p2.pause = now + 4000;
+        }
         return;
       }
       // now and then a pup takes off on its own, or comes back to the parent
@@ -9183,11 +9388,14 @@ PAWS.load();
         nextBubble = now + 180000 + Math.random() * 180000;   // three to six minutes
       } else if(!bubbleUntil && now > nextBubble && pose !== 'sleep'){
         greeted = true;
+        // a plan to pass on, a word about the weather, or simply hello
         const tell = toTell();
-        // now and then it passes on one of today's plans
-        bubbleText = (tell.length && Math.random() < 0.45)
-          ? planLine(tell[Math.floor(Math.random() * tell.length)])
-          : GREET();
+        let text = null;
+        if(tell.length && Math.random() < 0.35){
+          text = planLine(tell[Math.floor(Math.random() * tell.length)]);
+        }
+        if(!text && Math.random() < 0.4) text = wxLine();
+        bubbleText = text || GREET();
         bub.innerHTML = bubbleText + PAW_TAG;
         bub.classList.remove('hide');
         bubbleUntil = now + 6500;

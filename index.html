@@ -7999,14 +7999,22 @@ PAWS.load();
   function postCalToHost(){
     if(!(window.parent && window.parent !== window)) return;
     try{
-      const k = todayKey();
       window.parent.postMessage({
         source: 'onestep-cal',
-        date: k,
-        events: eventsOn(k).map(e => ({
+        today: todayKey(),
+        events: events().map(e => ({
           title: e.title || '',
+          date: e.date || '',
+          endDate: e.endDate || '',
           allDay: !!e.allDay,
-          time: dayTimeText(e, k),
+          start: e.start || '',
+          end: e.end || '',
+          repeat: e.repeat || 'none',
+          every: e.every || 1,
+          days: Array.isArray(e.days) ? e.days.slice() : null,
+          monthDay: e.monthDay || 0,
+          monthEnd: !!e.monthEnd,
+          cont: e.cont === false ? false : true,
           type: typeOf(e.type).label,
           color: typeOf(e.type).color
         }))
@@ -8737,6 +8745,11 @@ PAWS.load();
     payload: payload,
     merge: mergeRemote,
     rerender: () => { render(); postCalToHost(); }
+  });
+
+  window.addEventListener('message', ev => {
+    const d = ev.data;
+    if(d && d.source === 'tasks-req-cal') postCalToHost();
   });
 
   render();

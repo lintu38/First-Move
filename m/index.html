@@ -7945,7 +7945,33 @@ PAWS.load();
     return '〜' + (b.getMonth()+1) + '/' + b.getDate() + '（' + (n + 1) + '日間）';
   }
 
-  function save(){ PAWS.save(); }
+  function save(){ PAWS.save(); postCalToHost(); }
+  /* Tasks の右パネルへ、今日の予定を渡す（iframe に入っているときだけ） */
+  function postCalToHost(){
+    if(!(window.parent && window.parent !== window)) return;
+    try{
+      window.parent.postMessage({
+        source: 'onestep-cal',
+        today: todayKey(),
+        events: events().map(e => ({
+          title: e.title || '',
+          date: e.date || '',
+          endDate: e.endDate || '',
+          allDay: !!e.allDay,
+          start: e.start || '',
+          end: e.end || '',
+          repeat: e.repeat || 'none',
+          every: e.every || 1,
+          days: Array.isArray(e.days) ? e.days.slice() : null,
+          monthDay: e.monthDay || 0,
+          monthEnd: !!e.monthEnd,
+          cont: e.cont === false ? false : true,
+          type: typeOf(e.type).label,
+          color: typeOf(e.type).color
+        }))
+      }, '*');
+    }catch(err){ /* cross-origin host, ignore */ }
+  }
   function addTombs(ids){
     const t = data.tombs || (data.tombs = []);
     ids.forEach(id => { if(t.indexOf(id) < 0) t.push(id); });
@@ -8669,10 +8695,17 @@ PAWS.load();
     appId: 'schedule',
     payload: payload,
     merge: mergeRemote,
-    rerender: () => render()
+    rerender: () => { render(); postCalToHost(); }
+  });
+
+  window.addEventListener('message', ev => {
+    const d = ev.data;
+    if(d && d.source === 'tasks-req-cal') postCalToHost();
   });
 
   render();
+  postCalToHost();
+  setInterval(postCalToHost, 60000);
 })();
 
 </script>

@@ -1918,7 +1918,7 @@
     font-family:'Space Mono',monospace; }
 
   /* a small dog trots along above the views */
-  .cal-walk{ position:relative; height:33px; margin:-8px 0 -14px; overflow:hidden; }
+  .cal-walk{ position:relative; height:33px; margin:-8px 0 -14px; overflow:visible; }
   .cal-walk .walker{ z-index:1; }
   .cal-editor .ed-field .toggle{ flex:0 0 auto; }
 
@@ -8442,14 +8442,14 @@ PAWS.load();
 
   /* ---------------- the dog above the views ---------------- */
 
-  let cdX = 0.35, cdDir = -1, cdStop = 0, cdTimer = null;
+  let cdX = 0.35, cdDir = -1, cdStop = 0, cdPose = '', cdTimer = null;
 
   function paintCalDog(){
     const st = $id('calWalk'), dog = $id('calDog');
     if(!st || !dog) return;
     const W = st.clientWidth || 300;
     const x = 18 + cdX * (W - 36);
-    dog.className = 'walker' + (cdStop ? ' still' : '');
+    dog.className = 'walker' + (cdPose ? ' ' + cdPose : '');
     // its paws land on the top edge of the view bar
     dog.style.transform = 'translate(' + x.toFixed(1) + 'px, 26px) scale(.8)'
                         + (cdDir < 0 ? ' scaleX(-1)' : '');
@@ -8459,13 +8459,28 @@ PAWS.load();
     const st = $id('calWalk');
     if(!st || st.offsetParent === null) return;
     const now = Date.now();
-    if(cdStop){
-      if(now > cdStop) cdStop = 0;
+    if(cdPose){
+      if(now > cdStop){ cdPose = ''; cdStop = 0; }
     } else {
-      cdX += cdDir * 0.014;
+      cdX += cdDir * 0.012;
       if(cdX <= 0){ cdX = 0; cdDir = 1; }
       if(cdX >= 1){ cdX = 1; cdDir = -1; }
-      if(Math.random() < 0.012) cdStop = now + 3000 + Math.random() * 5000;
+      const h = new Date().getHours();
+      const deep = h >= 22 || h < 6, quiet = h >= 20 && h < 22;
+      if(Math.random() < (deep ? .075 : quiet ? .030 : .013)){
+        const rr = (a, b) => a + Math.random() * (b - a);
+        const r = Math.random();
+        cdPose = deep  ? (r < .78 ? 'sleep' : r < .93 ? 'lie' : r < .98 ? 'sit' : 'still')
+               : quiet ? (r < .35 ? 'sleep' : r < .70 ? 'lie' : r < .92 ? 'sit' : 'still')
+                       : (r < .26 ? 'still' : r < .58 ? 'sit' : r < .86 ? 'lie' : 'sleep');
+        cdStop = now + (
+            cdPose === 'sleep' ? (deep ? rr(420000, 1800000)
+                               : quiet ? rr(180000, 480000) : rr(120000, 420000))
+          : cdPose === 'lie'   ? (deep ? rr(120000, 300000)
+                               : quiet ? rr(90000, 240000) : rr(70000, 220000))
+          : cdPose === 'sit'   ? rr(35000, 110000)
+          : rr(12000, 35000));
+      }
     }
     paintCalDog();
   }
@@ -9618,7 +9633,11 @@ PAWS.load();
     if(!wet && pose !== 'walk'){
       if(now > poseUntil){
         pose = 'walk';
-        nextPose = now + 20000 + Math.random() * 35000;
+        const h2 = new Date().getHours();
+        const deep2 = h2 >= 22 || h2 < 6, quiet2 = h2 >= 20 && h2 < 22;
+        nextPose = now + (deep2 ? 3000 + Math.random() * 6000
+                        : quiet2 ? 8000 + Math.random() * 16000
+                        : 19000 + Math.random() * 40000);
       }
     } else if(!wet){
       dogX += dogDir * 0.018;
@@ -9626,15 +9645,20 @@ PAWS.load();
       if(dogX >= 1){ dogX = 1; dogDir = -1; }
       if(now > nextPose){
         const h = new Date().getHours();
-        const sleepy = h >= 21 || h < 6;
+        const deep  = h >= 22 || h < 6;          /* 夜はほとんど寝ている */
+        const quiet = h >= 20 && h < 22;
+        const rr = (a, b) => a + Math.random() * (b - a);
         const r = Math.random();
-        pose = sleepy ? (r < 0.45 ? 'sleep' : r < 0.75 ? 'lie' : 'sit')
-                      : (r < 0.40 ? 'sit' : r < 0.65 ? 'lie'
-                        : r < 0.78 ? 'sleep' : 'still');
-        poseUntil = now + (pose === 'sleep' ? 60000 + Math.random() * 90000
-                         : pose === 'lie'   ? 35000 + Math.random() * 55000
-                         : pose === 'sit'   ? 20000 + Math.random() * 30000
-                         : 6000 + Math.random() * 9000);
+        pose = deep  ? (r < .78 ? 'sleep' : r < .93 ? 'lie' : r < .98 ? 'sit' : 'still')
+             : quiet ? (r < .35 ? 'sleep' : r < .70 ? 'lie' : r < .92 ? 'sit' : 'still')
+                     : (r < .26 ? 'still' : r < .58 ? 'sit' : r < .86 ? 'lie' : 'sleep');
+        poseUntil = now + (
+            pose === 'sleep' ? (deep ? rr(420000, 1800000)
+                             : quiet ? rr(180000, 480000) : rr(120000, 420000))
+          : pose === 'lie'   ? (deep ? rr(120000, 300000)
+                             : quiet ? rr(90000, 240000) : rr(70000, 220000))
+          : pose === 'sit'   ? rr(35000, 110000)
+          : rr(12000, 35000));
       }
     }
 

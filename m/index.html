@@ -406,6 +406,8 @@
     z-index: 3;
   }
   .walker svg{ width:100%; height:100%; overflow: visible; }
+  /* 庭の子たちは、さわると返事をする */
+  .home-stage .walker{ pointer-events:auto; cursor:pointer; }
   .dog-body{ fill: #C9A87C; }
   .dog-dark{ fill: #A6845C; }
   .dog-light{ fill: #EBDCC4; }
@@ -1948,6 +1950,19 @@
   /* the dog's own patch of ground: no frame, just room to walk */
   .home-stage{ position:relative; height:150px; margin:-4px 0 -2px; overflow:hidden;
     border-radius:14px; }
+  /* ---- 庭だけの小窓 ---- */
+  html.yard, html.yard body{ height:100%; min-height:0; overflow:hidden; }
+  html.yard body{ padding:0; display:block; background:var(--bg); }
+  html.yard .app{ max-width:none; gap:0; height:100%; }
+  html.yard .head-block,
+  html.yard .tabbar,
+  html.yard #paneShared,
+  html.yard .pane:not(#paneHome),
+  html.yard #paneHome > *:not(#homeTop),
+  html.yard #homeTop > *:not(#hmStage){ display:none !important; }
+  html.yard #paneHome{ gap:0; height:100%; flex:1 1 auto; min-height:0; }
+  html.yard #homeTop{ height:100%; }
+  html.yard .home-stage{ height:100%; margin:0; border-radius:0; }
   /* the sky, and whatever is up in it */
   /* the faintest wash of the hour: it fades out at the top and at both ends,
      so the panel itself never shows an edge */
@@ -2195,6 +2210,8 @@ window.PAWS = (function(){
   const SYNC_KEY = 'paw_mobile_sync';
   // The little window is only a view of another window's session.
   const MINI = /[?&]mini=1/.test(window.location.search);
+  /* 庭だけを出す小窓 */
+  if(/[?&]yard=1/.test(window.location.search)) document.documentElement.classList.add('yard');
 
   const DEFAULT_TYPES = [
     { id:'WORK',  label:'WORK',  color:'#46AFC2', icon:'briefcase' },
@@ -4735,6 +4752,7 @@ PAWS.load();
 
     bind('startBtn', onStartWork);
     bind('miniBtn', openMini);
+    bind('yardBtn', openYard);
     bind('soundToggle', () => { data.soundOn = data.soundOn === false; saveData(); PAWS.refreshAll(); if(data.soundOn){ ensureAudio(); playChime(); } });
     bind('goBtn', onGo);
     bind('breakBtn', onBreak);
@@ -5071,6 +5089,30 @@ PAWS.load();
       return matchMedia('(hover: hover) and (pointer: fine)').matches;
     }catch(e){ return true; }
   })();
+
+  /* 庭だけの小窓：犬たちの様子をいつでも眺められる */
+  function openYard(){
+    if(!CAN_MINI){ alert('小窓はパソコン用の機能です。'); return; }
+    const g = (function(){ try{ return JSON.parse(localStorage.getItem('paw_yard_win') || 'null') || {}; }
+                           catch(e){ return {}; } })();
+    const w = Math.max(220, Math.min(1200, g.w || 360));
+    const h = Math.max(140, Math.min(1200, g.h || 220));
+    let feat = 'width=' + w + ',height=' + h + ',menubar=no,toolbar=no,location=no,status=no';
+    if(typeof g.x === 'number' && typeof g.y === 'number'){
+      feat += ',left=' + Math.max(0, Math.round(g.x)) + ',top=' + Math.max(0, Math.round(g.y));
+    }
+    const url = location.href.split(/[?#]/)[0] + '?yard=1&tab=home';
+    const win = window.open(url, 'pawYard', feat);
+    if(!win){ alert('小窓がブロックされました。ポップアップを許可してから、もう一度どうぞ。'); return; }
+    win.focus();
+    const keep = setInterval(() => {
+      if(win.closed){ clearInterval(keep); return; }
+      try{
+        localStorage.setItem('paw_yard_win', JSON.stringify(
+          {x: win.screenX, y: win.screenY, w: win.outerWidth, h: win.outerHeight}));
+      }catch(e){}
+    }, 4000);
+  }
 
   function openMini(){
     if(!CAN_MINI){ alert('小窓はパソコン用の機能です。'); return; }
@@ -9227,6 +9269,37 @@ PAWS.load();
 
   const PAW_TAG = '<span class="bpaw"></span>';
 
+  /* さわられたときのひとこと */
+  const TAP_LINES = {
+    sleep: ['むにゃ…', 'zzz…', 'いい夢みてる', 'もうすこし ねかせて…'],
+    lie:   ['ごろごろ…', 'おなかすいた…', 'ひなたぼっこ日和', 'ちょっとねむい…'],
+    sit:   ['おやつ、まだかな', 'なでて', 'ここで まってるよ', 'いいこに してるよ'],
+    still: ['なぁに？', 'いいにおいが する', 'ちょっと きゅうけい'],
+    walk:  ['おさんぽ、たのしい♪', 'しっぽが うずうずする', 'きょうも がんばろ',
+            'こっちだよ！', 'もふもふしたい', 'まったり']
+  };
+  const TAP_PUP = ['わん！', 'あそぼ！', 'まってー', 'ぼく、ちいさい', 'わーい'];
+  function tapDog(isPup){
+    const bub = $id('hmBubble');
+    if(!bub) return;
+    const now = Date.now();
+    let text;
+    if(isPup){
+      text = TAP_PUP[Math.floor(Math.random() * TAP_PUP.length)];
+    } else {
+      const pool = TAP_LINES[pose] || TAP_LINES.walk;
+      text = pool[Math.floor(Math.random() * pool.length)];
+      if(pose !== 'sleep' && Math.random() < .25) text = wxLine() || GREET();
+      /* 歩いていたら、ちょっと止まってこちらを見る */
+      if(pose === 'walk'){ pose = 'still'; poseUntil = now + 4500; nextPose = poseUntil; }
+    }
+    bubbleText = text;
+    bub.innerHTML = bubbleText + PAW_TAG;
+    bub.classList.remove('hide');
+    bubbleUntil = now + 4500;
+    paintDog();
+  }
+
   let dogX = 0.5, dogDir = -1, dogTimer = null;
   // walk · still · sit · lie · sleep
   let pose = 'walk', poseUntil = 0, nextPose = Date.now() + 15000 + Math.random() * 25000;
@@ -9844,6 +9917,16 @@ PAWS.load();
       pups.forEach(p => st.appendChild(p.el));
       const movers = [dog].concat(pups.map(p => p.el));
       movers.forEach(el => { el.style.transition = 'none'; });
+      /* 庭のどの子をさわっても返事をする */
+      if(!st.__dogTap){
+        st.__dogTap = true;
+        st.addEventListener('click', ev => {
+          const w = ev.target && ev.target.closest ? ev.target.closest('.walker') : null;
+          if(!w) return;
+          ev.stopPropagation();
+          tapDog(w.classList.contains('pup'));
+        });
+      }
       paintDog();
       void dog.offsetWidth;                       // let the placement settle
       movers.forEach(el => { el.style.transition = ''; });

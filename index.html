@@ -15,7 +15,7 @@
 <title>One Step at a Time</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #FAF6EF;
@@ -5033,7 +5033,7 @@ PAWS.load();
       const d = w.document;
       const fonts = d.createElement('link');
       fonts.rel = 'stylesheet';
-      fonts.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap';
       d.head.appendChild(fonts);
       // the app's own stylesheet, so the dial looks exactly the same
       const base = document.querySelector('style');
@@ -9335,21 +9335,34 @@ PAWS.load();
   function houseSvg(tone){
     const snow = tone.snow
       ? '<path d="M20 1.6 38.4 15H33.2L20 5.6 6.8 15H1.6z" fill="#F2F4F0" opacity=".92"/>' : '';
-    /* 屋根に犬のなまえを入れる（長いときは字を詰める）*/
+    /* 屋根のすぐ下に、なまえの札を掛ける（長いときは字を詰める）*/
     const nm = String((PAWS.dogName ? PAWS.dogName() : '') || '').trim().slice(0, 6);
-    const fs = nm.length <= 2 ? 6.4 : nm.length === 3 ? 5.4 : nm.length === 4 ? 4.4 : 3.7;
+    const fs = nm.length <= 3 ? 5.0 : nm.length === 4 ? 4.3 : nm.length === 5 ? 3.6 : 3.1;
+    /* 札は文字の幅に合わせる */
+    const tw = Math.min(23, nm.length * fs * 1.05);
+    const pw = Math.min(26.8, tw + 4.4);
+    const px = 20 - pw / 2;
     const plate = nm
-      ? `<text x="20" y="13.4" text-anchor="middle" font-size="${fs}" fill="#9A7F5F"
-           font-family="'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',sans-serif"
-           font-weight="700" textLength="${Math.min(18, nm.length * fs).toFixed(1)}"
-           lengthAdjust="spacingAndGlyphs">${esc(nm)}</text>`
-      : '<circle cx="20" cy="11.2" r="1.5" fill="#F7EEDD"/>';
+      ? `<g>
+           <rect x="${px.toFixed(2)}" y="15.2" width="${pw.toFixed(2)}" height="6.4" rx="1.5"
+             fill="#FBF6EC" stroke="#DCC9AC" stroke-width="0.7"/>
+           <text x="20" y="${(19.9 - (5.0 - fs) * 0.18).toFixed(2)}" text-anchor="middle"
+             font-size="${fs}" fill="#8E7454" font-weight="700"
+             font-family="'Zen Maru Gothic','Comfortaa','Zen Kaku Gothic New','Hiragino Maru Gothic ProN',sans-serif"
+             textLength="${tw.toFixed(1)}"
+             lengthAdjust="spacingAndGlyphs">${esc(nm)}</text>
+         </g>`
+      : '';
+    /* 札を掛けたぶん、入口は少し下げる */
+    const door = nm
+      ? 'M20 22.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-3.8c0-3.8 2.3-6.8 6.2-6.8z'
+      : 'M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z';
     return `<svg viewBox="0 0 40 34" aria-hidden="true">
       <path d="M20 2 38 15H2z" fill="#D3BC9F"/>
       <path d="M20 5.4 33.2 15H6.8z" fill="#E1CDB2"/>
       <rect x="6" y="14" width="28" height="19" rx="2" fill="#EEE3D0"/>
-      <path d="M6 20.5h28M6 26.5h28" stroke="#E0D0B8" stroke-width="0.9"/>
-      <path d="M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z" fill="#C6B29A"/>
+      <path d="M6 26.5h28" stroke="#E0D0B8" stroke-width="0.9"/>
+      <path d="${door}" fill="#C6B29A"/>
       ${snow}
       ${plate}
     </svg>`;
@@ -9419,7 +9432,7 @@ PAWS.load();
     { k:'fir',    x: 42, w:44, tall:true  },
     { k:'flower', x: 56, w:11, c:'#EBD08A' },
     { k:'grass',  x: 64, w:15 },
-    { k:'house',  x: 76, w:40 },
+    { k:'house',  x: 76, w:46 },
     { k:'flower', x: 87, w:11, c:'#C8AFD8' },
     { k:'tree',   x: 94, w:33, tall:true  },
     { k:'grass',  x: 99, w:12 }

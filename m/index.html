@@ -3444,15 +3444,23 @@ PAWS.load();
     bellStrike(ctx, t + 1.75, 2093.0, 0.055);
   }
 
-  function playClose(){
+  // Get Set と同じ、柔らかいほうの締め
+  function playSoftFanfare(){
     if(data.soundOn === false) return;
     const ctx = ensureAudio(); if(!ctx) return;
-    const t = ctx.currentTime + 0.03;
-    playNote(ctx, 659.25, t, 1.5, 0.05);            // E5
-    playNote(ctx, 783.99, t + 0.16, 1.9, 0.052);    // G5
-    playNote(ctx, 1046.5, t + 0.32, 2.6, 0.05);     // C6, left ringing
-    playNote(ctx, 523.25, t + 0.32, 2.8, 0.03);     // C5 underneath for body
-    playNote(ctx, 1567.98, t + 0.52, 1.6, 0.018);   // faint sparkle on top
+    const t = ctx.currentTime + .04;
+    playNote(ctx, 587.33, t, 1.4, .05);          // D5
+    playNote(ctx, 783.99, t + .18, 1.9, .05);    // G5
+    playNote(ctx, 987.77, t + .36, 2.4, .04);    // B5, left ringing
+    playNote(ctx, 391.99, t + .36, 2.6, .026);   // G4 underneath for body
+  }
+  // Session の終わりは Get Set と同じ鳴らし方：
+  // 目標に届いたら華やかなファンファーレ、届かなければ柔らかいほう。
+  function playClose(hit){
+    if(data.soundOn === false) return;
+    const ctx = ensureAudio(); if(!ctx) return;
+    playGoTone();
+    if(hit) playFanfare(); else playSoftFanfare();
   }
 
   // Repeating nudge while you still haven't started.
@@ -3529,7 +3537,8 @@ PAWS.load();
 
   function celebrateBurst(colors){
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const dial = $q('.dial-wrap');
+    /* Session を終えたあとはダイヤルが無いので、まとめの欄から散らす */
+    const dial = $q('.dial-wrap') || $q('.summary');
     if(!dial) return;
     const rect = dial.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
@@ -5472,10 +5481,12 @@ PAWS.load();
     cheerSlot = -1;
     stopTicking();
     stopReminder();
-    playClose();
+    const hitGoal = work >= (data.workGoalSec || 0);
+    playClose(hitGoal);
     banner = null;
     await saveData();
     render();
+    if(hitGoal) celebrateBurst();
   }
 
   async function onDoneReset(){
@@ -7966,8 +7977,10 @@ PAWS.load();
           monthDay: e.monthDay || 0,
           monthEnd: !!e.monthEnd,
           cont: e.cont === false ? false : true,
+          note: e.note || '',
           type: typeOf(e.type).label,
-          color: typeOf(e.type).color
+          color: typeOf(e.type).color,
+          bg: tint(typeOf(e.type).color, 0.13)
         }))
       }, '*');
     }catch(err){ /* cross-origin host, ignore */ }
@@ -8806,7 +8819,9 @@ PAWS.load();
 
   function fresh(){
     const w = data.wx;
-    return !!(w && w.at && (Date.now() - w.at) < 30 * 60 * 1000 && w.day === keyOf(new Date()));
+    /* v が古い記録は、いまの空ではなく「その日ぜんぶ」の天気だったので取り直す */
+    return !!(w && w.v === 2 && w.at && (Date.now() - w.at) < 30 * 60 * 1000
+      && w.day === keyOf(new Date()));
   }
 
   async function loadWeather(force){
@@ -8824,12 +8839,16 @@ PAWS.load();
       if(!r.ok) throw new Error('http ' + r.status);
       const j = await r.json();
       const d = j.daily || {};
+      /* 空の絵は「いまの天気」で。1日ぶんの代表値は雨よりに出るので使わない */
+      const nowCode = (j.current && j.current.weather_code != null) ? j.current.weather_code : null;
+      const dayCode = (d.weather_code && d.weather_code[0] != null) ? d.weather_code[0] : null;
       data.wx = {
+        v: 2,
         at: Date.now(),
         day: keyOf(new Date()),
         temp: j.current ? Math.round(j.current.temperature_2m) : null,
-        code: (d.weather_code && d.weather_code[0] != null) ? d.weather_code[0]
-              : (j.current ? j.current.weather_code : 0),
+        code: nowCode != null ? nowCode : (dayCode != null ? dayCode : 0),
+        dayCode: dayCode,
         hi: (d.temperature_2m_max || [])[0] != null ? Math.round(d.temperature_2m_max[0]) : null,
         lo: (d.temperature_2m_min || [])[0] != null ? Math.round(d.temperature_2m_min[0]) : null,
         pop: (d.precipitation_probability_max || [])[0]
@@ -9271,12 +9290,12 @@ PAWS.load();
     const snow = tone.snow
       ? '<path d="M20 1.6 38.4 15H33.2L20 5.6 6.8 15H1.6z" fill="#F2F4F0" opacity=".92"/>' : '';
     return `<svg viewBox="0 0 40 34" aria-hidden="true">
-      <path d="M20 2 38 15H2z" fill="#B08A5E"/>
-      <path d="M20 5.4 33.2 15H6.8z" fill="#C69E6E"/>
-      <rect x="6" y="14" width="28" height="19" rx="2" fill="#D8BC93"/>
-      <path d="M6 20.5h28M6 26.5h28" stroke="#C4A377" stroke-width="0.9"/>
-      <path d="M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z" fill="#6E5642"/>
-      <circle cx="20" cy="11.2" r="1.5" fill="#F0E2C9"/>
+      <path d="M20 2 38 15H2z" fill="#D3BC9F"/>
+      <path d="M20 5.4 33.2 15H6.8z" fill="#E1CDB2"/>
+      <rect x="6" y="14" width="28" height="19" rx="2" fill="#EEE3D0"/>
+      <path d="M6 20.5h28M6 26.5h28" stroke="#E0D0B8" stroke-width="0.9"/>
+      <path d="M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z" fill="#C6B29A"/>
+      <circle cx="20" cy="11.2" r="1.5" fill="#F7EEDD"/>
       ${snow}
     </svg>`;
   }

@@ -1965,19 +1965,16 @@
     rgba(64,84,126,0) 100%); }
   .orb{ position:absolute; width:26px; height:26px; border-radius:999px; z-index:0;
     transform:translateX(-50%); pointer-events:none; }
-  /* the sun burns: a white heart, a warm rim, and a halo of soft rays */
+  /* the sun burns: a white heart, a warm rim, and a soft round glow */
   .orb.sun{ background:radial-gradient(circle at 50% 44%, #FFFBEC 0%, #FDEBB4 34%, #F6CE72 66%, #EFB94C 100%);
-    box-shadow:0 0 0 5px rgba(246,206,114,.22), 0 0 18px 7px rgba(244,199,96,.40),
-      0 0 42px 18px rgba(244,199,96,.22);
+    box-shadow:0 0 0 6px rgba(246,206,114,.24), 0 0 20px 8px rgba(244,199,96,.42),
+      0 0 46px 20px rgba(244,199,96,.24);
     animation:sunPulse 6s ease-in-out infinite; }
-  .orb.sun::before{ content:''; position:absolute; inset:-13px; border-radius:999px;
-    background:repeating-conic-gradient(from 0deg,
-      rgba(246,206,114,.42) 0deg 3.5deg, rgba(246,206,114,0) 3.5deg 18deg);
-    -webkit-mask-image:radial-gradient(circle, transparent 44%, #000 60%, transparent 88%);
-    mask-image:radial-gradient(circle, transparent 44%, #000 60%, transparent 88%);
-    animation:sunSpin 80s linear infinite; pointer-events:none; }
+  .orb.sun::before{ content:''; position:absolute; inset:-16px; border-radius:999px;
+    background:radial-gradient(circle, rgba(246,206,114,.30) 0%, rgba(246,206,114,.15) 44%,
+      rgba(246,206,114,0) 72%);
+    pointer-events:none; }
   @keyframes sunPulse{ 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.09); } }
-  @keyframes sunSpin{ to{ transform:rotate(360deg); } }
   /* the evening sun is red right through, and its rays are gone */
   .home-stage.dusk .orb.sun{
     background:radial-gradient(circle at 50% 46%, #EC8B6D 0%, #E1785C 52%, #DA7055 100%);
@@ -9289,14 +9286,23 @@ PAWS.load();
   function houseSvg(tone){
     const snow = tone.snow
       ? '<path d="M20 1.6 38.4 15H33.2L20 5.6 6.8 15H1.6z" fill="#F2F4F0" opacity=".92"/>' : '';
+    /* 屋根に犬のなまえを入れる（長いときは字を詰める）*/
+    const nm = String((PAWS.dogName ? PAWS.dogName() : '') || '').trim().slice(0, 6);
+    const fs = nm.length <= 2 ? 6.4 : nm.length === 3 ? 5.4 : nm.length === 4 ? 4.4 : 3.7;
+    const plate = nm
+      ? `<text x="20" y="13.4" text-anchor="middle" font-size="${fs}" fill="#9A7F5F"
+           font-family="'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',sans-serif"
+           font-weight="700" textLength="${Math.min(18, nm.length * fs).toFixed(1)}"
+           lengthAdjust="spacingAndGlyphs">${esc(nm)}</text>`
+      : '<circle cx="20" cy="11.2" r="1.5" fill="#F7EEDD"/>';
     return `<svg viewBox="0 0 40 34" aria-hidden="true">
       <path d="M20 2 38 15H2z" fill="#D3BC9F"/>
       <path d="M20 5.4 33.2 15H6.8z" fill="#E1CDB2"/>
       <rect x="6" y="14" width="28" height="19" rx="2" fill="#EEE3D0"/>
       <path d="M6 20.5h28M6 26.5h28" stroke="#E0D0B8" stroke-width="0.9"/>
       <path d="M20 18.4c3.9 0 6.2 3 6.2 6.8V33H13.8v-7.8c0-3.8 2.3-6.8 6.2-6.8z" fill="#C6B29A"/>
-      <circle cx="20" cy="11.2" r="1.5" fill="#F7EEDD"/>
       ${snow}
+      ${plate}
     </svg>`;
   }
 
@@ -9364,7 +9370,7 @@ PAWS.load();
     { k:'fir',    x: 42, w:44, tall:true  },
     { k:'flower', x: 56, w:11, c:'#EBD08A' },
     { k:'grass',  x: 64, w:15 },
-    { k:'house',  x: 76, w:34 },
+    { k:'house',  x: 76, w:40 },
     { k:'flower', x: 87, w:11, c:'#C8AFD8' },
     { k:'tree',   x: 94, w:33, tall:true  },
     { k:'grass',  x: 99, w:12 }
